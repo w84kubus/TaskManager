@@ -993,14 +993,14 @@ function setupAuthEvents() {
       );
       await cred.user.updateProfile({ displayName: nameInput.value.trim() });
 
-      // Wyślij e-mail weryfikacyjny z linkiem powrotnym do aplikacji
-      _justRegistered = true;
+      // Wyślij e-mail weryfikacyjny PRZED tym jak onAuthStateChanged pokaże ekran
       await cred.user.sendEmailVerification({
         url: 'https://w84kubus.github.io/TaskManager/',
       });
-      // onAuthStateChanged obsługuje resztę
+
+      // Pokaż ekran weryfikacji ręcznie (onAuthStateChanged i tak to zrobi, ale upewniamy się)
+      showEmailVerification(cred.user.email);
     } catch (err) {
-      _justRegistered = false;
       setError(emailInput, document.getElementById('register-email-error'),
         translateAuthError(err.code));
     } finally {
