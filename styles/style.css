@@ -935,7 +935,7 @@ footer {
     font-size: .76rem;
   }
   .footer-sep   { display: none; }
-  .footer-link  { display: block; text-align: center; } /* block + center na osobnej linii */
+  .footer-link  { display: inline; } /* inline w osobnym <p> – text-align:center działa */
   .footer-sub   { font-size: .72rem; opacity: .8; }
 
   /* Przycisk wylogowania – lepiej widoczny */
