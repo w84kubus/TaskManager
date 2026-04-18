@@ -935,10 +935,12 @@ footer {
     font-size: .76rem;
   }
   .footer-sep   { display: none; }
-  .footer-copy  { flex-direction: column; align-items: stretch; width: 100%; text-align: center; }
+  .footer-copy  { flex-direction: column; align-items: stretch; width: 100%; }
+  .footer-copy p { text-align: center; } /* wyraźne centrowanie każdego paragrafu */
   .footer-copy p:first-child::after { display: none; } /* ukryj separator · */
-  .footer-link  { display: inline; }
-  .footer-sub   { font-size: .72rem; opacity: .8; }
+  /* Niezawodne centrowanie buttonu na iOS Safari */
+  .footer-link  { display: block; width: fit-content; margin: 0 auto; }
+  .footer-sub   { font-size: .72rem; opacity: .8; text-align: center; }
 
   /* Przycisk wylogowania – lepiej widoczny */
   .btn-logout {
