@@ -1,0 +1,13 @@
+# Pomocnicze pliki serwera (nie należą do projektu)
+server.ps1
+.claude/
+
+# System
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Edytory
+.vscode/
+*.swp
+*~
