@@ -96,6 +96,15 @@
 
 html { scroll-behavior: smooth; }
 
+/* Sticky footer – app-wrapper wypełnia całą wysokość okna */
+#app-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+#app-wrapper main { flex: 1; }
+
 body {
   font-family: var(--font);
   background: var(--bg-page);
