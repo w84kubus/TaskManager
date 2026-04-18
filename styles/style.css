@@ -96,7 +96,9 @@
 
 html {
   scroll-behavior: smooth;
-  /* NIE ustawiamy overflow-x: hidden na html – iOS Safari przycina tło i fixed elementy */
+  /* overflow-x: clip zamiast hidden – blokuje poziomy scroll,
+     ale NIE tworzy BFC i nie przycina tła ani position:fixed */
+  overflow-x: clip;
 }
 
 /* Sticky footer – app-wrapper wypełnia całą wysokość okna */
@@ -892,7 +894,12 @@ footer {
   .nav-link  { padding: .4rem var(--sp-sm); font-size: .82rem; }
   .nav-icon  { display: none; }   /* tablet: ukryj emoji, zostaw tekst */
 
-  main { padding-left: var(--sp-md); padding-right: var(--sp-md); }
+  main {
+    padding-left: var(--sp-md);
+    padding-right: var(--sp-md);
+    /* Dodatkowy oddech pod paskiem Safari na iOS */
+    padding-bottom: calc(var(--sp-2xl) + env(safe-area-inset-bottom, 0px));
+  }
 
   .view-header h1 { font-size: 1.5rem; }
 
@@ -904,8 +911,8 @@ footer {
 
   .task-controls { flex-direction: column; align-items: stretch; }
   .sort-search   { min-width: unset; width: 100%; }
-  #sort-select   { min-width: unset; width: 100%; }
-  #search-input  { min-width: 0; }
+  #sort-select   { min-width: 0; flex: 1; }    /* flex:1 zamiast width:100% – nie przekracza kontenera */
+  #search-input  { min-width: 0; flex: 1; }
 
   /* Stats: 2 kolumny na tablecie */
   .stats-grid   { grid-template-columns: repeat(2, 1fr); }
@@ -914,7 +921,12 @@ footer {
   /* Settings: 1 kolumna */
   .settings-grid { grid-template-columns: 1fr; }
 
-  .footer-inner { flex-direction: column; gap: var(--sp-xs); text-align: center; padding: var(--sp-md); }
+  .footer-inner {
+    flex-direction: column;
+    gap: var(--sp-xs);
+    text-align: center;
+    padding: var(--sp-md) var(--sp-md) calc(var(--sp-md) + env(safe-area-inset-bottom, 0px));
+  }
   .footer-sep   { display: none; } /* ukryj separator · na mobile */
   .footer-link  { display: block; margin-top: 2px; } /* link na osobnej linii */
 
