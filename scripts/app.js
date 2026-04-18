@@ -434,6 +434,10 @@ function showApp() {
   const banner = document.getElementById('guest-banner');
   banner.hidden = !isGuest;
   document.body.classList.toggle('guest-mode', isGuest);
+
+  // Ukryj "Usuń konto" dla gościa (nie ma konta Firebase)
+  const deleteCard = document.getElementById('delete-account-card');
+  if (deleteCard) deleteCard.hidden = isGuest;
 }
 
 function showAuth() {
@@ -902,6 +906,83 @@ function exportTxtAsync() {
 }
 
 /* ============================================================
+   POLITYKA PRYWATNOŚCI
+   ============================================================ */
+function showPrivacyPolicy() {
+  document.getElementById('privacy-modal').hidden = false;
+  document.body.style.overflow = 'hidden';
+  document.getElementById('privacy-close-btn').focus();
+}
+
+function hidePrivacyPolicy() {
+  document.getElementById('privacy-modal').hidden = true;
+  document.body.style.overflow = '';
+}
+
+/* ============================================================
+   USUŃ KONTO (RODO – prawo do bycia zapomnianym)
+   ============================================================ */
+async function deleteAccount() {
+  const user = _auth?.currentUser;
+  if (!user) return;
+
+  const confirmed = await showConfirm(
+    'Usuń konto',
+    'Czy na pewno chcesz trwale usunąć konto i wszystkie dane? Tej operacji nie można cofnąć.'
+  );
+  if (!confirmed) return;
+
+  const btn = document.getElementById('delete-account-btn');
+  btn.disabled    = true;
+  btn.textContent = 'Usuwanie…';
+
+  try {
+    // 1. Zatrzymaj listener Firestore
+    if (_firestoreUnsubscribe) { _firestoreUnsubscribe(); _firestoreUnsubscribe = null; }
+
+    // 2. Usuń wszystkie zadania z Firestore
+    const col = tasksCol();
+    if (col && _db) {
+      const snap = await col.get();
+      if (!snap.empty) {
+        const batch = _db.batch();
+        snap.docs.forEach(d => batch.delete(d.ref));
+        await batch.commit();
+      }
+      // Usuń dokument użytkownika (ustawienia)
+      await _db.collection('users').doc(firestoreDocId()).delete().catch(() => {});
+    }
+
+    // 3. Usuń konto z Firebase Auth
+    await user.delete();
+
+    // 4. Wyczyść localStorage
+    localStorage.clear();
+
+    // 5. Pokaż ekran logowania
+    state.currentUser = null;
+    state.tasks = [];
+    showAuth();
+    showToast('Konto zostało trwale usunięte.', 'success', 5000);
+  } catch (err) {
+    btn.disabled    = false;
+    btn.textContent = 'Usuń konto';
+
+    if (err.code === 'auth/requires-recent-login') {
+      showToast(
+        'Ze względów bezpieczeństwa zaloguj się ponownie i spróbuj jeszcze raz.',
+        'error', 7000
+      );
+      await _auth.signOut();
+      showAuth();
+    } else {
+      showToast('Błąd usuwania konta — spróbuj ponownie.', 'error');
+      console.error('[DeleteAccount]', err);
+    }
+  }
+}
+
+/* ============================================================
    DARK MODE
    ============================================================ */
 function applyDarkMode(enabled) {
@@ -1037,6 +1118,15 @@ function setupAuthEvents() {
       clearError(passInput, document.getElementById('register-password-error'));
     }
 
+    const consentBox = document.getElementById('register-consent');
+    if (!consentBox.checked) {
+      setError(consentBox, document.getElementById('register-consent-error'),
+        'Akceptacja Polityki Prywatności jest wymagana.');
+      valid = false;
+    } else {
+      clearError(consentBox, document.getElementById('register-consent-error'));
+    }
+
     if (!valid) return;
 
     const submitBtn = e.target.querySelector('[type="submit"]');
@@ -1114,6 +1204,9 @@ function setupAuthEvents() {
       submitBtn.textContent = 'Wyślij link resetujący';
     }
   });
+
+  /* ── Polityka prywatności – otwieranie z formularza rejestracji ── */
+  document.getElementById('open-privacy-reg').addEventListener('click', showPrivacyPolicy);
 
   /* ── Weryfikacja e-mail: przyciski ──────────────────────── */
   document.getElementById('verify-check-btn').addEventListener('click',  checkEmailVerification);
@@ -1337,6 +1430,17 @@ function setupEvents() {
     saveState();
     firestoreSyncSettings();
   });
+
+  /* ── Polityka prywatności – stopka i modal ─────────────── */
+  document.getElementById('open-privacy-footer').addEventListener('click', showPrivacyPolicy);
+  document.getElementById('privacy-close-btn').addEventListener('click',  hidePrivacyPolicy);
+  document.getElementById('privacy-accept-btn').addEventListener('click', hidePrivacyPolicy);
+  document.getElementById('privacy-modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('privacy-modal')) hidePrivacyPolicy();
+  });
+
+  /* ── Usuń konto ─────────────────────────────────────────── */
+  document.getElementById('delete-account-btn').addEventListener('click', deleteAccount);
 
   /* ── Wyczyść dane (click) ──────────────────────────────── */
   document.getElementById('clear-data-btn').addEventListener('click', () => {

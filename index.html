@@ -107,6 +107,19 @@
                    aria-required="true" aria-describedby="register-password-error" autocomplete="new-password">
             <span class="error-msg" id="register-password-error" role="alert" aria-live="polite"></span>
           </div>
+          <div class="form-group consent-group">
+            <label class="consent-label">
+              <input type="checkbox" id="register-consent" aria-required="true"
+                     aria-describedby="register-consent-error">
+              <span>Akceptuję
+                <button type="button" class="privacy-inline-link" id="open-privacy-reg">
+                  Politykę Prywatności
+                </button>
+                i wyrażam zgodę na przetwarzanie danych osobowych.
+              </span>
+            </label>
+            <span class="error-msg" id="register-consent-error" role="alert" aria-live="polite"></span>
+          </div>
           <button type="submit" class="btn btn-primary auth-submit">Utwórz konto</button>
         </form>
       </div>
@@ -437,6 +450,16 @@
           </button>
         </div>
 
+        <div class="setting-card setting-card--danger" id="delete-account-card">
+          <div class="setting-info">
+            <h2>Usuń konto</h2>
+            <p>Trwale usuń konto i wszystkie powiązane dane — operacja nieodwracalna (prawo do bycia zapomnianym)</p>
+          </div>
+          <button id="delete-account-btn" class="btn btn-danger" aria-label="Trwale usuń konto">
+            Usuń konto
+          </button>
+        </div>
+
         <div class="setting-card">
           <div class="setting-info">
             <h2>Eksportuj JSON</h2>
@@ -552,15 +575,88 @@
       <p class="footer-sub">
         Zbudowany z <span aria-label="pasją">❤️</span> używając czystego HTML, CSS i JavaScript
       </p>
+      <p class="footer-legal">
+        <button type="button" class="footer-link" id="open-privacy-footer">Polityka Prywatności</button>
+      </p>
     </div>
   </footer>
 
   </div><!-- /#app-wrapper -->
 
+  <!-- ═══════════════════════════════════════
+       MODAL – POLITYKA PRYWATNOŚCI
+  ════════════════════════════════════════ -->
+  <div id="privacy-modal" class="privacy-modal" role="dialog" aria-modal="true"
+       aria-labelledby="privacy-modal-title" hidden>
+    <div class="privacy-modal-inner">
+      <div class="privacy-modal-header">
+        <h2 id="privacy-modal-title">Polityka Prywatności</h2>
+        <button id="privacy-close-btn" class="modal-close" aria-label="Zamknij politykę prywatności">×</button>
+      </div>
+      <div class="privacy-modal-body">
+
+        <p class="privacy-updated">Ostatnia aktualizacja: 18 kwietnia 2026 r.</p>
+
+        <h3>1. Administrator danych osobowych</h3>
+        <p>Administratorem danych osobowych jest właściciel aplikacji TaskManager dostępnej pod adresem <strong>https://w84kubus.github.io/TaskManager/</strong> (dalej: „Administrator"). Kontakt: profil GitHub <a href="https://github.com/w84kubus" target="_blank" rel="noopener">github.com/w84kubus</a>.</p>
+
+        <h3>2. Jakie dane zbieramy</h3>
+        <ul>
+          <li><strong>Adres e-mail</strong> — wymagany do rejestracji i logowania</li>
+          <li><strong>Imię</strong> — podawane dobrowolnie przy rejestracji, wyświetlane w interfejsie</li>
+          <li><strong>Treść zadań</strong> — zadania dodawane przez użytkownika (mogą zawierać dane osobowe)</li>
+          <li><strong>Ustawienia aplikacji</strong> — tryb ciemny, preferencje powiadomień</li>
+        </ul>
+        <p>Nie zbieramy danych o lokalizacji, numerów telefonów ani informacji płatniczych.</p>
+
+        <h3>3. Cel i podstawa prawna przetwarzania</h3>
+        <ul>
+          <li>Świadczenie usługi (obsługa konta, synchronizacja zadań) — <strong>art. 6 ust. 1 lit. b RODO</strong> (wykonanie umowy)</li>
+          <li>Wysyłka e-maila weryfikacyjnego i linku resetowania hasła — <strong>art. 6 ust. 1 lit. b RODO</strong></li>
+          <li>Przetwarzanie na podstawie zgody udzielonej przy rejestracji — <strong>art. 6 ust. 1 lit. a RODO</strong></li>
+        </ul>
+
+        <h3>4. Procesorzy danych (podmioty trzecie)</h3>
+        <p>Dane są przechowywane w usługach Google LLC w ramach platformy <strong>Firebase</strong>:</p>
+        <ul>
+          <li><strong>Firebase Authentication</strong> — zarządzanie kontami i sesjami</li>
+          <li><strong>Firebase Firestore</strong> — przechowywanie zadań i ustawień</li>
+        </ul>
+        <p>Google LLC stosuje standardowe klauzule umowne (SCC) zapewniające ochronę danych zgodną z RODO. Polityka prywatności Google: <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">policies.google.com/privacy</a>.</p>
+
+        <h3>5. Okres przechowywania danych</h3>
+        <p>Dane są przechowywane do momentu <strong>usunięcia konta</strong> przez użytkownika. Usunięcie konta powoduje trwałe usunięcie wszystkich danych z Firebase Authentication i Firestore. Opcja usunięcia konta dostępna jest w sekcji <strong>Ustawienia → Usuń konto</strong>.</p>
+
+        <h3>6. Prawa użytkownika (RODO)</h3>
+        <ul>
+          <li><strong>Prawo dostępu</strong> — możesz pobrać swoje dane (Ustawienia → Eksportuj JSON)</li>
+          <li><strong>Prawo do sprostowania</strong> — możesz edytować swoje zadania w aplikacji</li>
+          <li><strong>Prawo do usunięcia</strong> — usuń konto w Ustawienia → Usuń konto</li>
+          <li><strong>Prawo do przenoszenia</strong> — eksport danych w formacie JSON lub TXT</li>
+          <li><strong>Prawo do cofnięcia zgody</strong> — możesz usunąć konto w dowolnym momencie</li>
+          <li><strong>Prawo do skargi</strong> — możesz złożyć skargę do Prezesa UODO (<a href="https://uodo.gov.pl" target="_blank" rel="noopener">uodo.gov.pl</a>)</li>
+        </ul>
+
+        <h3>7. Pliki cookie i pamięć lokalna</h3>
+        <p>Aplikacja nie używa plików cookie. Korzysta z <strong>localStorage</strong> przeglądarki wyłącznie do przechowywania informacji o sesji gościa i lokalnych ustawień. Dane te nie są przesyłane do zewnętrznych serwerów przez samą aplikację.</p>
+
+        <h3>8. Bezpieczeństwo danych</h3>
+        <p>Hasła nigdy nie są przechowywane w postaci jawnej — są hashowane przez Firebase Authentication. Dostęp do danych w Firestore jest chroniony regułami bezpieczeństwa: każdy użytkownik ma dostęp wyłącznie do własnych danych (<code>request.auth.uid == userId</code>). Komunikacja z serwerami Firebase odbywa się wyłącznie przez szyfrowane połączenie HTTPS.</p>
+
+        <h3>9. Zmiany w polityce prywatności</h3>
+        <p>O istotnych zmianach w polityce prywatności użytkownicy zostaną poinformowani przez toast powiadomienie w aplikacji lub e-mail. Aktualna wersja zawsze dostępna jest pod przyciskiem „Polityka Prywatności" w stopce aplikacji.</p>
+
+      </div>
+      <div class="privacy-modal-footer">
+        <button type="button" class="btn btn-primary" id="privacy-accept-btn">Rozumiem</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Firebase SDK (compat) -->
   <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-auth-compat.js"></script>
-  <script src="scripts/app.js?v=6"></script>
+  <script src="scripts/app.js?v=7"></script>
 </body>
 </html>

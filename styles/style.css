@@ -1392,6 +1392,170 @@ body.guest-mode main {
 }
 
 /* ============================================================
+   ZGODA RODO – checkbox w formularzu rejestracji
+   ============================================================ */
+.consent-group {
+  margin-top: var(--sp-sm);
+}
+
+.consent-label {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-sm);
+  cursor: pointer;
+  font-size: .88rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.consent-label input[type="checkbox"] {
+  margin-top: 2px;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.privacy-inline-link {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-size: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: opacity var(--tr-fast);
+}
+
+.privacy-inline-link:hover { opacity: .75; }
+
+/* ============================================================
+   STOPKA – link do polityki prywatności
+   ============================================================ */
+.footer-legal { margin-top: var(--sp-xs); }
+
+.footer-link {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: .8rem;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color var(--tr-fast);
+}
+
+.footer-link:hover { color: var(--accent); }
+
+/* ============================================================
+   MODAL – POLITYKA PRYWATNOŚCI
+   ============================================================ */
+.privacy-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sp-md);
+  background: rgba(0, 0, 0, .55);
+  backdrop-filter: blur(4px);
+  animation: fadeUp .2s ease;
+}
+
+.privacy-modal[hidden] { display: none !important; }
+
+.privacy-modal-inner {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  width: 100%;
+  max-width: 640px;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+
+.privacy-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--sp-lg) var(--sp-xl);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.privacy-modal-header h2 {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.privacy-modal-body {
+  overflow-y: auto;
+  padding: var(--sp-xl);
+  flex: 1;
+  scroll-behavior: smooth;
+}
+
+.privacy-modal-body h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: var(--sp-lg) 0 var(--sp-sm);
+}
+
+.privacy-modal-body h3:first-child { margin-top: 0; }
+
+.privacy-modal-body p,
+.privacy-modal-body li {
+  font-size: .9rem;
+  color: var(--text-secondary);
+  line-height: 1.65;
+  margin-bottom: var(--sp-sm);
+}
+
+.privacy-modal-body ul {
+  padding-left: var(--sp-lg);
+  margin-bottom: var(--sp-sm);
+}
+
+.privacy-modal-body a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.privacy-modal-body code {
+  background: var(--bg-muted);
+  padding: 1px 6px;
+  border-radius: var(--r-sm);
+  font-size: .82rem;
+  color: var(--accent);
+}
+
+.privacy-updated {
+  font-size: .8rem !important;
+  color: var(--text-muted) !important;
+  margin-bottom: var(--sp-lg) !important;
+}
+
+.privacy-modal-footer {
+  padding: var(--sp-md) var(--sp-xl);
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: flex-end;
+  flex-shrink: 0;
+}
+
+/* ============================================================
    UTILITY
    ============================================================ */
 .sr-only {
