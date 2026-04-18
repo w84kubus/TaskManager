@@ -927,12 +927,16 @@ footer {
 
   .footer-inner {
     flex-direction: column;
-    gap: var(--sp-xs);
+    align-items: stretch;   /* p-ki mają pełną szerokość → text-align działa poprawnie */
+    justify-content: center;
+    gap: 2px;
     text-align: center;
-    padding: var(--sp-md) var(--sp-md) calc(var(--sp-md) + env(safe-area-inset-bottom, 0px));
+    padding: var(--sp-sm) var(--sp-md) calc(var(--sp-sm) + env(safe-area-inset-bottom, 0px));
+    font-size: .76rem;
   }
-  .footer-sep   { display: none; } /* ukryj separator · na mobile */
-  .footer-link  { display: block; margin-top: 2px; } /* link na osobnej linii */
+  .footer-sep   { display: none; }
+  .footer-link  { display: block; text-align: center; } /* block + center na osobnej linii */
+  .footer-sub   { font-size: .72rem; opacity: .8; }
 
   /* Przycisk wylogowania – lepiej widoczny */
   .btn-logout {
