@@ -701,7 +701,10 @@ input.error { border-color: var(--danger) !important; }
 
 .toggle-slider {
   position: absolute;
-  inset: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   background: var(--border);
   border-radius: var(--r-full);
   transition: background var(--tr-normal);
@@ -732,7 +735,10 @@ input.error { border-color: var(--danger) !important; }
    ============================================================ */
 .modal {
   position: fixed;
-  inset: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   z-index: 200;
   display: flex;
   align-items: center;
@@ -744,7 +750,10 @@ input.error { border-color: var(--danger) !important; }
 
 .modal-overlay {
   position: absolute;
-  inset: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   background: rgba(10, 15, 35, .55);
   backdrop-filter: blur(3px);
 }
@@ -873,13 +882,13 @@ footer {
 }
 
 @keyframes toastSlide {
-  from { opacity: 0; transform: translateX(40px); }
-  to   { opacity: 1; transform: translateX(0);    }
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0);    }
 }
 
 @keyframes toastOut {
-  from { opacity: 1; transform: translateX(0);    }
-  to   { opacity: 0; transform: translateX(40px); }
+  from { opacity: 1; transform: translateY(0);    }
+  to   { opacity: 0; transform: translateY(8px);  }
 }
 
 /* ============================================================
@@ -1601,7 +1610,10 @@ body.guest-mode main {
    ============================================================ */
 .privacy-modal {
   position: fixed;
-  inset: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   z-index: 500;
   display: flex;
   align-items: center;
