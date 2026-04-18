@@ -96,9 +96,10 @@
 
 html {
   scroll-behavior: smooth;
-  /* overflow-x: clip zamiast hidden – blokuje poziomy scroll,
-     ale NIE tworzy BFC i nie przycina tła ani position:fixed */
+  /* clip: blokuje poziomy scroll bez tworzenia BFC,
+     nie przycina tła ani position:fixed – bezpieczne na iOS */
   overflow-x: clip;
+  max-width: 100%;   /* HTML nigdy nie przekroczy szerokości widoku */
 }
 
 /* Sticky footer – app-wrapper wypełnia całą wysokość okna */
@@ -107,6 +108,8 @@ html {
   flex-direction: column;
   min-height: 100vh;
   min-height: 100dvh; /* dynamiczna wysokość na mobile (uwzględnia pasek przeglądarki) */
+  width: 100%;         /* nie szerszy niż body */
+  overflow-x: clip;    /* catch-all na wszelkie wewnętrzne przepełnienia */
 }
 
 /* WAŻNE: display:flex nadpisuje atrybut hidden – przywróć display:none */
@@ -121,7 +124,8 @@ body {
   line-height: 1.6;
   min-height: 100vh;
   min-height: 100dvh;
-  overflow-x: hidden; /* zapobiegaj poziomemu scrollowi */
+  overflow-x: hidden;  /* zapobiegaj poziomemu scrollowi */
+  max-width: 100%;     /* body nigdy nie szersze niż html */
   /* Transition #1 – płynne przełączanie dark/light */
   transition: background var(--tr-normal), color var(--tr-normal);
 }
@@ -895,10 +899,10 @@ footer {
   .nav-icon  { display: none; }   /* tablet: ukryj emoji, zostaw tekst */
 
   main {
-    padding-left: var(--sp-md);
-    padding-right: var(--sp-md);
-    /* Dodatkowy oddech pod paskiem Safari na iOS */
-    padding-bottom: calc(var(--sp-2xl) + env(safe-area-inset-bottom, 0px));
+    /* Shorthand nadpisuje base shorthand w całości – brak konfliktu */
+    padding: calc(var(--header-h) + var(--safe-top) + var(--sp-xl))
+             var(--sp-md)
+             calc(var(--sp-2xl) + env(safe-area-inset-bottom, 0px));
   }
 
   .view-header h1 { font-size: 1.5rem; }
