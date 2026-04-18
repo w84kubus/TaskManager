@@ -94,13 +94,17 @@
    ============================================================ */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-html { scroll-behavior: smooth; }
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden; /* zapobiegaj poziomemu scrollowi */
+}
 
 /* Sticky footer – app-wrapper wypełnia całą wysokość okna */
 #app-wrapper {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  min-height: 100dvh; /* dynamiczna wysokość na mobile (uwzględnia pasek przeglądarki) */
 }
 
 /* WAŻNE: display:flex nadpisuje atrybut hidden – przywróć display:none */
@@ -114,6 +118,8 @@ body {
   color: var(--text-primary);
   line-height: 1.6;
   min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden; /* zapobiegaj poziomemu scrollowi */
   /* Transition #1 – płynne przełączanie dark/light */
   transition: background var(--tr-normal), color var(--tr-normal);
 }
@@ -907,6 +913,8 @@ footer {
   .settings-grid { grid-template-columns: 1fr; }
 
   .footer-inner { flex-direction: column; gap: var(--sp-xs); text-align: center; padding: var(--sp-md); }
+  .footer-sep   { display: none; } /* ukryj separator · na mobile */
+  .footer-link  { display: block; margin-top: 2px; } /* link na osobnej linii */
 
   /* Przycisk wylogowania – lepiej widoczny */
   .btn-logout {
@@ -987,6 +995,7 @@ footer {
    ============================================================ */
 .auth-screen {
   min-height: 100vh;
+  min-height: 100dvh; /* dynamiczna wysokość – uwzględnia pasek przeglądarki */
   display: flex;
   flex-direction: column;
   align-items: center;
