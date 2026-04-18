@@ -859,11 +859,15 @@ footer {
 @media (max-width: 768px) {
   :root { --header-h: 56px; }
 
-  .header-inner { padding: 0 var(--sp-md); }
-  .logo-text    { display: none; }
+  .header-inner {
+    padding: 0 max(var(--sp-md), env(safe-area-inset-right, 0px));
+    padding-left:  max(var(--sp-md), env(safe-area-inset-left,  0px));
+    padding-right: max(var(--sp-md), env(safe-area-inset-right, 0px));
+  }
+  .logo-text { display: none; }
 
-  .nav-link { padding: .4rem var(--sp-sm); font-size: .82rem; }
-  .nav-link span { display: none; }   /* ukryj emoji na małym ekranie */
+  .nav-link  { padding: .4rem var(--sp-sm); font-size: .82rem; }
+  .nav-icon  { display: none; }   /* tablet: ukryj emoji, zostaw tekst */
 
   main { padding-left: var(--sp-md); padding-right: var(--sp-md); }
 
@@ -911,6 +915,34 @@ footer {
    MEDIA QUERY #2 – Mobile  (≤ 480px)
    ============================================================ */
 @media (max-width: 480px) {
+
+  /* ── Header: emoji-only nav, kompaktowe ─────────────────── */
+  :root { --header-h: 52px; }
+
+  .header-inner { gap: var(--sp-xs); }
+
+  /* Pokaż emoji, ukryj etykiety tekstowe */
+  .nav-icon  { display: inline; font-size: 1.25rem; line-height: 1; }
+  .nav-label { display: none; }
+
+  /* Nav: przyciski jako kwadratowe ikony */
+  .nav-link {
+    padding: .45rem .55rem;
+    font-size: 1.1rem;
+    border-radius: var(--r-sm);
+  }
+
+  nav ul { gap: 2px; }
+
+  /* Logo icon trochę mniejszy */
+  .logo-icon { width: 30px; height: 30px; font-size: .95rem; }
+
+  /* User menu: mniejszy odstęp, mniejszy przycisk */
+  .user-menu { gap: var(--sp-xs); padding-left: var(--sp-xs); margin-left: var(--sp-xs); }
+  .user-avatar { width: 28px; height: 28px; font-size: .72rem; }
+  .btn-logout  { width: 32px; height: 32px; }
+
+  /* ── Reszta mobile ──────────────────────────────────────── */
   .filter-buttons  { width: 100%; justify-content: stretch; }
   .filter-btn      { flex: 1; text-align: center; }
 
@@ -918,7 +950,7 @@ footer {
   .stat-value      { font-size: 2rem; }
 
   .task-item       { padding: var(--sp-sm) var(--sp-md); }
-  .task-meta       { display: none; }   /* uproszczone karty na bardzo małym ekranie */
+  .task-meta       { display: none; }
 
   .modal-content   { border-radius: var(--r-lg); }
 
