@@ -935,7 +935,7 @@ footer {
     font-size: .76rem;
   }
   .footer-sep   { display: none; }
-  .footer-copy  { flex-direction: column; align-items: center; width: 100%; }
+  .footer-copy  { flex-direction: column; align-items: stretch; width: 100%; text-align: center; }
   .footer-copy p:first-child::after { display: none; } /* ukryj separator · */
   .footer-link  { display: inline; }
   .footer-sub   { font-size: .72rem; opacity: .8; }
