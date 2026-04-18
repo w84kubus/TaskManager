@@ -819,10 +819,12 @@ footer {
   margin: 0 auto;
   padding: var(--sp-lg) var(--sp-xl);
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
+  gap: var(--sp-xs);
   font-size: .82rem;
   color: var(--text-muted);
+  text-align: center;
 }
 
 /* ============================================================
@@ -889,7 +891,7 @@ footer {
   /* Settings: 1 kolumna */
   .settings-grid { grid-template-columns: 1fr; }
 
-  .footer-inner { flex-direction: column; gap: var(--sp-xs); text-align: center; }
+  .footer-inner { padding: var(--sp-md); }
 
   /* Przycisk wylogowania – lepiej widoczny */
   .btn-logout {
@@ -1435,7 +1437,7 @@ body.guest-mode main {
 /* ============================================================
    STOPKA – link do polityki prywatności
    ============================================================ */
-.footer-legal { margin-top: var(--sp-xs); }
+.footer-legal { margin-top: 0; }
 
 .footer-link {
   background: none;
