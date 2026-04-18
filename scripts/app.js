@@ -107,11 +107,29 @@ async function firestoreLoad() {
   }
 }
 
+// Toast zawsze widoczny (niezależnie od ustawień powiadomień) – do diagnostyki
+function _dbToast(msg, type = 'warning') {
+  const container = document.getElementById('toast-container');
+  if (!container) return;
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.setAttribute('role', 'status');
+  t.textContent = msg;
+  container.appendChild(t);
+  setTimeout(() => { t.classList.add('out'); setTimeout(() => t.remove(), 320); }, 6000);
+}
+
 // Synchronizuj przy każdym załadowaniu strony (load + login)
 async function firestoreOnLoad() {
-  if (!state.currentUser || state.currentUser.provider === 'guest') return;
-  const localCount    = state.tasks.length;
-  const cloudExists   = await firestoreLoad();
+  if (!state.currentUser || state.currentUser.provider === 'guest') return false;
+
+  if (!_db) {
+    _dbToast('❌ Firebase: brak połączenia — odśwież stronę', 'error');
+    return false;
+  }
+
+  const localCount  = state.tasks.length;
+  const cloudExists = await firestoreLoad();
 
   if (cloudExists) {
     // Chmura jest źródłem prawdy — odśwież UI
@@ -122,10 +140,13 @@ async function firestoreOnLoad() {
     const nt = document.getElementById('notifications-toggle');
     if (nt) { nt.checked = state.notifications; nt.setAttribute('aria-checked', String(state.notifications)); }
     renderTaskList();
+    _dbToast(`☁️ Chmura OK — ${state.tasks.length} zadań`, 'success');
   } else if (localCount > 0) {
-    // Mamy lokalne dane, ale brak dokumentu w chmurze — wypchnij je
+    // Lokalne dane bez dokumentu w chmurze — wypchnij
     firestoreSync();
-    showToast('☁️ Dane przesłane do chmury', 'success', 2500);
+    _dbToast(`⬆️ Wysłano ${localCount} zadań do chmury`, 'success');
+  } else {
+    _dbToast('🆕 Nowy użytkownik — brak danych w chmurze', 'warning');
   }
   return cloudExists;
 }
