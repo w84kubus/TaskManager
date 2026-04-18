@@ -935,7 +935,8 @@ footer {
     font-size: .76rem;
   }
   .footer-sep   { display: none; }
-  .footer-link  { display: inline; } /* inline w osobnym <p> – text-align:center działa */
+  .footer-copy  { align-items: center; width: 100%; } /* wyśrodkuj na mobile */
+  .footer-link  { display: inline; }
   .footer-sub   { font-size: .72rem; opacity: .8; }
 
   /* Przycisk wylogowania – lepiej widoczny */
@@ -1479,6 +1480,15 @@ body.guest-mode main {
 }
 
 .privacy-inline-link:hover { opacity: .75; }
+
+/* ============================================================
+   STOPKA – grupowanie copyright + link
+   ============================================================ */
+.footer-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
 
 /* ============================================================
    STOPKA – link do polityki prywatności
