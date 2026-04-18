@@ -1169,7 +1169,7 @@ footer {
   font-size: .95rem;
 }
 
-/* Przycisk „Kontynuuj bez logowania" pod kartą auth */
+/* Przyciski pomocnicze (wróć, verify-back) */
 .guest-link {
   display: inline-flex;
   align-items: center;
@@ -1189,6 +1189,66 @@ footer {
 .guest-link:hover {
   color: var(--text-secondary);
   background: var(--bg-muted);
+}
+
+/* ── Separator „lub" ──────────────────────────────────── */
+.guest-divider {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-md);
+  margin-top: var(--sp-lg);
+  font-size: .78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  width: 100%;
+  max-width: 440px;
+}
+
+.guest-divider::before,
+.guest-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ── Przycisk „Kontynuuj bez logowania" – wyraźny ──────── */
+.guest-btn-prominent {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-sm);
+  width: 100%;
+  max-width: 440px;
+  margin-top: var(--sp-sm);
+  padding: .85rem var(--sp-lg);
+  font-size: 1rem;
+  font-weight: 700;
+  font-family: inherit;
+  color: var(--text-primary);
+  background: var(--bg-subtle);
+  border: 2px solid var(--border);
+  border-radius: var(--r-lg);
+  cursor: pointer;
+  letter-spacing: -.01em;
+  transition: border-color var(--tr-normal), background var(--tr-normal),
+              color var(--tr-normal), box-shadow var(--tr-normal),
+              transform var(--tr-fast);
+}
+
+.guest-btn-prominent:hover {
+  border-color: var(--accent);
+  background: var(--accent-light);
+  color: var(--accent);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.guest-btn-prominent:active {
+  transform: translateY(0);
+  box-shadow: none;
 }
 
 /* ============================================================
