@@ -1007,9 +1007,19 @@ footer {
 
   #toast-container { left: var(--sp-md); right: var(--sp-md); }
 
-  /* Auth mobile */
-  .auth-screen  { padding: var(--sp-md); align-items: flex-start; padding-top: var(--sp-2xl); }
-  .auth-card    { padding: var(--sp-lg) var(--sp-md); }
+  /* Auth mobile – kompaktowy, żeby guest-btn był widoczny bez scrollowania */
+  .auth-screen  { padding: var(--sp-sm) var(--sp-md); align-items: flex-start; padding-top: var(--sp-lg); justify-content: flex-start; }
+  .auth-card    { padding: var(--sp-md) var(--sp-md); }
+  .auth-logo    { margin-bottom: var(--sp-xs); }
+  .auth-subtitle { margin-bottom: var(--sp-md); font-size: .82rem; }
+  .auth-tabs    { margin-bottom: var(--sp-md); }
+  .auth-divider { margin: var(--sp-sm) 0; }
+  .auth-panel .form-group { margin-bottom: 8px; }
+  input[type="text"], input[type="email"],
+  input[type="password"], input[type="search"], select { padding: .5rem var(--sp-md); }
+  .auth-submit  { padding: .65rem; margin-top: 4px; }
+  .guest-divider { margin-top: var(--sp-sm); }
+  .guest-btn-prominent { padding: .7rem var(--sp-md); font-size: .93rem; margin-top: var(--sp-xs); }
 
   /* Guest banner mobile */
   .guest-banner-text { font-size: .78rem; min-width: 0; }
