@@ -107,32 +107,58 @@ async function firestoreLoad() {
   }
 }
 
-// Toast zawsze widoczny (niezależnie od ustawień powiadomień) – do diagnostyki
-function _dbToast(msg, type = 'warning') {
-  const container = document.getElementById('toast-container');
-  if (!container) return;
-  const t = document.createElement('div');
-  t.className = `toast ${type}`;
-  t.setAttribute('role', 'status');
-  t.textContent = msg;
-  container.appendChild(t);
-  setTimeout(() => { t.classList.add('out'); setTimeout(() => t.remove(), 320); }, 6000);
+// Nasłuchiwacz zmian w czasie rzeczywistym
+let _firestoreUnsubscribe = null;
+
+function firestoreStartListener() {
+  const docId = firestoreDocId();
+  if (!_db || !docId) return;
+
+  // Zatrzymaj poprzedni nasłuchiwacz
+  if (_firestoreUnsubscribe) { _firestoreUnsubscribe(); _firestoreUnsubscribe = null; }
+
+  _firestoreUnsubscribe = _db.collection('users').doc(docId)
+    .onSnapshot(doc => {
+      // Ignoruj zmiany lokalne (własne zapisy) — tylko zdalne aktualizacje
+      if (!doc.exists || doc.metadata.hasPendingWrites) return;
+
+      const d = doc.data();
+      let changed = false;
+
+      if (Array.isArray(d.tasks) && JSON.stringify(d.tasks) !== JSON.stringify(state.tasks)) {
+        state.tasks = d.tasks;
+        localStorage.setItem(userKey('tasks'), JSON.stringify(state.tasks));
+        renderTaskList();
+        if (!document.getElementById('stats').hidden) renderStats();
+        changed = true;
+      }
+      if (typeof d.darkMode === 'boolean' && d.darkMode !== state.darkMode) {
+        state.darkMode = d.darkMode;
+        applyDarkMode(state.darkMode);
+        localStorage.setItem(userKey('dark'), JSON.stringify(state.darkMode));
+        changed = true;
+      }
+      if (typeof d.notifications === 'boolean' && d.notifications !== state.notifications) {
+        state.notifications = d.notifications;
+        const nt = document.getElementById('notifications-toggle');
+        if (nt) { nt.checked = state.notifications; nt.setAttribute('aria-checked', String(state.notifications)); }
+        localStorage.setItem(userKey('notif'), JSON.stringify(state.notifications));
+        changed = true;
+      }
+
+      if (changed) showToast('☁️ Zadania zaktualizowane', 'success', 2000);
+    }, e => console.warn('[Firebase] Błąd nasłuchiwacza:', e));
 }
 
 // Synchronizuj przy każdym załadowaniu strony (load + login)
 async function firestoreOnLoad() {
   if (!state.currentUser || state.currentUser.provider === 'guest') return false;
-
-  if (!_db) {
-    _dbToast('❌ Firebase: brak połączenia — odśwież stronę', 'error');
-    return false;
-  }
+  if (!_db) return false;
 
   const localCount  = state.tasks.length;
   const cloudExists = await firestoreLoad();
 
   if (cloudExists) {
-    // Chmura jest źródłem prawdy — odśwież UI
     localStorage.setItem(userKey('tasks'), JSON.stringify(state.tasks));
     localStorage.setItem(userKey('dark'),  JSON.stringify(state.darkMode));
     localStorage.setItem(userKey('notif'), JSON.stringify(state.notifications));
@@ -140,14 +166,12 @@ async function firestoreOnLoad() {
     const nt = document.getElementById('notifications-toggle');
     if (nt) { nt.checked = state.notifications; nt.setAttribute('aria-checked', String(state.notifications)); }
     renderTaskList();
-    _dbToast(`☁️ Chmura OK — ${state.tasks.length} zadań`, 'success');
   } else if (localCount > 0) {
-    // Lokalne dane bez dokumentu w chmurze — wypchnij
     firestoreSync();
-    _dbToast(`⬆️ Wysłano ${localCount} zadań do chmury`, 'success');
-  } else {
-    _dbToast('🆕 Nowy użytkownik — brak danych w chmurze', 'warning');
   }
+
+  // Uruchom nasłuchiwacz czasu rzeczywistego
+  firestoreStartListener();
   return cloudExists;
 }
 
@@ -362,8 +386,9 @@ function showAuth() {
 }
 
 function logout() {
+  // Zatrzymaj nasłuchiwacz Firestore
+  if (_firestoreUnsubscribe) { _firestoreUnsubscribe(); _firestoreUnsubscribe = null; }
   clearSession();
-  // Reset state
   state.tasks = [];
   state.darkMode = false;
   state.notifications = true;
