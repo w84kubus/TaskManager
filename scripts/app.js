@@ -242,13 +242,17 @@ function mapFirebaseUser(firebaseUser) {
   const pid      = firebaseUser.providerData?.[0]?.providerId;
   const provider = pid === 'google.com' ? 'google' : 'email';
   return {
-    name:    firebaseUser.displayName || firebaseUser.email.split('@')[0],
-    email:   firebaseUser.email,
-    picture: firebaseUser.photoURL || '',
+    name:          firebaseUser.displayName || firebaseUser.email.split('@')[0],
+    email:         firebaseUser.email,
+    picture:       firebaseUser.photoURL || '',
     provider,
-    uid:     firebaseUser.uid,
+    uid:           firebaseUser.uid,
+    emailVerified: firebaseUser.emailVerified,
   };
 }
+
+// Flaga: true jeśli użytkownik właśnie się zarejestrował (żeby pokazać właściwy toast)
+let _justRegistered = false;
 
 // Tłumaczenie kodów błędów Firebase Auth
 function translateAuthError(code) {
@@ -930,8 +934,15 @@ function setupAuthEvents() {
         passInput.value
       );
       await cred.user.updateProfile({ displayName: nameInput.value.trim() });
+
+      // Wyślij e-mail weryfikacyjny z linkiem powrotnym do aplikacji
+      _justRegistered = true;
+      await cred.user.sendEmailVerification({
+        url: 'https://w84kubus.github.io/TaskManager/',
+      });
       // onAuthStateChanged obsługuje resztę
     } catch (err) {
+      _justRegistered = false;
       setError(emailInput, document.getElementById('register-email-error'),
         translateAuthError(err.code));
     } finally {
@@ -1001,6 +1012,23 @@ async function onLoginSuccess(isFreshLogin = true) {
       isGuest ? 'warning' : 'success',
       3500
     );
+
+    if (!isGuest && state.currentUser.provider === 'email') {
+      if (_justRegistered) {
+        // Świeża rejestracja — poinformuj o e-mailu weryfikacyjnym
+        _justRegistered = false;
+        setTimeout(() => showToast(
+          `📧 Wysłano link weryfikacyjny na ${state.currentUser.email} — kliknij go, aby potwierdzić konto`,
+          'warning', 8000
+        ), 3800);
+      } else if (!state.currentUser.emailVerified) {
+        // Logowanie na niezweryfikowane konto — przypomnij
+        setTimeout(() => showToast(
+          '📧 Adres e-mail niezweryfikowany — sprawdź skrzynkę i kliknij link',
+          'warning', 6000
+        ), 3800);
+      }
+    }
   }
 
   // 2. Synchronizacja z Firestore (tylko dla zalogowanych)
