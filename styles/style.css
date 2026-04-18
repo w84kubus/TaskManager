@@ -1311,10 +1311,12 @@ footer {
   border-bottom: 1px solid var(--warning);
   font-size: .84rem;
   color: var(--text-primary);
-  /* pozycjonowanie pod fixed headerem */
+  /* pozycjonowanie pod fixed headerem – fizyczne właściwości dla max zgodności iOS */
   position: fixed;
-  inset-block-start: var(--header-h);
-  inset-inline: 0;
+  top: var(--header-h);
+  left: 0;
+  right: 0;
+  width: 100%;
   z-index: 90;
   animation: fadeUp .25s ease;
   /* WAŻNE: overflow:hidden zapobiega rozszerzaniu viewport iOS Safari */
