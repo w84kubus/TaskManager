@@ -1173,6 +1173,47 @@ body.guest-mode main {
   padding-top: calc(var(--header-h) + var(--safe-top) + 44px + var(--sp-xl));
 }
 
+/* ============================================================
+   EKRAN WERYFIKACJI E-MAIL
+   ============================================================ */
+.verify-card {
+  text-align: center;
+}
+
+.verify-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: var(--sp-md);
+  color: var(--text-primary);
+}
+
+.verify-desc {
+  color: var(--text-secondary);
+  margin-bottom: var(--sp-md);
+  line-height: 1.7;
+}
+
+.verify-desc strong {
+  color: var(--accent);
+  word-break: break-all;
+}
+
+.verify-hint {
+  font-size: .88rem;
+  color: var(--text-muted);
+  margin-bottom: var(--sp-xl);
+  line-height: 1.7;
+}
+
+.verify-hint strong {
+  color: var(--text-secondary);
+}
+
+.verify-resend {
+  margin-top: var(--sp-sm);
+  width: 100%;
+}
+
 /* Avatar gościa */
 .user-avatar.social-guest {
   background: var(--text-muted);

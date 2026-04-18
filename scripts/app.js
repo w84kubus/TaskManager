@@ -297,6 +297,64 @@ function clearGuestSession() {
   localStorage.removeItem('tm_guest_session');
 }
 
+/* ============================================================
+   EKRAN WERYFIKACJI E-MAIL
+   ============================================================ */
+function showEmailVerification(email) {
+  document.getElementById('auth-screen').hidden   = true;
+  document.getElementById('verify-screen').hidden = false;
+  document.getElementById('app-wrapper').hidden   = true;
+  document.getElementById('verify-email-addr').textContent = email;
+}
+
+function hideEmailVerification() {
+  document.getElementById('verify-screen').hidden = true;
+}
+
+async function resendVerificationEmail() {
+  const user = _auth?.currentUser;
+  if (!user) return;
+  const btn = document.getElementById('verify-resend-btn');
+  btn.disabled    = true;
+  btn.textContent = 'Wysyłanie…';
+  try {
+    await user.sendEmailVerification({ url: 'https://w84kubus.github.io/TaskManager/' });
+    showToast('📧 Wysłano ponownie — sprawdź skrzynkę i folder Spam', 'success', 5000);
+  } catch (e) {
+    if (e.code === 'auth/too-many-requests') {
+      showToast('Zbyt wiele prób — poczekaj chwilę i spróbuj ponownie', 'error');
+    } else {
+      showToast('Błąd wysyłania — spróbuj ponownie', 'error');
+    }
+  } finally {
+    btn.disabled    = false;
+    btn.textContent = 'Wyślij ponownie';
+  }
+}
+
+async function checkEmailVerification() {
+  const user = _auth?.currentUser;
+  if (!user) return;
+  const btn = document.getElementById('verify-check-btn');
+  btn.disabled    = true;
+  btn.textContent = 'Sprawdzam…';
+  try {
+    await user.reload(); // odśwież dane użytkownika z serwera
+    if (_auth.currentUser.emailVerified) {
+      hideEmailVerification();
+      state.currentUser = mapFirebaseUser(_auth.currentUser);
+      await onLoginSuccess(true);
+    } else {
+      showToast('E-mail jeszcze nie zweryfikowany — kliknij link w wiadomości', 'warning', 5000);
+    }
+  } catch (e) {
+    showToast('Błąd sprawdzania — spróbuj ponownie', 'error');
+  } finally {
+    btn.disabled    = false;
+    btn.textContent = '✓ Już zweryfikowano — zaloguj mnie';
+  }
+}
+
 function showApp() {
   document.getElementById('auth-screen').hidden = true;
   document.getElementById('app-wrapper').hidden = false;
@@ -955,6 +1013,15 @@ function setupAuthEvents() {
   document.getElementById('google-login').addEventListener('click',    triggerGoogleSignIn);
   document.getElementById('google-register').addEventListener('click', triggerGoogleSignIn);
 
+  /* ── Weryfikacja e-mail: przyciski ──────────────────────── */
+  document.getElementById('verify-check-btn').addEventListener('click',  checkEmailVerification);
+  document.getElementById('verify-resend-btn').addEventListener('click', resendVerificationEmail);
+  document.getElementById('verify-back-btn').addEventListener('click', () => {
+    hideEmailVerification();
+    if (_auth) _auth.signOut().catch(() => {});
+    showAuth();
+  });
+
   /* ── Tryb gościa (click) ────────────────────────────────── */
   document.getElementById('guest-btn').addEventListener('click', guestLogin);
 
@@ -1287,10 +1354,17 @@ function init() {
     _authInitialized = true;
 
     if (firebaseUser) {
+      // Blokuj dostęp dla niezweryfikowanych kont e-mail
+      if (firebaseUser.providerData[0]?.providerId === 'password' && !firebaseUser.emailVerified) {
+        showEmailVerification(firebaseUser.email);
+        return;
+      }
       state.currentUser = mapFirebaseUser(firebaseUser);
       await onLoginSuccess(!isPageLoad); // ciche przywrócenie przy page reload
     } else {
-      // Brak Firebase user — sprawdź tryb gościa
+      // Brak Firebase user — ukryj ekran weryfikacji jeśli był widoczny
+      hideEmailVerification();
+      // Sprawdź tryb gościa
       const guestData = localStorage.getItem('tm_guest_session');
       if (guestData) {
         try {

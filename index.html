@@ -123,6 +123,40 @@
   </div>
 
   <!-- ═══════════════════════════════════════
+       EKRAN WERYFIKACJI E-MAIL
+  ════════════════════════════════════════ -->
+  <div id="verify-screen" class="auth-screen" hidden aria-label="Weryfikacja adresu e-mail">
+    <div class="auth-card verify-card">
+      <div class="auth-logo" aria-hidden="true">
+        <span class="logo-icon">📧</span>
+        <span class="logo-text">TaskManager</span>
+      </div>
+
+      <h2 class="verify-title">Potwierdź adres e-mail</h2>
+      <p class="verify-desc">
+        Wysłaliśmy link weryfikacyjny na<br>
+        <strong id="verify-email-addr"></strong>
+      </p>
+      <p class="verify-hint">
+        Kliknij link w e-mailu, a następnie wróć tutaj i naciśnij przycisk poniżej.<br>
+        <small>Nie widzisz? Sprawdź folder <strong>Spam / Oferty</strong>.</small>
+      </p>
+
+      <button id="verify-check-btn" class="btn btn-primary auth-submit" type="button">
+        ✓ Już zweryfikowano — zaloguj mnie
+      </button>
+
+      <button id="verify-resend-btn" class="btn btn-secondary verify-resend" type="button">
+        Wyślij ponownie
+      </button>
+
+      <button id="verify-back-btn" class="guest-link" type="button">
+        Wróć do logowania
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
        GŁÓWNA APLIKACJA (ukryta do logowania)
   ════════════════════════════════════════ -->
   <div id="app-wrapper" hidden>
