@@ -298,6 +298,31 @@ function clearGuestSession() {
 }
 
 /* ============================================================
+   RESET HASŁA
+   ============================================================ */
+function showForgotPanel() {
+  document.querySelector('.auth-tabs').hidden          = true;
+  document.getElementById('login-panel').hidden        = true;
+  document.getElementById('register-panel').hidden     = true;
+  document.getElementById('forgot-panel').hidden       = false;
+  document.querySelector('.auth-subtitle').textContent = 'Zresetuj swoje hasło';
+}
+
+function hideForgotPanel() {
+  document.getElementById('forgot-panel').hidden       = true;
+  document.querySelector('.auth-tabs').hidden          = false;
+  document.getElementById('login-panel').hidden        = false;
+  document.getElementById('register-panel').hidden     = true;
+  document.querySelector('.auth-subtitle').textContent = 'Zaloguj się, aby zarządzać swoimi zadaniami';
+  // Przywróć aktywną zakładkę „Logowanie"
+  document.querySelectorAll('.auth-tab').forEach(t => {
+    const isLogin = t.dataset.authTab === 'login';
+    t.classList.toggle('active', isLogin);
+    t.setAttribute('aria-selected', String(isLogin));
+  });
+}
+
+/* ============================================================
    EKRAN WERYFIKACJI E-MAIL
    ============================================================ */
 /**
@@ -1044,6 +1069,51 @@ function setupAuthEvents() {
   /* ── Przyciski Google Sign-In ──────────────────────────── */
   document.getElementById('google-login').addEventListener('click',    triggerGoogleSignIn);
   document.getElementById('google-register').addEventListener('click', triggerGoogleSignIn);
+
+  /* ── Zapomniałem hasła ──────────────────────────────────── */
+  document.getElementById('forgot-btn').addEventListener('click', showForgotPanel);
+
+  document.getElementById('forgot-back-btn').addEventListener('click', () => {
+    document.getElementById('forgot-email').value = '';
+    clearError(
+      document.getElementById('forgot-email'),
+      document.getElementById('forgot-email-error')
+    );
+    hideForgotPanel();
+  });
+
+  document.getElementById('forgot-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const emailInput = document.getElementById('forgot-email');
+    const emailError = document.getElementById('forgot-email-error');
+
+    if (!EMAIL_REGEX.test(emailInput.value.trim())) {
+      setError(emailInput, emailError, 'Wpisz poprawny adres e-mail.');
+      return;
+    }
+    clearError(emailInput, emailError);
+
+    const submitBtn = e.target.querySelector('[type="submit"]');
+    submitBtn.disabled    = true;
+    submitBtn.textContent = 'Wysyłanie…';
+
+    try {
+      await _auth.sendPasswordResetEmail(emailInput.value.trim(), {
+        url: 'https://w84kubus.github.io/TaskManager/',
+      });
+      showToast(
+        `📧 Wysłano link resetowania hasła na ${emailInput.value.trim()} — sprawdź skrzynkę`,
+        'success', 7000
+      );
+      emailInput.value = '';
+      hideForgotPanel();
+    } catch (err) {
+      setError(emailInput, emailError, translateAuthError(err.code));
+    } finally {
+      submitBtn.disabled    = false;
+      submitBtn.textContent = 'Wyślij link resetujący';
+    }
+  });
 
   /* ── Weryfikacja e-mail: przyciski ──────────────────────── */
   document.getElementById('verify-check-btn').addEventListener('click',  checkEmailVerification);

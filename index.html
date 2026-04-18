@@ -66,6 +66,7 @@
             <span class="error-msg" id="login-password-error" role="alert" aria-live="polite"></span>
           </div>
           <button type="submit" class="btn btn-primary auth-submit">Zaloguj się</button>
+          <button type="button" class="forgot-link" id="forgot-btn">Zapomniałem hasła?</button>
         </form>
       </div>
 
@@ -109,7 +110,26 @@
           <button type="submit" class="btn btn-primary auth-submit">Utwórz konto</button>
         </form>
       </div>
-    </div>
+
+      <!-- Panel: Reset hasła -->
+      <div id="forgot-panel" class="auth-panel" hidden aria-label="Resetowanie hasła">
+        <div class="forgot-icon" aria-hidden="true">🔑</div>
+        <p class="forgot-desc">
+          Podaj adres e-mail powiązany z kontem — wyślemy Ci link do ustawienia nowego hasła.
+        </p>
+        <form id="forgot-form" novalidate aria-label="Formularz resetowania hasła">
+          <div class="form-group">
+            <label for="forgot-email">Adres e-mail</label>
+            <input type="email" id="forgot-email" placeholder="twoj@email.pl"
+                   aria-required="true" aria-describedby="forgot-email-error" autocomplete="email">
+            <span class="error-msg" id="forgot-email-error" role="alert" aria-live="polite"></span>
+          </div>
+          <button type="submit" class="btn btn-primary auth-submit">Wyślij link resetujący</button>
+        </form>
+        <button type="button" class="guest-link" id="forgot-back-btn">← Wróć do logowania</button>
+      </div>
+
+    </div><!-- /.auth-card -->
 
     <!-- Przycisk trybu gościa -->
     <button id="guest-btn" class="guest-link" type="button"
@@ -538,6 +558,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-auth-compat.js"></script>
-  <script src="scripts/app.js?v=5"></script>
+  <script src="scripts/app.js?v=6"></script>
 </body>
 </html>
