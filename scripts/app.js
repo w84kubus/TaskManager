@@ -300,11 +300,43 @@ function clearGuestSession() {
 /* ============================================================
    EKRAN WERYFIKACJI E-MAIL
    ============================================================ */
-function showEmailVerification(email) {
+/**
+ * Pokaż ekran weryfikacji e-mail.
+ * @param {string} email  - adres e-mail użytkownika
+ * @param {'register'|'login'} source - skąd pochodzi wywołanie:
+ *   'register' = świeża rejestracja (wysłano link, poinformuj użytkownika)
+ *   'login'    = próba logowania, konto niezweryfikowane (blokada)
+ */
+function showEmailVerification(email, source) {
   document.getElementById('auth-screen').hidden   = true;
   document.getElementById('verify-screen').hidden = false;
   document.getElementById('app-wrapper').hidden   = true;
-  document.getElementById('verify-email-addr').textContent = email;
+
+  const card      = document.querySelector('#verify-screen .verify-card');
+  const iconWrap  = document.getElementById('verify-icon-wrap');
+  const titleEl   = document.getElementById('verify-title');
+  const descEl    = document.getElementById('verify-desc');
+  // Zabezpiecz e-mail przed XSS
+  const safeEmail = (email || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+  if (source === 'login') {
+    // Konto niezweryfikowane — blokada dostępu
+    card.classList.add('blocked');
+    iconWrap.textContent = '🔒';
+    titleEl.textContent  = 'Weryfikacja wymagana';
+    descEl.innerHTML     =
+      `Twoje konto nie zostało jeszcze potwierdzone.<br>` +
+      `Kliknij link weryfikacyjny w wiadomości wysłanej na<br>` +
+      `<strong>${safeEmail}</strong>`;
+  } else {
+    // Świeża rejestracja — poinformuj o wysłaniu linku
+    card.classList.remove('blocked');
+    iconWrap.textContent = '📧';
+    titleEl.textContent  = 'Potwierdź adres e-mail';
+    descEl.innerHTML     =
+      `Wysłaliśmy link weryfikacyjny na<br>` +
+      `<strong>${safeEmail}</strong>`;
+  }
 }
 
 function hideEmailVerification() {
@@ -328,7 +360,7 @@ async function resendVerificationEmail() {
     }
   } finally {
     btn.disabled    = false;
-    btn.textContent = 'Wyślij ponownie';
+    btn.textContent = 'Wyślij link ponownie';
   }
 }
 
@@ -351,7 +383,7 @@ async function checkEmailVerification() {
     showToast('Błąd sprawdzania — spróbuj ponownie', 'error');
   } finally {
     btn.disabled    = false;
-    btn.textContent = '✓ Już zweryfikowano — zaloguj mnie';
+    btn.textContent = '✓ Potwierdziłem — zaloguj mnie';
   }
 }
 
@@ -999,7 +1031,7 @@ function setupAuthEvents() {
       });
 
       // Pokaż ekran weryfikacji ręcznie (onAuthStateChanged i tak to zrobi, ale upewniamy się)
-      showEmailVerification(cred.user.email);
+      showEmailVerification(cred.user.email, 'register');
     } catch (err) {
       setError(emailInput, document.getElementById('register-email-error'),
         translateAuthError(err.code));
@@ -1356,7 +1388,7 @@ function init() {
     if (firebaseUser) {
       // Blokuj dostęp dla niezweryfikowanych kont e-mail
       if (firebaseUser.providerData[0]?.providerId === 'password' && !firebaseUser.emailVerified) {
-        showEmailVerification(firebaseUser.email);
+        showEmailVerification(firebaseUser.email, 'login');
         return;
       }
       state.currentUser = mapFirebaseUser(firebaseUser);

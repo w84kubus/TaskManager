@@ -1180,34 +1180,83 @@ body.guest-mode main {
   text-align: center;
 }
 
-.verify-title {
-  font-size: 1.4rem;
-  font-weight: 700;
+.verify-icon-wrap {
+  font-size: 3rem;
   margin-bottom: var(--sp-md);
-  color: var(--text-primary);
+  line-height: 1;
+  display: block;
 }
+
+/* Stan "zablokowany" — czerwona ikona kłódki */
+.verify-card.blocked .verify-icon-wrap { filter: none; }
+
+.verify-title {
+  font-size: 1.45rem;
+  font-weight: 800;
+  margin-bottom: var(--sp-sm);
+  color: var(--text-primary);
+  letter-spacing: -.02em;
+}
+
+/* Tytuł blokady w kolorze ostrzeżenia */
+.verify-card.blocked .verify-title { color: var(--danger); }
 
 .verify-desc {
   color: var(--text-secondary);
-  margin-bottom: var(--sp-md);
+  margin-bottom: var(--sp-lg);
   line-height: 1.7;
+  font-size: .97rem;
 }
 
 .verify-desc strong {
   color: var(--accent);
   word-break: break-all;
+  font-weight: 600;
+}
+
+/* Lista kroków */
+.verify-steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-sm);
+  text-align: left;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--sp-md);
+  margin-bottom: var(--sp-md);
+}
+
+.verify-step {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-sm);
+  font-size: .92rem;
+  color: var(--text-secondary);
+}
+
+.verify-step-num {
+  min-width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 50%;
+  font-size: .78rem;
+  font-weight: 700;
+  flex-shrink: 0;
 }
 
 .verify-hint {
-  font-size: .88rem;
+  font-size: .84rem;
   color: var(--text-muted);
-  margin-bottom: var(--sp-xl);
-  line-height: 1.7;
+  margin-bottom: var(--sp-lg);
+  line-height: 1.6;
 }
 
-.verify-hint strong {
-  color: var(--text-secondary);
-}
+.verify-hint strong { color: var(--text-secondary); }
 
 .verify-resend {
   margin-top: var(--sp-sm);
