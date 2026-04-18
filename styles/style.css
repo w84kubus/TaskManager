@@ -103,6 +103,9 @@ html { scroll-behavior: smooth; }
   min-height: 100vh;
 }
 
+/* WAŻNE: display:flex nadpisuje atrybut hidden – przywróć display:none */
+#app-wrapper[hidden] { display: none !important; }
+
 #app-wrapper main { flex: 1; }
 
 body {
