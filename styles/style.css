@@ -1023,6 +1023,7 @@ footer {
 
   /* Guest banner mobile */
   .guest-banner-text { font-size: .78rem; min-width: 0; }
+  .guest-banner-btn  { white-space: normal; }
   body.guest-mode main { padding-top: calc(var(--header-h) + var(--safe-top) + 80px + var(--sp-xl)); }
 }
 
@@ -1316,6 +1317,10 @@ footer {
   inset-inline: 0;
   z-index: 90;
   animation: fadeUp .25s ease;
+  /* WAŻNE: overflow:hidden zapobiega rozszerzaniu viewport iOS Safari */
+  overflow: hidden;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .guest-banner[hidden] { display: none !important; }
