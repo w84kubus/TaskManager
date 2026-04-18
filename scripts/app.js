@@ -39,7 +39,6 @@ function saveState() {
   localStorage.setItem(userKey('tasks'), JSON.stringify(state.tasks));
   localStorage.setItem(userKey('dark'),  JSON.stringify(state.darkMode));
   localStorage.setItem(userKey('notif'), JSON.stringify(state.notifications));
-  firestoreSync(); // synchronizuj z chmurą
 }
 
 function loadState() {
@@ -80,85 +79,118 @@ function initFirebase() {
   }
 }
 
-// ID dokumentu Firestore – email z zamienionymi znakami specjalnymi
+// ID dokumentu użytkownika — email bez znaków specjalnych
 function firestoreDocId() {
   if (!state.currentUser || state.currentUser.provider === 'guest') return null;
   return state.currentUser.email.replace(/[@.]/g, '_');
 }
 
-// Wczytaj dane z Firestore — zwraca true jeśli dokument istnieje
+// Referencja do kolekcji zadań użytkownika (każde zadanie = osobny dokument)
+function tasksCol() {
+  const docId = firestoreDocId();
+  return (_db && docId) ? _db.collection('users').doc(docId).collection('tasks') : null;
+}
+
+// Zapisz / zaktualizuj jedno zadanie w Firestore
+function firestoreSetTask(task) {
+  const col = tasksCol();
+  if (!col) return;
+  col.doc(task.id).set(task).catch(e => console.warn('[FB] setTask:', e));
+}
+
+// Usuń jedno zadanie z Firestore
+function firestoreDeleteTask(taskId) {
+  const col = tasksCol();
+  if (!col) return;
+  col.doc(taskId).delete().catch(e => console.warn('[FB] deleteTask:', e));
+}
+
+// Synchronizuj tylko ustawienia (dark mode, powiadomienia)
+function firestoreSyncSettings() {
+  const docId = firestoreDocId();
+  if (!_db || !docId) return;
+  _db.collection('users').doc(docId).set({
+    darkMode:      state.darkMode,
+    notifications: state.notifications,
+    updatedAt:     firebase.firestore.FieldValue.serverTimestamp(),
+  }, { merge: true }).catch(e => console.warn('[FB] syncSettings:', e));
+}
+
+// Wczytaj wszystkie dane z Firestore (przy logowaniu / ładowaniu strony)
 async function firestoreLoad() {
   const docId = firestoreDocId();
   if (!_db || !docId) return false;
   try {
-    const doc = await _db.collection('users').doc(docId).get();
-    if (doc.exists) {
-      const d = doc.data();
-      if (Array.isArray(d.tasks))               state.tasks         = d.tasks;
-      if (typeof d.darkMode      === 'boolean')  state.darkMode      = d.darkMode;
-      if (typeof d.notifications === 'boolean')  state.notifications = d.notifications;
-      return true;   // konto istnieje w chmurze
+    // Ustawienia
+    const userDoc = await _db.collection('users').doc(docId).get();
+    if (userDoc.exists) {
+      const d = userDoc.data();
+      if (typeof d.darkMode      === 'boolean') state.darkMode      = d.darkMode;
+      if (typeof d.notifications === 'boolean') state.notifications = d.notifications;
     }
-    return false;    // nowy użytkownik — brak dokumentu
+    // Zadania (subcollection — bez konfliktów przy równoczesnym zapisie)
+    const snap = await tasksCol().get();
+    if (!snap.empty) {
+      state.tasks = snap.docs.map(d => d.data());
+      state.tasks.sort((a, b) => b.createdAt - a.createdAt);
+      return true;
+    }
+    return userDoc.exists; // dokument istnieje ale brak zadań
   } catch (e) {
-    console.warn('[Firebase] Błąd odczytu:', e);
-    showToast('Brak synchronizacji z chmurą — sprawdź połączenie.', 'warning');
+    console.warn('[FB] load:', e);
     return false;
   }
 }
 
-// Nasłuchiwacz zmian w czasie rzeczywistym
+// Nasłuchiwacz czasu rzeczywistego — kolekcja zadań
 let _firestoreUnsubscribe = null;
 
 function firestoreStartListener() {
-  const docId = firestoreDocId();
-  if (!_db || !docId) return;
-
-  // Zatrzymaj poprzedni nasłuchiwacz
+  const col = tasksCol();
+  if (!col) return;
   if (_firestoreUnsubscribe) { _firestoreUnsubscribe(); _firestoreUnsubscribe = null; }
 
-  _firestoreUnsubscribe = _db.collection('users').doc(docId)
-    .onSnapshot(doc => {
-      // Ignoruj zmiany lokalne (własne zapisy) — tylko zdalne aktualizacje
-      if (!doc.exists || doc.metadata.hasPendingWrites) return;
+  _firestoreUnsubscribe = col.onSnapshot(snapshot => {
+    let changed = false;
 
-      const d = doc.data();
-      let changed = false;
+    snapshot.docChanges().forEach(change => {
+      if (change.doc.metadata.hasPendingWrites) return; // ignoruj własne zapisy
+      const task = change.doc.data();
 
-      if (Array.isArray(d.tasks) && JSON.stringify(d.tasks) !== JSON.stringify(state.tasks)) {
-        state.tasks = d.tasks;
-        localStorage.setItem(userKey('tasks'), JSON.stringify(state.tasks));
-        renderTaskList();
-        if (!document.getElementById('stats').hidden) renderStats();
-        changed = true;
+      if (change.type === 'added') {
+        if (!state.tasks.find(t => t.id === task.id)) {
+          state.tasks.unshift(task);
+          changed = true;
+        }
+      } else if (change.type === 'modified') {
+        const idx = state.tasks.findIndex(t => t.id === task.id);
+        if (idx >= 0) { state.tasks[idx] = task; changed = true; }
+      } else if (change.type === 'removed') {
+        const before = state.tasks.length;
+        state.tasks = state.tasks.filter(t => t.id !== task.id);
+        if (state.tasks.length !== before) changed = true;
       }
-      if (typeof d.darkMode === 'boolean' && d.darkMode !== state.darkMode) {
-        state.darkMode = d.darkMode;
-        applyDarkMode(state.darkMode);
-        localStorage.setItem(userKey('dark'), JSON.stringify(state.darkMode));
-        changed = true;
-      }
-      if (typeof d.notifications === 'boolean' && d.notifications !== state.notifications) {
-        state.notifications = d.notifications;
-        const nt = document.getElementById('notifications-toggle');
-        if (nt) { nt.checked = state.notifications; nt.setAttribute('aria-checked', String(state.notifications)); }
-        localStorage.setItem(userKey('notif'), JSON.stringify(state.notifications));
-        changed = true;
-      }
+    });
 
-      if (changed) showToast('☁️ Zadania zaktualizowane', 'success', 2000);
-    }, e => console.warn('[Firebase] Błąd nasłuchiwacza:', e));
+    if (changed) {
+      localStorage.setItem(userKey('tasks'), JSON.stringify(state.tasks));
+      renderTaskList();
+      if (!document.getElementById('stats').hidden) renderStats();
+      showToast('☁️ Zsynchronizowano', 'success', 1800);
+    }
+  }, e => console.warn('[FB] listener:', e));
 }
 
-// Synchronizuj przy każdym załadowaniu strony (load + login)
+// Pełna inicjalizacja synchronizacji przy logowaniu / ładowaniu strony
 async function firestoreOnLoad() {
   if (!state.currentUser || state.currentUser.provider === 'guest') return false;
   if (!_db) return false;
 
-  const localCount  = state.tasks.length;
+  const localTasks  = [...state.tasks]; // kopia lokalnych zadań przed nadpisaniem
   const cloudExists = await firestoreLoad();
 
   if (cloudExists) {
+    // Chmura = źródło prawdy
     localStorage.setItem(userKey('tasks'), JSON.stringify(state.tasks));
     localStorage.setItem(userKey('dark'),  JSON.stringify(state.darkMode));
     localStorage.setItem(userKey('notif'), JSON.stringify(state.notifications));
@@ -166,28 +198,18 @@ async function firestoreOnLoad() {
     const nt = document.getElementById('notifications-toggle');
     if (nt) { nt.checked = state.notifications; nt.setAttribute('aria-checked', String(state.notifications)); }
     renderTaskList();
-  } else if (localCount > 0) {
-    firestoreSync();
+  } else if (localTasks.length > 0) {
+    // Migracja: wypchnij lokalne zadania jako osobne dokumenty
+    const col = tasksCol();
+    if (col) {
+      const batch = _db.batch();
+      localTasks.forEach(t => batch.set(col.doc(t.id), t));
+      batch.commit().catch(e => console.warn('[FB] migration:', e));
+    }
   }
 
-  // Uruchom nasłuchiwacz czasu rzeczywistego
   firestoreStartListener();
   return cloudExists;
-}
-
-// Zapisz dane do Firestore (fire-and-forget)
-function firestoreSync() {
-  const docId = firestoreDocId();
-  if (!_db || !docId) return;
-  _db.collection('users').doc(docId).set({
-    tasks:         state.tasks,
-    darkMode:      state.darkMode,
-    notifications: state.notifications,
-    updatedAt:     firebase.firestore.FieldValue.serverTimestamp(),
-  }).catch(e => {
-    console.warn('[Firebase] Błąd zapisu:', e);
-    showToast('Błąd zapisu do chmury ☁️', 'error');
-  });
 }
 
 /* ============================================================
@@ -414,12 +436,14 @@ function addTask(name, priority, category) {
   };
   state.tasks.unshift(task);
   saveState();
+  firestoreSetTask(task);   // osobny dokument w Firestore
   return task;
 }
 
 function removeTask(id) {
   state.tasks = state.tasks.filter(t => t.id !== id);
   saveState();
+  firestoreDeleteTask(id);  // usuń dokument z Firestore
 }
 
 function toggleTask(id) {
@@ -427,6 +451,7 @@ function toggleTask(id) {
   if (!task) return null;
   task.done = !task.done;
   saveState();
+  firestoreSetTask(task);   // zaktualizuj dokument w Firestore
   return task;
 }
 
@@ -435,6 +460,7 @@ function editTask(id, patch) {
   if (!task) return;
   Object.assign(task, patch);
   saveState();
+  firestoreSetTask(task);   // zaktualizuj dokument w Firestore
 }
 
 /* ============================================================
@@ -799,10 +825,15 @@ function applyDarkMode(enabled) {
    WYCZYSZCZENIE DANYCH
    ============================================================ */
 function clearAll() {
+  // Usuń każde zadanie z Firestore (osobny dokument)
+  const col = tasksCol();
+  if (col) state.tasks.forEach(t => col.doc(t.id).delete().catch(() => {}));
+
   state.tasks         = [];
   state.darkMode      = false;
   state.notifications = true;
   saveState();
+  firestoreSyncSettings();
 
   applyDarkMode(false);
   document.getElementById('notifications-toggle').checked = true;
@@ -1095,6 +1126,7 @@ function setupEvents() {
     e.target.setAttribute('aria-checked', String(state.darkMode));
     applyDarkMode(state.darkMode);
     saveState();
+    firestoreSyncSettings();
     showToast(state.darkMode ? 'Tryb ciemny włączony 🌙' : 'Tryb jasny włączony ☀️', 'success');
   });
 
@@ -1103,6 +1135,7 @@ function setupEvents() {
     state.notifications = e.target.checked;
     e.target.setAttribute('aria-checked', String(state.notifications));
     saveState();
+    firestoreSyncSettings();
   });
 
   /* ── Wyczyść dane (click) ──────────────────────────────── */
