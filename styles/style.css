@@ -55,8 +55,10 @@
   /* Typografia */
   --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
 
-  /* Wysokość nagłówka */
-  --header-h: 64px;
+  /* Wysokość nagłówka + bezpieczna strefa iOS */
+  --header-h:    64px;
+  --safe-top:    env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
 
   /* Przejścia */
   --tr-fast:   150ms ease;
@@ -122,12 +124,16 @@ input, select { font-family: inherit; }
   inset-block-start: 0;
   inset-inline: 0;
   z-index: 100;
-  height: var(--header-h);
+  height: calc(var(--header-h) + var(--safe-top));
+  padding-top: var(--safe-top);
   background: var(--bg-card);
   border-bottom: 1px solid var(--border);
   box-shadow: var(--shadow-sm);
   transition: box-shadow var(--tr-normal), background var(--tr-normal);
 }
+
+/* Ciemny kolor paska systemowego iOS przy dark mode */
+[data-theme="dark"] #site-header { background: #161b27; }
 
 #site-header.scrolled { box-shadow: var(--shadow-md); }
 
@@ -205,7 +211,7 @@ nav ul {
 main {
   max-width: 1120px;
   margin: 0 auto;
-  padding: calc(var(--header-h) + var(--sp-xl)) var(--sp-xl) var(--sp-2xl);
+  padding: calc(var(--header-h) + var(--safe-top) + var(--sp-xl)) var(--sp-xl) calc(var(--sp-2xl) + var(--safe-bottom));
 }
 
 .view { animation: fadeUp .3s ease; }
@@ -898,7 +904,7 @@ footer {
 
   /* Guest banner tablet */
   .guest-banner { padding: .55rem var(--sp-md); gap: var(--sp-xs); }
-  body.guest-mode main { padding-top: calc(var(--header-h) + 60px + var(--sp-xl)); }
+  body.guest-mode main { padding-top: calc(var(--header-h) + var(--safe-top) + 60px + var(--sp-xl)); }
 }
 
 /* ============================================================
@@ -924,7 +930,7 @@ footer {
 
   /* Guest banner mobile */
   .guest-banner-text { font-size: .78rem; }
-  body.guest-mode main { padding-top: calc(var(--header-h) + 80px + var(--sp-xl)); }
+  body.guest-mode main { padding-top: calc(var(--header-h) + var(--safe-top) + 80px + var(--sp-xl)); }
 }
 
 /* ============================================================
@@ -1164,7 +1170,7 @@ footer {
 
 /* Gdy banner widoczny — przesuń main w dół */
 body.guest-mode main {
-  padding-top: calc(var(--header-h) + 44px + var(--sp-xl));
+  padding-top: calc(var(--header-h) + var(--safe-top) + 44px + var(--sp-xl));
 }
 
 /* Avatar gościa */

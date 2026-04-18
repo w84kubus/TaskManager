@@ -1,33 +1,50 @@
 # TaskManager
 
-Aplikacja webowa do zarządzania zadaniami — dodawaj, edytuj, filtruj i śledź postęp swoich zadań.
+Aplikacja webowa do zarządzania zadaniami — dodawaj, edytuj, filtruj i śledź postęp swoich zadań. Dane synchronizują się w czasie rzeczywistym między wszystkimi urządzeniami.
 
 ## Demo
 
-Otwórz `index.html` w przeglądarce (Chrome / Firefox) lub uruchom lokalny serwer.
+🌐 **https://w84kubus.github.io/TaskManager/**
 
 ## Funkcjonalności
 
-### Logowanie / Rejestracja
-- **Google** — symulowany OAuth (frontend demo; w produkcji: Google Identity Services)
-- **Apple** — symulowany OAuth (frontend demo; w produkcji: Sign in with Apple)
-- **E-mail** — pełna rejestracja i logowanie z walidacją RegExp + zapis w `localStorage`
-- Sesja persystuje po zamknięciu/odświeżeniu strony
+### Logowanie / Rejestracja (Firebase Auth)
+- **Google** — logowanie przez oficjalne popup Google OAuth (Firebase Authentication)
+- **E-mail** — rejestracja i logowanie z walidacją + zapis w Firebase Auth
+- Konto online — zaloguj się z dowolnego urządzenia, zadania zawsze aktualne
+- Sesja persystuje po zamknięciu/odświeżeniu strony (Firebase Auth state)
 - Dane zadań izolowane per-konto (każdy użytkownik widzi tylko swoje)
 - Własny modal potwierdzenia zamiast natywnego `confirm()`
+- Tryb gościa — lokalny dostęp bez zakładania konta
+
+### Synchronizacja w chmurze (Firebase Firestore)
+- Synchronizacja zadań w **czasie rzeczywistym** (`onSnapshot` listener)
+- Każde zadanie = osobny dokument Firestore (brak konfliktów przy równoczesnym zapisie)
+- Dark mode i powiadomienia synchronizowane między urządzeniami
+- Widoczne komunikaty przy problemach z uprawnieniami Firestore
 
 ### 3 widoki
 - **Zadania** — dodawanie, edycja, usuwanie, oznaczanie jako ukończone
 - **Statystyki** — karty podsumowujące + wykresy słupkowe (kategorie, priorytety)
-- **Ustawienia** — dark mode, powiadomienia toast, eksport JSON, czyszczenie danych
+- **Ustawienia** — dark mode, powiadomienia toast, eksport JSON, eksport TXT, czyszczenie danych
 
 ### Interaktywność
 - Dynamiczne dodawanie i usuwanie elementów DOM (z animacją)
 - Filtrowanie (wszystkie / aktywne / ukończone) + wyszukiwanie live
 - Sortowanie (data, priorytet, alfabet)
-- Dark mode z zapisem w `localStorage`
+- Dark mode z zapisem w Firestore (synced) i localStorage (fallback)
 - Modal edycji zadania
 - Toast notifications
+
+### Eksport danych
+- **JSON** — pełna kopia zapasowa z metadanymi
+- **TXT** — czytelna lista zadań z formatowaniem
+
+### Ikona i PWA-ready
+- Własna ikona SVG (favicon + apple-touch-icon)
+- `meta theme-color` — dostosowany kolor paska systemowego iOS/Android
+- `viewport-fit=cover` — obsługa notcha iPhone (safe-area-inset)
+- `apple-mobile-web-app-capable` — możliwość dodania do ekranu głównego
 
 ### Technologie
 
@@ -35,28 +52,28 @@ Otwórz `index.html` w przeglądarce (Chrome / Firefox) lub uruchom lokalny serw
 |---|---|
 | HTML5 semantyczny | `<header>`, `<nav>`, `<main>`, `<section>` ×3, `<footer>` |
 | Atrybuty dostępności | 59× `aria-*`, `role`, `alt` |
-| Własne CSS (bez frameworków) | 903 linii czystego CSS |
+| Własne CSS (bez frameworków) | 900+ linii czystego CSS |
 | Flexbox ×3 | header-inner, form-row, task-item |
 | CSS Grid ×2 | stats-grid (4 kol.), settings-grid (2 kol.) |
 | Media queries ×2 | 768px (tablet), 480px (mobile) |
 | Transitions / animations ×3+ | logo hover, przyciski, slideIn, fadeUp, modalPop, toast |
-| CSS Variables | 40+ zmiennych (light + dark) |
-| Auth system | rejestracja + login e-mail, Google, Apple (frontend demo) |
-| Per-user storage | dane izolowane kluczem `tm_{email}_{key}` |
-| Session persistence | `tm_session` w localStorage, auto-login po reload |
-| Confirm modal | własny `openConfirm()` zamiast natywnego `confirm()` |
+| CSS Variables | 40+ zmiennych (light + dark) + safe-area env() |
+| Firebase Auth | rejestracja + login e-mail + Google OAuth |
+| Firebase Firestore | real-time sync, per-task subcollection |
+| Bezpieczne reguły Firestore | `request.auth.uid == userId` |
 | DOM manipulation | createElement, innerHTML, appendChild |
 | Event listeners ×4 typy | `click`, `submit`, `input`, `scroll` |
 | Walidacja RegExp | `/^[\p{L}\p{N}\s\-.,!?()]{2,120}$/u` |
 | `event.preventDefault()` | ×3 (formularze, nawigacja) |
-| `localStorage` | zapis/odczyt zadań + ustawień |
-| Async (setTimeout / Promise) | toast auto-hide, eksport JSON |
+| `localStorage` | fallback offline + dark mode per-device |
+| Async (setTimeout / Promise) | toast auto-hide, eksport JSON/TXT |
 
 ## Struktura plików
 
 ```
 Task Manager/
 ├── index.html            # Główna strona HTML
+├── favicon.svg           # Ikona aplikacji (SVG)
 ├── styles/
 │   └── style.css         # Arkusz stylów
 ├── scripts/
@@ -66,10 +83,9 @@ Task Manager/
 
 ## Uruchomienie
 
-1. Sklonuj repozytorium
-2. Otwórz `index.html` w przeglądarce
+Otwórz **https://w84kubus.github.io/TaskManager/** w przeglądarce.
 
-Lub z serwerem lokalnym:
+Lub lokalnie:
 ```bash
 # Node.js
 npx serve .
@@ -78,16 +94,36 @@ npx serve .
 python -m http.server 3000
 ```
 
+## Konfiguracja Firebase
+
+### Reguły Firestore (Firebase Console → Firestore → Rules):
+```
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId}/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}
+```
+
+### Autoryzowane domeny (Firebase Console → Authentication → Settings → Authorized domains):
+- `localhost`
+- `w84kubus.github.io`
+
 ## Testowanie
 
 | Przeglądarka | Status |
 |---|---|
 | Chrome | ✅ |
 | Firefox | ✅ |
+| Safari iOS (iPhone) | ✅ |
 | Konsola (0 błędów) | ✅ |
 | Responsywność mobile | ✅ |
 | Responsywność tablet | ✅ |
 | Responsywność desktop | ✅ |
+| Sync real-time | ✅ |
 
 ## Autorzy
 

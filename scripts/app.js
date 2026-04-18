@@ -24,15 +24,17 @@ const state = {
   search:        '',
   darkMode:      false,
   notifications: true,
-  currentUser:   null,        // { email, name, provider }
+  currentUser:   null,   // { email, name, provider, uid }
 };
 
 /* ============================================================
    localStorage – zapis / odczyt (per-user)
    ============================================================ */
 function userKey(key) {
-  const uid = state.currentUser ? state.currentUser.email : '_guest';
-  return `tm_${uid}_${key}`;
+  const id = state.currentUser
+    ? (state.currentUser.email || state.currentUser.uid || '_guest')
+    : '_guest';
+  return `tm_${id}_${key}`;
 }
 
 function saveState() {
@@ -67,22 +69,24 @@ const FIREBASE_CONFIG = {
   appId:             '1:749463900730:web:85a386c0aa36c32dab9b03',
 };
 
-let _db = null;
+let _db   = null;
+let _auth = null;
 
 function initFirebase() {
   try {
     if (typeof firebase === 'undefined') return;
     if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
-    _db = firebase.firestore();
+    _db   = firebase.firestore();
+    _auth = firebase.auth();
   } catch (e) {
     console.warn('[Firebase] Inicjalizacja nieudana:', e);
   }
 }
 
-// ID dokumentu użytkownika — email bez znaków specjalnych
+// ID dokumentu = Firebase Auth UID (bezpieczne, unikalne)
 function firestoreDocId() {
   if (!state.currentUser || state.currentUser.provider === 'guest') return null;
-  return state.currentUser.email.replace(/[@.]/g, '_');
+  return state.currentUser.uid || null;
 }
 
 // Referencja do kolekcji zadań użytkownika (każde zadanie = osobny dokument)
@@ -95,22 +99,33 @@ function tasksCol() {
 function firestoreSetTask(task) {
   const col = tasksCol();
   if (!col) return;
-  col.doc(task.id).set(task).catch(e => console.warn('[FB] setTask:', e));
+  col.doc(task.id).set(task).catch(e => {
+    console.warn('[FB] setTask:', e);
+    if (e.code === 'permission-denied') {
+      showToast('⚠️ Sync: brak uprawnień Firestore — sprawdź reguły', 'error', 6000);
+    }
+  });
 }
 
 // Usuń jedno zadanie z Firestore
 function firestoreDeleteTask(taskId) {
   const col = tasksCol();
   if (!col) return;
-  col.doc(taskId).delete().catch(e => console.warn('[FB] deleteTask:', e));
+  col.doc(taskId).delete().catch(e => {
+    console.warn('[FB] deleteTask:', e);
+    if (e.code === 'permission-denied') {
+      showToast('⚠️ Sync: brak uprawnień Firestore — sprawdź reguły', 'error', 6000);
+    }
+  });
 }
 
-// Synchronizuj ustawienia konta (powiadomienia) — darkMode jest per-urządzenie
+// Synchronizuj ustawienia konta (powiadomienia + dark mode)
 function firestoreSyncSettings() {
   const docId = firestoreDocId();
   if (!_db || !docId) return;
   _db.collection('users').doc(docId).set({
     notifications: state.notifications,
+    darkMode:      state.darkMode,
     updatedAt:     firebase.firestore.FieldValue.serverTimestamp(),
   }, { merge: true }).catch(e => console.warn('[FB] syncSettings:', e));
 }
@@ -120,23 +135,24 @@ async function firestoreLoad() {
   const docId = firestoreDocId();
   if (!_db || !docId) return false;
   try {
-    // Ustawienia
     const userDoc = await _db.collection('users').doc(docId).get();
     if (userDoc.exists) {
       const d = userDoc.data();
-      // darkMode jest per-urządzenie — nie ładuj z chmury
       if (typeof d.notifications === 'boolean') state.notifications = d.notifications;
+      if (typeof d.darkMode      === 'boolean') state.darkMode      = d.darkMode;
     }
-    // Zadania (subcollection — bez konfliktów przy równoczesnym zapisie)
     const snap = await tasksCol().get();
     if (!snap.empty) {
       state.tasks = snap.docs.map(d => d.data());
       state.tasks.sort((a, b) => b.createdAt - a.createdAt);
       return true;
     }
-    return userDoc.exists; // dokument istnieje ale brak zadań
+    return userDoc.exists;
   } catch (e) {
     console.warn('[FB] load:', e);
+    if (e.code === 'permission-denied') {
+      showToast('⚠️ Firestore: brak uprawnień — sprawdź reguły bezpieczeństwa', 'error', 8000);
+    }
     return false;
   }
 }
@@ -153,7 +169,7 @@ function firestoreStartListener() {
     let changed = false;
 
     snapshot.docChanges().forEach(change => {
-      if (change.doc.metadata.hasPendingWrites) return; // ignoruj własne zapisy
+      if (change.doc.metadata.hasPendingWrites) return;
       const task = change.doc.data();
 
       if (change.type === 'added') {
@@ -177,7 +193,12 @@ function firestoreStartListener() {
       if (!document.getElementById('stats').hidden) renderStats();
       showToast('☁️ Zsynchronizowano', 'success', 1800);
     }
-  }, e => console.warn('[FB] listener:', e));
+  }, err => {
+    console.warn('[FB] listener:', err);
+    if (err.code === 'permission-denied') {
+      showToast('⚠️ Sync nieaktywny — brak uprawnień Firestore', 'error', 8000);
+    }
+  });
 }
 
 // Pełna inicjalizacja synchronizacji przy logowaniu / ładowaniu strony
@@ -185,11 +206,10 @@ async function firestoreOnLoad() {
   if (!state.currentUser || state.currentUser.provider === 'guest') return false;
   if (!_db) return false;
 
-  const localTasks  = [...state.tasks]; // kopia lokalnych zadań przed nadpisaniem
+  const localTasks  = [...state.tasks];
   const cloudExists = await firestoreLoad();
 
   if (cloudExists) {
-    // Chmura = źródło prawdy
     localStorage.setItem(userKey('tasks'), JSON.stringify(state.tasks));
     localStorage.setItem(userKey('dark'),  JSON.stringify(state.darkMode));
     localStorage.setItem(userKey('notif'), JSON.stringify(state.notifications));
@@ -198,7 +218,7 @@ async function firestoreOnLoad() {
     if (nt) { nt.checked = state.notifications; nt.setAttribute('aria-checked', String(state.notifications)); }
     renderTaskList();
   } else if (localTasks.length > 0) {
-    // Migracja: wypchnij lokalne zadania jako osobne dokumenty
+    // Migracja lokalnych zadań do chmury
     const col = tasksCol();
     if (col) {
       const batch = _db.batch();
@@ -212,154 +232,74 @@ async function firestoreOnLoad() {
 }
 
 /* ============================================================
-   AUTH – rejestracja / logowanie / wylogowanie
+   AUTH – Firebase Authentication
    ============================================================ */
-const EMAIL_REGEX  = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-const PASS_REGEX   = /^(?=.*[A-Z])(?=.*\d).{6,}$/;
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+const PASS_REGEX  = /^(?=.*[A-Z])(?=.*\d).{6,}$/;
 
-function getUsers() {
-  try { return JSON.parse(localStorage.getItem('tm_users') || '[]'); }
-  catch { return []; }
-}
-
-function saveUsers(users) {
-  localStorage.setItem('tm_users', JSON.stringify(users));
-}
-
-function registerUser(name, email, password) {
-  const users = getUsers();
-  if (users.find(u => u.email === email.toLowerCase())) {
-    return { ok: false, error: 'Konto z tym adresem e-mail już istnieje.' };
-  }
-  const user = {
-    name:     name.trim(),
-    email:    email.toLowerCase().trim(),
-    password, // w prawdziwej aplikacji – hash!
-    provider: 'email',
-    createdAt: Date.now(),
+// Mapuj użytkownika Firebase na wewnętrzny format
+function mapFirebaseUser(firebaseUser) {
+  const pid      = firebaseUser.providerData?.[0]?.providerId;
+  const provider = pid === 'google.com' ? 'google' : 'email';
+  return {
+    name:    firebaseUser.displayName || firebaseUser.email.split('@')[0],
+    email:   firebaseUser.email,
+    picture: firebaseUser.photoURL || '',
+    provider,
+    uid:     firebaseUser.uid,
   };
-  users.push(user);
-  saveUsers(users);
-  return { ok: true, user };
 }
 
-function loginUser(email, password) {
-  const users = getUsers();
-  const user = users.find(u => u.email === email.toLowerCase().trim());
-  if (!user) return { ok: false, error: 'Nie znaleziono konta z tym adresem e-mail.' };
-  if (user.password !== password) return { ok: false, error: 'Nieprawidłowe hasło.' };
-  return { ok: true, user };
+// Tłumaczenie kodów błędów Firebase Auth
+function translateAuthError(code) {
+  const map = {
+    'auth/email-already-in-use':   'Konto z tym adresem e-mail już istnieje.',
+    'auth/invalid-email':          'Nieprawidłowy adres e-mail.',
+    'auth/user-not-found':         'Nie znaleziono konta z tym adresem e-mail.',
+    'auth/wrong-password':         'Nieprawidłowe hasło.',
+    'auth/invalid-credential':     'Nieprawidłowy e-mail lub hasło.',
+    'auth/weak-password':          'Hasło musi mieć co najmniej 6 znaków.',
+    'auth/too-many-requests':      'Zbyt wiele prób. Spróbuj ponownie za chwilę.',
+    'auth/network-request-failed': 'Błąd sieci. Sprawdź połączenie.',
+    'auth/popup-blocked':          'Popup zablokowany — zezwól na wyskakujące okna.',
+    'auth/popup-closed-by-user':   'Logowanie anulowane.',
+  };
+  return map[code] || 'Wystąpił błąd. Spróbuj ponownie.';
 }
 
-/* ============================================================
-   GOOGLE IDENTITY SERVICES (prawdziwy OAuth)
-   ============================================================ */
-// ↓ Wklej tutaj swój Client ID z Google Cloud Console
-const GOOGLE_CLIENT_ID = '899283010824-akk03hma7k4a07pc9so1sqb9amo1jgn3.apps.googleusercontent.com';
-
-// Klient OAuth2 – inicjowany raz, wywoływany przy każdym kliknięciu
-let _googleTokenClient = null;
-
-function initGoogleAuth() {
-  if (typeof google === 'undefined' || !GOOGLE_CLIENT_ID || GOOGLE_CLIENT_ID.includes('REPLACE')) return;
+// Logowanie Google przez Firebase Auth
+async function triggerGoogleSignIn() {
+  if (!_auth) { showToast('Firebase nie załadowany — odśwież stronę.', 'error'); return; }
+  const provider = new firebase.auth.GoogleAuthProvider();
   try {
-    _googleTokenClient = google.accounts.oauth2.initTokenClient({
-      client_id: GOOGLE_CLIENT_ID,
-      scope:     'openid email profile',
-      callback:  async (tokenResponse) => {
-        if (tokenResponse.error) {
-          showToast('Błąd Google: ' + tokenResponse.error, 'error');
-          return;
-        }
-        try {
-          const res  = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-            headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
-          });
-          const info = await res.json();
-          handleGoogleUserInfo(info);
-        } catch (e) {
-          showToast('Nie udało się pobrać danych profilu Google.', 'error');
-        }
-      },
-    });
-  } catch (e) {
-    console.warn('[Google Auth] Inicjalizacja nieudana:', e);
-  }
-}
-
-function handleGoogleUserInfo(info) {
-  if (!info.email) { showToast('Błąd logowania Google.', 'error'); return; }
-
-  const user = {
-    name:      info.name    || info.email.split('@')[0],
-    email:     info.email,
-    picture:   info.picture || '',
-    provider:  'google',
-    password:  '',
-    createdAt: Date.now(),
-  };
-
-  const users = getUsers();
-  const idx = users.findIndex(u => u.email === user.email && u.provider === 'google');
-  if (idx >= 0) users[idx] = { ...users[idx], name: user.name, picture: user.picture };
-  else users.push(user);
-  saveUsers(users);
-
-  setSession(user);
-  onLoginSuccess();
-}
-
-function triggerGoogleSignIn() {
-  if (typeof google === 'undefined') {
-    showToast('Biblioteka Google nie załadowana — sprawdź połączenie.', 'error');
-    return;
-  }
-  if (!GOOGLE_CLIENT_ID || GOOGLE_CLIENT_ID.includes('REPLACE')) {
-    showToast('Brak Client ID — skonfiguruj Google Cloud Console.', 'error');
-    return;
-  }
-  if (!_googleTokenClient) {
-    initGoogleAuth();
-    if (!_googleTokenClient) {
-      showToast('Google Auth nie jest gotowy — odśwież stronę.', 'error');
-      return;
+    await _auth.signInWithPopup(provider);
+    // onAuthStateChanged obsługuje resztę
+  } catch (err) {
+    if (err.code !== 'auth/popup-closed-by-user') {
+      showToast(translateAuthError(err.code), 'error');
     }
   }
-  // Otwiera niezawodne okno popup Google
-  _googleTokenClient.requestAccessToken();
 }
 
+// Tryb gościa (bez Firebase Auth — tylko localStorage)
 function guestLogin() {
-  const guestUser = { name: 'Gość', email: '_guest', provider: 'guest' };
-  localStorage.setItem('tm_session', JSON.stringify(guestUser));
+  const guestUser = { name: 'Gość', email: '_guest', provider: 'guest', uid: '_guest' };
+  localStorage.setItem('tm_guest_session', JSON.stringify(guestUser));
   state.currentUser = guestUser;
-  onLoginSuccess();
+  onLoginSuccess(true);
 }
 
-function setSession(user) {
-  const sessionUser = { name: user.name, email: user.email, provider: user.provider };
-  localStorage.setItem('tm_session', JSON.stringify(sessionUser));
-  state.currentUser = sessionUser;
-}
-
-function getSession() {
-  try { return JSON.parse(localStorage.getItem('tm_session')); }
-  catch { return null; }
-}
-
-function clearSession() {
-  localStorage.removeItem('tm_session');
-  state.currentUser = null;
+function clearGuestSession() {
+  localStorage.removeItem('tm_guest_session');
 }
 
 function showApp() {
   document.getElementById('auth-screen').hidden = true;
   document.getElementById('app-wrapper').hidden = false;
 
-  // Pokaż dane użytkownika w headerze
   const avatar = document.getElementById('user-avatar');
   const nameEl = document.getElementById('user-name');
-  const u = state.currentUser;
+  const u      = state.currentUser;
   const isGuest = u.provider === 'guest';
 
   nameEl.textContent = isGuest ? 'Tryb gościa' : u.name;
@@ -372,7 +312,6 @@ function showApp() {
   if (u.provider === 'google') avatar.classList.add('social-google');
   if (isGuest)                 avatar.classList.add('social-guest');
 
-  // Banner gościa
   const banner = document.getElementById('guest-banner');
   banner.hidden = !isGuest;
   document.body.classList.toggle('guest-mode', isGuest);
@@ -384,11 +323,9 @@ function showAuth() {
   document.getElementById('guest-banner').hidden = true;
   document.body.classList.remove('guest-mode');
 
-  // Wyczyść pola formularzy
   document.getElementById('login-form').reset();
   document.getElementById('register-form').reset();
 
-  // Wyczyść błędy walidacji
   ['login-email-error','login-password-error',
    'register-name-error','register-email-error','register-password-error'].forEach(id => {
     const el = document.getElementById(id);
@@ -396,7 +333,6 @@ function showAuth() {
   });
   document.querySelectorAll('.auth-panel .error').forEach(el => el.classList.remove('error'));
 
-  // Wróć na zakładkę Logowanie
   document.querySelectorAll('.auth-tab').forEach(t => {
     const isLogin = t.dataset.authTab === 'login';
     t.classList.toggle('active', isLogin);
@@ -407,14 +343,22 @@ function showAuth() {
 }
 
 function logout() {
-  // Zatrzymaj nasłuchiwacz Firestore
   if (_firestoreUnsubscribe) { _firestoreUnsubscribe(); _firestoreUnsubscribe = null; }
-  clearSession();
-  state.tasks = [];
-  state.darkMode = false;
+
+  state.tasks         = [];
+  state.darkMode      = false;
   state.notifications = true;
   applyDarkMode(false);
-  showAuth();
+
+  if (state.currentUser?.provider === 'guest') {
+    clearGuestSession();
+    state.currentUser = null;
+    showAuth();
+  } else {
+    state.currentUser = null;
+    if (_auth) _auth.signOut().catch(e => console.warn('[Auth] signOut:', e));
+    // onAuthStateChanged wywoła showAuth()
+  }
 }
 
 /* ============================================================
@@ -435,14 +379,14 @@ function addTask(name, priority, category) {
   };
   state.tasks.unshift(task);
   saveState();
-  firestoreSetTask(task);   // osobny dokument w Firestore
+  firestoreSetTask(task);
   return task;
 }
 
 function removeTask(id) {
   state.tasks = state.tasks.filter(t => t.id !== id);
   saveState();
-  firestoreDeleteTask(id);  // usuń dokument z Firestore
+  firestoreDeleteTask(id);
 }
 
 function toggleTask(id) {
@@ -450,7 +394,7 @@ function toggleTask(id) {
   if (!task) return null;
   task.done = !task.done;
   saveState();
-  firestoreSetTask(task);   // zaktualizuj dokument w Firestore
+  firestoreSetTask(task);
   return task;
 }
 
@@ -459,7 +403,7 @@ function editTask(id, patch) {
   if (!task) return;
   Object.assign(task, patch);
   saveState();
-  firestoreSetTask(task);   // zaktualizuj dokument w Firestore
+  firestoreSetTask(task);
 }
 
 /* ============================================================
@@ -468,30 +412,21 @@ function editTask(id, patch) {
 function getVisibleTasks() {
   let list = [...state.tasks];
 
-  // Filtr statusu
   if (state.filter === 'active') list = list.filter(t => !t.done);
   if (state.filter === 'done')   list = list.filter(t =>  t.done);
 
-  // Wyszukiwanie (input event)
   if (state.search.trim()) {
     const q = state.search.trim().toLowerCase();
     list = list.filter(t => t.name.toLowerCase().includes(q));
   }
 
-  // Sortowanie
   switch (state.sort) {
-    case 'date-asc':
-      list.sort((a, b) => a.createdAt - b.createdAt); break;
-    case 'date-desc':
-      list.sort((a, b) => b.createdAt - a.createdAt); break;
-    case 'priority-high':
-      list.sort((a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]); break;
-    case 'priority-low':
-      list.sort((a, b) => PRIORITY_ORDER[b.priority] - PRIORITY_ORDER[a.priority]); break;
-    case 'alpha-asc':
-      list.sort((a, b) => a.name.localeCompare(b.name, 'pl')); break;
-    case 'alpha-desc':
-      list.sort((a, b) => b.name.localeCompare(a.name, 'pl')); break;
+    case 'date-asc':      list.sort((a, b) => a.createdAt - b.createdAt); break;
+    case 'date-desc':     list.sort((a, b) => b.createdAt - a.createdAt); break;
+    case 'priority-high': list.sort((a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]); break;
+    case 'priority-low':  list.sort((a, b) => PRIORITY_ORDER[b.priority] - PRIORITY_ORDER[a.priority]); break;
+    case 'alpha-asc':     list.sort((a, b) => a.name.localeCompare(b.name, 'pl')); break;
+    case 'alpha-desc':    list.sort((a, b) => b.name.localeCompare(a.name, 'pl')); break;
   }
 
   return list;
@@ -523,7 +458,7 @@ function escHtml(str) {
 }
 
 /* ============================================================
-   RENDEROWANIE LISTY ZADAŃ  (manipulacja DOM)
+   RENDEROWANIE LISTY ZADAŃ
    ============================================================ */
 function renderTaskList() {
   const ul         = document.getElementById('task-list');
@@ -539,17 +474,14 @@ function renderTaskList() {
 
   emptyState.hidden = true;
 
-  // Dynamiczne dodawanie elementów DOM
   tasks.forEach(task => {
     const li = document.createElement('li');
-    li.className      = `task-item${task.done ? ' done' : ''}`;
-    li.dataset.id     = task.id;
+    li.className  = `task-item${task.done ? ' done' : ''}`;
+    li.dataset.id = task.id;
     li.setAttribute('role', 'listitem');
 
     li.innerHTML = `
-      <button
-        class="task-checkbox"
-        data-action="toggle"
+      <button class="task-checkbox" data-action="toggle"
         aria-label="${task.done ? 'Oznacz jako aktywne' : 'Oznacz jako ukończone'}"
         title="${task.done ? 'Cofnij' : 'Ukończ'}"
       >${task.done ? '✓' : ''}</button>
@@ -637,58 +569,40 @@ function renderBarChart(id, counts, labels) {
    NAWIGACJA MIĘDZY WIDOKAMI
    ============================================================ */
 function switchView(viewId) {
-  // Ukryj wszystkie widoki
   document.querySelectorAll('.view').forEach(s => {
     s.hidden = true;
     s.classList.remove('active');
   });
 
-  // Aktualizuj linki nawigacji
   document.querySelectorAll('.nav-link').forEach(a => {
     const isActive = a.dataset.view === viewId;
     a.classList.toggle('active', isActive);
     a.setAttribute('aria-current', isActive ? 'page' : 'false');
   });
 
-  // Pokaż wybrany widok
   const target = document.getElementById(viewId);
   if (target) {
     target.hidden = false;
     target.classList.add('active');
   }
 
-  // Odśwież statystyki gdy otwierany jest ten widok
   if (viewId === 'stats') renderStats();
 }
 
 /* ============================================================
-   WALIDACJA FORMULARZA  (RegExp)
+   WALIDACJA FORMULARZA
    ============================================================ */
-// Tylko litery (w tym polskie), cyfry, spacje, myślniki – min 2 znaki
 const VALID_TASK = /^[\p{L}\p{N}\s\-.,!?()]{2,120}$/u;
 
 function validateName(value, inputId, errorId) {
   const input = document.getElementById(inputId);
   const error = document.getElementById(errorId);
-
   const v = value.trim();
 
-  if (v.length === 0) {
-    setError(input, error, 'Nazwa zadania nie może być pusta.');
-    return false;
-  }
-  if (v.length < 2) {
-    setError(input, error, 'Nazwa musi mieć co najmniej 2 znaki.');
-    return false;
-  }
-  if (v.length > 120) {
-    setError(input, error, 'Nazwa nie może przekraczać 120 znaków.');
-    return false;
-  }
-  if (!VALID_TASK.test(v)) {
-    setError(input, error, 'Nazwa zawiera niedozwolone znaki.');
-    return false;
-  }
+  if (v.length === 0)      { setError(input, error, 'Nazwa zadania nie może być pusta.');      return false; }
+  if (v.length < 2)        { setError(input, error, 'Nazwa musi mieć co najmniej 2 znaki.');   return false; }
+  if (v.length > 120)      { setError(input, error, 'Nazwa nie może przekraczać 120 znaków.'); return false; }
+  if (!VALID_TASK.test(v)) { setError(input, error, 'Nazwa zawiera niedozwolone znaki.');       return false; }
 
   clearError(input, error);
   return true;
@@ -712,7 +626,6 @@ function openConfirm(title, message, onConfirm) {
   document.getElementById('confirm-message').textContent = message;
   document.getElementById('confirm-modal').hidden = false;
 
-  // Jednorazowe listenery – usuń poprzednie klony
   const okBtn = document.getElementById('confirm-ok');
   const newOk = okBtn.cloneNode(true);
   okBtn.parentNode.replaceChild(newOk, okBtn);
@@ -777,7 +690,7 @@ function showToast(message, type = 'success', duration = 3200) {
 }
 
 /* ============================================================
-   EKSPORT DANYCH  (async – Promise)
+   EKSPORT JSON  (async – Promise)
    ============================================================ */
 function exportDataAsync() {
   // Asynchroniczność #2 – Promise
@@ -786,7 +699,7 @@ function exportDataAsync() {
       try {
         const payload = {
           exportedAt: new Date().toISOString(),
-          version:    '1.0.0',
+          version:    '2.0.0',
           tasks:      state.tasks,
         };
         const blob = new Blob(
@@ -808,10 +721,76 @@ function exportDataAsync() {
 }
 
 /* ============================================================
+   EKSPORT TXT  (async – Promise)
+   ============================================================ */
+function exportTxtAsync() {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      try {
+        const dateStr = new Date().toLocaleDateString('pl-PL', {
+          day: 'numeric', month: 'long', year: 'numeric',
+        });
+        const total  = state.tasks.length;
+        const done   = state.tasks.filter(t => t.done).length;
+        const active = total - done;
+
+        const lines = [
+          '╔══════════════════════════════════════╗',
+          '║         TASKMANAGER — ZADANIA        ║',
+          '╚══════════════════════════════════════╝',
+          `  Data eksportu : ${dateStr}`,
+          `  Użytkownik    : ${state.currentUser?.name || '—'}`,
+          `  Wszystkich    : ${total}  |  Aktywnych: ${active}  |  Ukończonych: ${done}`,
+          '',
+          '──────────────────────────────────────',
+          '',
+        ];
+
+        if (state.tasks.length === 0) {
+          lines.push('  Brak zadań do wyeksportowania.');
+        } else {
+          const sorted = [...state.tasks].sort((a, b) => b.createdAt - a.createdAt);
+          sorted.forEach((task, i) => {
+            const status   = task.done ? '[✓]' : '[ ]';
+            const created  = new Date(task.createdAt).toLocaleString('pl-PL');
+            const priority = PRIORITY_LABEL[task.priority] || task.priority;
+            const category = CATEGORY_LABEL[task.category] || task.category;
+            lines.push(`${i + 1}. ${status} ${task.name}`);
+            lines.push(`     Priorytet : ${priority}`);
+            lines.push(`     Kategoria : ${category}`);
+            lines.push(`     Dodano    : ${created}`);
+            lines.push('');
+          });
+        }
+
+        lines.push('──────────────────────────────────────');
+        lines.push('  Wygenerowano przez TaskManager');
+        lines.push('  https://w84kubus.github.io/TaskManager/');
+
+        const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
+        const url  = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href     = url;
+        link.download = `zadania_${new Date().toISOString().slice(0, 10)}.txt`;
+        link.click();
+        URL.revokeObjectURL(url);
+        resolve();
+      } catch (err) {
+        reject(err);
+      }
+    }, 300);
+  });
+}
+
+/* ============================================================
    DARK MODE
    ============================================================ */
 function applyDarkMode(enabled) {
   document.documentElement.setAttribute('data-theme', enabled ? 'dark' : 'light');
+
+  // Aktualizuj kolor paska statusu iOS
+  const themeMeta = document.querySelector('meta[name="theme-color"]');
+  if (themeMeta) themeMeta.content = enabled ? '#161b27' : '#5a6bff';
 
   const toggle = document.getElementById('dark-mode-toggle');
   if (toggle) {
@@ -824,7 +803,6 @@ function applyDarkMode(enabled) {
    WYCZYSZCZENIE DANYCH
    ============================================================ */
 function clearAll() {
-  // Usuń każde zadanie z Firestore (osobny dokument)
   const col = tasksCol();
   if (col) state.tasks.forEach(t => col.doc(t.id).delete().catch(() => {}));
 
@@ -846,7 +824,7 @@ function clearAll() {
 }
 
 /* ============================================================
-   REJESTRACJA ZDARZEŃ
+   REJESTRACJA ZDARZEŃ – AUTH
    ============================================================ */
 function setupAuthEvents() {
 
@@ -867,14 +845,13 @@ function setupAuthEvents() {
   });
 
   /* ── Login form (submit) ───────────────────────────────── */
-  document.getElementById('login-form').addEventListener('submit', e => {
+  document.getElementById('login-form').addEventListener('submit', async e => {
     e.preventDefault();
 
     const emailInput = document.getElementById('login-email');
     const passInput  = document.getElementById('login-password');
     let valid = true;
 
-    // Walidacja email (RegExp)
     if (!EMAIL_REGEX.test(emailInput.value.trim())) {
       setError(emailInput, document.getElementById('login-email-error'), 'Wpisz poprawny adres e-mail.');
       valid = false;
@@ -891,18 +868,27 @@ function setupAuthEvents() {
 
     if (!valid) return;
 
-    const result = loginUser(emailInput.value, passInput.value);
-    if (!result.ok) {
-      setError(passInput, document.getElementById('login-password-error'), result.error);
-      return;
-    }
+    const submitBtn = e.target.querySelector('[type="submit"]');
+    submitBtn.disabled    = true;
+    submitBtn.textContent = 'Logowanie…';
 
-    setSession(result.user);
-    onLoginSuccess();
+    try {
+      await _auth.signInWithEmailAndPassword(
+        emailInput.value.trim(),
+        passInput.value
+      );
+      // onAuthStateChanged obsługuje resztę
+    } catch (err) {
+      setError(passInput, document.getElementById('login-password-error'),
+        translateAuthError(err.code));
+    } finally {
+      submitBtn.disabled    = false;
+      submitBtn.textContent = 'Zaloguj się';
+    }
   });
 
   /* ── Register form (submit) ────────────────────────────── */
-  document.getElementById('register-form').addEventListener('submit', e => {
+  document.getElementById('register-form').addEventListener('submit', async e => {
     e.preventDefault();
 
     const nameInput  = document.getElementById('register-name');
@@ -925,7 +911,8 @@ function setupAuthEvents() {
     }
 
     if (!PASS_REGEX.test(passInput.value)) {
-      setError(passInput, document.getElementById('register-password-error'), 'Min. 6 znaków, 1 wielka litera i 1 cyfra.');
+      setError(passInput, document.getElementById('register-password-error'),
+        'Min. 6 znaków, 1 wielka litera i 1 cyfra.');
       valid = false;
     } else {
       clearError(passInput, document.getElementById('register-password-error'));
@@ -933,32 +920,43 @@ function setupAuthEvents() {
 
     if (!valid) return;
 
-    const result = registerUser(nameInput.value, emailInput.value, passInput.value);
-    if (!result.ok) {
-      setError(emailInput, document.getElementById('register-email-error'), result.error);
-      return;
-    }
+    const submitBtn = e.target.querySelector('[type="submit"]');
+    submitBtn.disabled    = true;
+    submitBtn.textContent = 'Rejestracja…';
 
-    setSession(result.user);
-    onLoginSuccess();
+    try {
+      const cred = await _auth.createUserWithEmailAndPassword(
+        emailInput.value.trim(),
+        passInput.value
+      );
+      await cred.user.updateProfile({ displayName: nameInput.value.trim() });
+      // onAuthStateChanged obsługuje resztę
+    } catch (err) {
+      setError(emailInput, document.getElementById('register-email-error'),
+        translateAuthError(err.code));
+    } finally {
+      submitBtn.disabled    = false;
+      submitBtn.textContent = 'Utwórz konto';
+    }
   });
 
-  /* ── Przyciski Google Sign-In (click) ──────────────────── */
+  /* ── Przyciski Google Sign-In ──────────────────────────── */
   document.getElementById('google-login').addEventListener('click',    triggerGoogleSignIn);
   document.getElementById('google-register').addEventListener('click', triggerGoogleSignIn);
 
   /* ── Tryb gościa (click) ────────────────────────────────── */
   document.getElementById('guest-btn').addEventListener('click', guestLogin);
 
-  /* ── Banner gościa: zaloguj się (click) ─────────────────── */
+  /* ── Banner gościa: zaloguj się ─────────────────────────── */
   document.getElementById('guest-banner-login').addEventListener('click', () => {
     openConfirm(
       'Przejdź do logowania',
       'Twoje zadania jako gość zostaną zachowane lokalnie. Po zalogowaniu na konto będziesz pracować na osobnym zestawie zadań.',
       () => {
-        clearSession();
-        state.tasks = [];
-        state.darkMode = false;
+        clearGuestSession();
+        state.currentUser = null;
+        state.tasks       = [];
+        state.darkMode    = false;
         state.notifications = true;
         applyDarkMode(false);
         showAuth();
@@ -966,18 +964,22 @@ function setupAuthEvents() {
     );
   });
 
-  /* ── Banner gościa: zamknij (click) ─────────────────────── */
+  /* ── Banner gościa: zamknij ─────────────────────────────── */
   document.getElementById('guest-banner-close').addEventListener('click', () => {
     document.getElementById('guest-banner').hidden = true;
     document.body.classList.remove('guest-mode');
-    // Przywróć normalny padding main
     document.querySelector('main').style.paddingTop = '';
   });
 }
 
-async function onLoginSuccess() {
-  state.tasks = [];
-  state.darkMode = false;
+/* ============================================================
+   onLoginSuccess – po zalogowaniu / przywróceniu sesji
+   isFreshLogin = true  → pokaż toast powitalny
+   isFreshLogin = false → ciche przywrócenie (page reload)
+   ============================================================ */
+async function onLoginSuccess(isFreshLogin = true) {
+  state.tasks         = [];
+  state.darkMode      = false;
   state.notifications = true;
 
   // 1. Szybki odczyt z localStorage (offline-first)
@@ -992,14 +994,17 @@ async function onLoginSuccess() {
   switchView('tasks');
   showApp();
 
-  const isGuest = state.currentUser.provider === 'guest';
-  showToast(
-    isGuest ? 'Tryb gościa — zadania są lokalne 👤' : `Witaj, ${state.currentUser.name}! 👋`,
-    isGuest ? 'warning' : 'success',
-    3500
-  );
+  if (isFreshLogin) {
+    const isGuest = state.currentUser.provider === 'guest';
+    showToast(
+      isGuest ? 'Tryb gościa — zadania są lokalne 👤' : `Witaj, ${state.currentUser.name}! 👋`,
+      isGuest ? 'warning' : 'success',
+      3500
+    );
+  }
 
   // 2. Synchronizacja z Firestore (tylko dla zalogowanych)
+  const isGuest = state.currentUser.provider === 'guest';
   let isNewUser = isGuest;
   if (!isGuest) {
     const cloudDocExists = await firestoreOnLoad();
@@ -1010,9 +1015,9 @@ async function onLoginSuccess() {
   if (isNewUser && state.tasks.length === 0) {
     setTimeout(() => {
       const samples = [
-        { name: 'Zaplanuj tygodniowy harmonogram', priority: 'high',   category: 'work' },
+        { name: 'Zaplanuj tygodniowy harmonogram', priority: 'high',   category: 'work'     },
         { name: 'Zrób zakupy spożywcze',           priority: 'medium', category: 'shopping' },
-        { name: 'Spacer 30 minut',                  priority: 'low',    category: 'health' },
+        { name: 'Spacer 30 minut',                  priority: 'low',    category: 'health'   },
       ];
       samples.forEach(s => addTask(s.name, s.priority, s.category));
       renderTaskList();
@@ -1020,19 +1025,22 @@ async function onLoginSuccess() {
   }
 }
 
+/* ============================================================
+   REJESTRACJA ZDARZEŃ – APLIKACJA
+   ============================================================ */
 function setupEvents() {
 
   /* ── Nawigacja (click) ─────────────────────────────────── */
   document.querySelectorAll('.nav-link').forEach(link => {
     link.addEventListener('click', e => {
-      e.preventDefault();               // event.preventDefault()
+      e.preventDefault();                // event.preventDefault() #1
       switchView(link.dataset.view);
     });
   });
 
   /* ── Formularz dodawania (submit) ──────────────────────── */
   document.getElementById('task-form').addEventListener('submit', e => {
-    e.preventDefault();                 // event.preventDefault()
+    e.preventDefault();                  // event.preventDefault() #2
 
     const nameInput = document.getElementById('task-name');
     const name      = nameInput.value;
@@ -1073,7 +1081,6 @@ function setupEvents() {
       case 'delete': {
         const task = state.tasks.find(t => t.id === taskId);
         if (!task) break;
-        // Dynamiczne usuwanie elementu
         li.style.transition = 'opacity .2s, transform .2s';
         li.style.opacity    = '0';
         li.style.transform  = 'translateX(20px)';
@@ -1095,14 +1102,12 @@ function setupEvents() {
   document.querySelectorAll('.filter-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       state.filter = btn.dataset.filter;
-
       document.querySelectorAll('.filter-btn').forEach(b => {
         b.classList.remove('active');
         b.setAttribute('aria-pressed', 'false');
       });
       btn.classList.add('active');
       btn.setAttribute('aria-pressed', 'true');
-
       renderTaskList();
     });
   });
@@ -1122,7 +1127,6 @@ function setupEvents() {
   /* ── Dark mode toggle (change) ─────────────────────────── */
   document.getElementById('dark-mode-toggle').addEventListener('change', e => {
     state.darkMode = e.target.checked;
-    e.target.setAttribute('aria-checked', String(state.darkMode));
     applyDarkMode(state.darkMode);
     saveState();
     firestoreSyncSettings();
@@ -1146,20 +1150,35 @@ function setupEvents() {
     );
   });
 
-  /* ── Eksport (click + async/await) ─────────────────────── */
+  /* ── Eksport JSON (click + async/await) ─────────────────── */
   document.getElementById('export-btn').addEventListener('click', async () => {
     const btn = document.getElementById('export-btn');
     btn.disabled    = true;
     btn.textContent = 'Eksportowanie…';
-
     try {
       await exportDataAsync();
-      showToast('Eksport zakończony pomyślnie!', 'success');
+      showToast('Eksport JSON zakończony!', 'success');
     } catch {
-      showToast('Błąd podczas eksportu danych.', 'error');
+      showToast('Błąd podczas eksportu JSON.', 'error');
     } finally {
       btn.disabled    = false;
       btn.textContent = 'Eksportuj JSON';
+    }
+  });
+
+  /* ── Eksport TXT (click + async/await) ─────────────────── */
+  document.getElementById('export-txt-btn').addEventListener('click', async () => {
+    const btn = document.getElementById('export-txt-btn');
+    btn.disabled    = true;
+    btn.textContent = 'Eksportowanie…';
+    try {
+      await exportTxtAsync();
+      showToast('Eksport TXT zakończony!', 'success');
+    } catch {
+      showToast('Błąd podczas eksportu TXT.', 'error');
+    } finally {
+      btn.disabled    = false;
+      btn.textContent = 'Eksportuj TXT';
     }
   });
 
@@ -1174,7 +1193,7 @@ function setupEvents() {
 
   /* ── Formularz edycji (submit) ─────────────────────────── */
   document.getElementById('edit-form').addEventListener('submit', e => {
-    e.preventDefault();                 // event.preventDefault()
+    e.preventDefault();                  // event.preventDefault() #3
 
     const nameInput = document.getElementById('edit-task-name');
     if (!validateName(nameInput.value, 'edit-task-name', 'edit-name-error')) {
@@ -1215,41 +1234,48 @@ function setupEvents() {
 /* ============================================================
    INICJALIZACJA
    ============================================================ */
+let _authInitialized = false;
+
 function init() {
-  initFirebase();   // połącz z Firestore
+  initFirebase();
   setupAuthEvents();
   setupEvents();
 
-  // Zainicjuj Google Identity Services (GIS)
-  if (typeof google !== 'undefined') {
-    initGoogleAuth();
-  } else {
-    // GIS script ładuje się asynchronicznie — czekamy na jego załadowanie
-    const gisScript = document.querySelector('script[src*="accounts.google.com/gsi/client"]');
-    if (gisScript) gisScript.addEventListener('load', initGoogleAuth);
-    else window.addEventListener('load', () => { if (typeof google !== 'undefined') initGoogleAuth(); });
+  if (!_auth) {
+    // Firebase niedostępny — sprawdź sesję gościa
+    const guestData = localStorage.getItem('tm_guest_session');
+    if (guestData) {
+      try { state.currentUser = JSON.parse(guestData); onLoginSuccess(false); }
+      catch { showAuth(); }
+    } else {
+      showAuth();
+    }
+    return;
   }
 
-  // Sprawdź czy jest zapisana sesja
-  const session = getSession();
-  if (session) {
-    state.currentUser = session;
-    loadState();
-    applyDarkMode(state.darkMode);
+  // Firebase Auth — nasłuchiwacz stanu sesji (zastępuje getSession/setSession)
+  _auth.onAuthStateChanged(async (firebaseUser) => {
+    const isPageLoad = !_authInitialized;
+    _authInitialized = true;
 
-    const notifToggle = document.getElementById('notifications-toggle');
-    notifToggle.checked = state.notifications;
-    notifToggle.setAttribute('aria-checked', String(state.notifications));
-
-    renderTaskList();
-    switchView('tasks');
-    showApp();
-
-    // Synchronizuj z Firestore w tle (po pokazaniu UI)
-    firestoreOnLoad();
-  } else {
-    showAuth();
-  }
+    if (firebaseUser) {
+      state.currentUser = mapFirebaseUser(firebaseUser);
+      await onLoginSuccess(!isPageLoad); // ciche przywrócenie przy page reload
+    } else {
+      // Brak Firebase user — sprawdź tryb gościa
+      const guestData = localStorage.getItem('tm_guest_session');
+      if (guestData) {
+        try {
+          state.currentUser = JSON.parse(guestData);
+          await onLoginSuccess(!isPageLoad);
+          return;
+        } catch { /* fall through */ }
+      }
+      state.currentUser = null;
+      state.tasks = [];
+      showAuth();
+    }
+  });
 }
 
 /* Uruchom po załadowaniu DOM */
