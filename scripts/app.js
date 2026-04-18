@@ -107,6 +107,29 @@ async function firestoreLoad() {
   }
 }
 
+// Synchronizuj przy każdym załadowaniu strony (load + login)
+async function firestoreOnLoad() {
+  if (!state.currentUser || state.currentUser.provider === 'guest') return;
+  const localCount    = state.tasks.length;
+  const cloudExists   = await firestoreLoad();
+
+  if (cloudExists) {
+    // Chmura jest źródłem prawdy — odśwież UI
+    localStorage.setItem(userKey('tasks'), JSON.stringify(state.tasks));
+    localStorage.setItem(userKey('dark'),  JSON.stringify(state.darkMode));
+    localStorage.setItem(userKey('notif'), JSON.stringify(state.notifications));
+    applyDarkMode(state.darkMode);
+    const nt = document.getElementById('notifications-toggle');
+    if (nt) { nt.checked = state.notifications; nt.setAttribute('aria-checked', String(state.notifications)); }
+    renderTaskList();
+  } else if (localCount > 0) {
+    // Mamy lokalne dane, ale brak dokumentu w chmurze — wypchnij je
+    firestoreSync();
+    showToast('☁️ Dane przesłane do chmury', 'success', 2500);
+  }
+  return cloudExists;
+}
+
 // Zapisz dane do Firestore (fire-and-forget)
 function firestoreSync() {
   const docId = firestoreDocId();
@@ -903,28 +926,8 @@ async function onLoginSuccess() {
   // 2. Synchronizacja z Firestore (tylko dla zalogowanych)
   let isNewUser = isGuest;
   if (!isGuest) {
-    const localTaskCount = state.tasks.length; // ile zadań mamy z localStorage
-    const cloudDocExists = await firestoreLoad();
+    const cloudDocExists = await firestoreOnLoad();
     isNewUser = !cloudDocExists;
-
-    if (cloudDocExists) {
-      // Chmura jest źródłem prawdy — nadpisz localStorage
-      showToast(`☁️ Zsynchronizowano ${state.tasks.length} zadań`, 'success', 2500);
-    } else if (localTaskCount > 0) {
-      // Mamy lokalne dane, ale brak dokumentu w Firestore (migracja)
-      // state.tasks nadal zawiera dane z localStorage — wypchnij je do chmury
-      firestoreSync();
-      showToast('☁️ Dane lokalne przesłane do chmury', 'success', 2500);
-    }
-
-    // Zaktualizuj localStorage aktualnym stanem
-    localStorage.setItem(userKey('tasks'), JSON.stringify(state.tasks));
-    localStorage.setItem(userKey('dark'),  JSON.stringify(state.darkMode));
-    localStorage.setItem(userKey('notif'), JSON.stringify(state.notifications));
-    applyDarkMode(state.darkMode);
-    document.getElementById('notifications-toggle').checked = state.notifications;
-    document.getElementById('notifications-toggle').setAttribute('aria-checked', String(state.notifications));
-    renderTaskList();
   }
 
   // Przykładowe zadania TYLKO dla absolutnie nowych użytkowników
@@ -1163,6 +1166,9 @@ function init() {
     renderTaskList();
     switchView('tasks');
     showApp();
+
+    // Synchronizuj z Firestore w tle (po pokazaniu UI)
+    firestoreOnLoad();
   } else {
     showAuth();
   }
