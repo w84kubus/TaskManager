@@ -99,7 +99,7 @@ function loginUser(email, password) {
    GOOGLE IDENTITY SERVICES (prawdziwy OAuth)
    ============================================================ */
 // ↓ Wklej tutaj swój Client ID z Google Cloud Console
-const GOOGLE_CLIENT_ID = 'REPLACE_WITH_YOUR_GOOGLE_CLIENT_ID';
+const GOOGLE_CLIENT_ID = '899283010824-akk03hma7k4a07pc9so1sqb9amo1jgn3.apps.googleusercontent.com';
 
 function initGoogleAuth() {
   if (typeof google === 'undefined' || !GOOGLE_CLIENT_ID || GOOGLE_CLIENT_ID.includes('REPLACE')) return;
