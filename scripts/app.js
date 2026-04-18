@@ -86,20 +86,24 @@ function firestoreDocId() {
   return state.currentUser.email.replace(/[@.]/g, '_');
 }
 
-// Wczytaj dane z Firestore (nadpisuje localStorage)
+// Wczytaj dane z Firestore — zwraca true jeśli dokument istnieje
 async function firestoreLoad() {
   const docId = firestoreDocId();
-  if (!_db || !docId) return;
+  if (!_db || !docId) return false;
   try {
     const doc = await _db.collection('users').doc(docId).get();
     if (doc.exists) {
       const d = doc.data();
-      if (Array.isArray(d.tasks))              state.tasks         = d.tasks;
-      if (typeof d.darkMode      === 'boolean') state.darkMode      = d.darkMode;
-      if (typeof d.notifications === 'boolean') state.notifications = d.notifications;
+      if (Array.isArray(d.tasks))               state.tasks         = d.tasks;
+      if (typeof d.darkMode      === 'boolean')  state.darkMode      = d.darkMode;
+      if (typeof d.notifications === 'boolean')  state.notifications = d.notifications;
+      return true;   // konto istnieje w chmurze
     }
+    return false;    // nowy użytkownik — brak dokumentu
   } catch (e) {
     console.warn('[Firebase] Błąd odczytu:', e);
+    showToast('Brak synchronizacji z chmurą — sprawdź połączenie.', 'warning');
+    return false;
   }
 }
 
@@ -112,7 +116,10 @@ function firestoreSync() {
     darkMode:      state.darkMode,
     notifications: state.notifications,
     updatedAt:     firebase.firestore.FieldValue.serverTimestamp(),
-  }).catch(e => console.warn('[Firebase] Błąd zapisu:', e));
+  }).catch(e => {
+    console.warn('[Firebase] Błąd zapisu:', e);
+    showToast('Błąd zapisu do chmury ☁️', 'error');
+  });
 }
 
 /* ============================================================
@@ -894,8 +901,10 @@ async function onLoginSuccess() {
   );
 
   // 2. Pobierz aktualne dane z Firestore (cloud-sync, tylko dla zalogowanych)
+  let isNewUser = isGuest; // gość zawsze traktowany jak nowy
   if (!isGuest) {
-    await firestoreLoad();
+    const cloudDocExists = await firestoreLoad();
+    isNewUser = !cloudDocExists; // nowy = brak dokumentu w Firestore
     // Nadpisz localStorage świeżymi danymi z chmury
     localStorage.setItem(userKey('tasks'), JSON.stringify(state.tasks));
     localStorage.setItem(userKey('dark'),  JSON.stringify(state.darkMode));
@@ -906,8 +915,8 @@ async function onLoginSuccess() {
     renderTaskList();
   }
 
-  // Przykładowe zadania dla nowego użytkownika
-  if (state.tasks.length === 0) {
+  // Przykładowe zadania TYLKO dla absolutnie nowych użytkowników
+  if (isNewUser && state.tasks.length === 0) {
     setTimeout(() => {
       const samples = [
         { name: 'Zaplanuj tygodniowy harmonogram', priority: 'high',   category: 'work' },
