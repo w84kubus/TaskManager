@@ -101,41 +101,48 @@ function loginUser(email, password) {
 // ↓ Wklej tutaj swój Client ID z Google Cloud Console
 const GOOGLE_CLIENT_ID = '899283010824-akk03hma7k4a07pc9so1sqb9amo1jgn3.apps.googleusercontent.com';
 
+// Klient OAuth2 – inicjowany raz, wywoływany przy każdym kliknięciu
+let _googleTokenClient = null;
+
 function initGoogleAuth() {
   if (typeof google === 'undefined' || !GOOGLE_CLIENT_ID || GOOGLE_CLIENT_ID.includes('REPLACE')) return;
   try {
-    google.accounts.id.initialize({
+    _googleTokenClient = google.accounts.oauth2.initTokenClient({
       client_id: GOOGLE_CLIENT_ID,
-      callback:  handleGoogleCredential,
-      ux_mode:   'popup',
-      cancel_on_tap_outside: true,
+      scope:     'openid email profile',
+      callback:  async (tokenResponse) => {
+        if (tokenResponse.error) {
+          showToast('Błąd Google: ' + tokenResponse.error, 'error');
+          return;
+        }
+        try {
+          const res  = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+            headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
+          });
+          const info = await res.json();
+          handleGoogleUserInfo(info);
+        } catch (e) {
+          showToast('Nie udało się pobrać danych profilu Google.', 'error');
+        }
+      },
     });
   } catch (e) {
     console.warn('[Google Auth] Inicjalizacja nieudana:', e);
   }
 }
 
-function parseGoogleJwt(token) {
-  try {
-    const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-    return JSON.parse(window.atob(base64));
-  } catch { return null; }
-}
-
-function handleGoogleCredential(response) {
-  const payload = parseGoogleJwt(response.credential);
-  if (!payload) { showToast('Błąd logowania Google.', 'error'); return; }
+function handleGoogleUserInfo(info) {
+  if (!info.email) { showToast('Błąd logowania Google.', 'error'); return; }
 
   const user = {
-    name:      payload.name  || payload.email.split('@')[0],
-    email:     payload.email,
-    picture:   payload.picture || '',
+    name:      info.name    || info.email.split('@')[0],
+    email:     info.email,
+    picture:   info.picture || '',
     provider:  'google',
     password:  '',
     createdAt: Date.now(),
   };
 
-  // Zapisz/zaktualizuj w lokalnej bazie użytkowników
   const users = getUsers();
   const idx = users.findIndex(u => u.email === user.email && u.provider === 'google');
   if (idx >= 0) users[idx] = { ...users[idx], name: user.name, picture: user.picture };
@@ -146,7 +153,7 @@ function handleGoogleCredential(response) {
   onLoginSuccess();
 }
 
-function triggerGoogleSignIn(buttonId) {
+function triggerGoogleSignIn() {
   if (typeof google === 'undefined') {
     showToast('Biblioteka Google nie załadowana — sprawdź połączenie.', 'error');
     return;
@@ -155,35 +162,15 @@ function triggerGoogleSignIn(buttonId) {
     showToast('Brak Client ID — skonfiguruj Google Cloud Console.', 'error');
     return;
   }
-
-  const btn = document.getElementById(buttonId);
-  btn.disabled = true;
-  const orig = btn.innerHTML;
-  btn.innerHTML = '<span style="display:inline-flex;align-items:center;gap:6px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#4285F4" stroke-width="3" stroke-dasharray="31.4" stroke-dashoffset="31.4" style="animation:spin 1s linear infinite"><animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="0.8s" repeatCount="indefinite"/></circle></svg>Łączenie z Google…</span>';
-
-  try {
-    google.accounts.id.prompt(notification => {
-      btn.disabled = false;
-      btn.innerHTML = orig;
-      if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-        // Fallback: renderuj ukryty przycisk i kliknij go
-        const tmp = document.createElement('div');
-        tmp.style.cssText = 'position:fixed;top:-999px;left:-999px;';
-        document.body.appendChild(tmp);
-        google.accounts.id.renderButton(tmp, { type: 'standard', theme: 'outline', size: 'large' });
-        setTimeout(() => {
-          const gBtn = tmp.querySelector('div[role="button"]');
-          if (gBtn) gBtn.click();
-          else showToast('Zaloguj się przez popup Google.', 'warning');
-          setTimeout(() => tmp.remove(), 3000);
-        }, 300);
-      }
-    });
-  } catch (e) {
-    btn.disabled = false;
-    btn.innerHTML = orig;
-    showToast('Błąd Google Sign-In: ' + e.message, 'error');
+  if (!_googleTokenClient) {
+    initGoogleAuth();
+    if (!_googleTokenClient) {
+      showToast('Google Auth nie jest gotowy — odśwież stronę.', 'error');
+      return;
+    }
   }
+  // Otwiera niezawodne okno popup Google
+  _googleTokenClient.requestAccessToken();
 }
 
 function guestLogin() {
@@ -791,8 +778,8 @@ function setupAuthEvents() {
   });
 
   /* ── Przyciski Google Sign-In (click) ──────────────────── */
-  document.getElementById('google-login').addEventListener('click',    () => triggerGoogleSignIn('google-login'));
-  document.getElementById('google-register').addEventListener('click', () => triggerGoogleSignIn('google-register'));
+  document.getElementById('google-login').addEventListener('click',    triggerGoogleSignIn);
+  document.getElementById('google-register').addEventListener('click', triggerGoogleSignIn);
 
   /* ── Tryb gościa (click) ────────────────────────────────── */
   document.getElementById('guest-btn').addEventListener('click', guestLogin);
