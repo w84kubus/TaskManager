@@ -900,12 +900,24 @@ async function onLoginSuccess() {
     3500
   );
 
-  // 2. Pobierz aktualne dane z Firestore (cloud-sync, tylko dla zalogowanych)
-  let isNewUser = isGuest; // gość zawsze traktowany jak nowy
+  // 2. Synchronizacja z Firestore (tylko dla zalogowanych)
+  let isNewUser = isGuest;
   if (!isGuest) {
+    const localTaskCount = state.tasks.length; // ile zadań mamy z localStorage
     const cloudDocExists = await firestoreLoad();
-    isNewUser = !cloudDocExists; // nowy = brak dokumentu w Firestore
-    // Nadpisz localStorage świeżymi danymi z chmury
+    isNewUser = !cloudDocExists;
+
+    if (cloudDocExists) {
+      // Chmura jest źródłem prawdy — nadpisz localStorage
+      showToast(`☁️ Zsynchronizowano ${state.tasks.length} zadań`, 'success', 2500);
+    } else if (localTaskCount > 0) {
+      // Mamy lokalne dane, ale brak dokumentu w Firestore (migracja)
+      // state.tasks nadal zawiera dane z localStorage — wypchnij je do chmury
+      firestoreSync();
+      showToast('☁️ Dane lokalne przesłane do chmury', 'success', 2500);
+    }
+
+    // Zaktualizuj localStorage aktualnym stanem
     localStorage.setItem(userKey('tasks'), JSON.stringify(state.tasks));
     localStorage.setItem(userKey('dark'),  JSON.stringify(state.darkMode));
     localStorage.setItem(userKey('notif'), JSON.stringify(state.notifications));
