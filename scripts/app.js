@@ -105,12 +105,11 @@ function firestoreDeleteTask(taskId) {
   col.doc(taskId).delete().catch(e => console.warn('[FB] deleteTask:', e));
 }
 
-// Synchronizuj tylko ustawienia (dark mode, powiadomienia)
+// Synchronizuj ustawienia konta (powiadomienia) — darkMode jest per-urządzenie
 function firestoreSyncSettings() {
   const docId = firestoreDocId();
   if (!_db || !docId) return;
   _db.collection('users').doc(docId).set({
-    darkMode:      state.darkMode,
     notifications: state.notifications,
     updatedAt:     firebase.firestore.FieldValue.serverTimestamp(),
   }, { merge: true }).catch(e => console.warn('[FB] syncSettings:', e));
@@ -125,7 +124,7 @@ async function firestoreLoad() {
     const userDoc = await _db.collection('users').doc(docId).get();
     if (userDoc.exists) {
       const d = userDoc.data();
-      if (typeof d.darkMode      === 'boolean') state.darkMode      = d.darkMode;
+      // darkMode jest per-urządzenie — nie ładuj z chmury
       if (typeof d.notifications === 'boolean') state.notifications = d.notifications;
     }
     // Zadania (subcollection — bez konfliktów przy równoczesnym zapisie)
