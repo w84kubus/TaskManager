@@ -95,25 +95,95 @@ function loginUser(email, password) {
   return { ok: true, user };
 }
 
-function socialLogin(provider) {
-  // Symulacja logowania OAuth – w prawdziwej aplikacji: redirect do providera
-  return new Promise(resolve => {
-    setTimeout(() => {
-      const name  = provider === 'google' ? 'Google User' : 'Apple User';
-      const email = provider === 'google'
-        ? 'user@gmail.com'
-        : 'user@icloud.com';
+/* ============================================================
+   GOOGLE IDENTITY SERVICES (prawdziwy OAuth)
+   ============================================================ */
+// ↓ Wklej tutaj swój Client ID z Google Cloud Console
+const GOOGLE_CLIENT_ID = 'REPLACE_WITH_YOUR_GOOGLE_CLIENT_ID';
 
-      const users = getUsers();
-      let user = users.find(u => u.email === email && u.provider === provider);
-      if (!user) {
-        user = { name, email, password: '', provider, createdAt: Date.now() };
-        users.push(user);
-        saveUsers(users);
+function initGoogleAuth() {
+  if (typeof google === 'undefined' || !GOOGLE_CLIENT_ID || GOOGLE_CLIENT_ID.includes('REPLACE')) return;
+  try {
+    google.accounts.id.initialize({
+      client_id: GOOGLE_CLIENT_ID,
+      callback:  handleGoogleCredential,
+      ux_mode:   'popup',
+      cancel_on_tap_outside: true,
+    });
+  } catch (e) {
+    console.warn('[Google Auth] Inicjalizacja nieudana:', e);
+  }
+}
+
+function parseGoogleJwt(token) {
+  try {
+    const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+    return JSON.parse(window.atob(base64));
+  } catch { return null; }
+}
+
+function handleGoogleCredential(response) {
+  const payload = parseGoogleJwt(response.credential);
+  if (!payload) { showToast('Błąd logowania Google.', 'error'); return; }
+
+  const user = {
+    name:      payload.name  || payload.email.split('@')[0],
+    email:     payload.email,
+    picture:   payload.picture || '',
+    provider:  'google',
+    password:  '',
+    createdAt: Date.now(),
+  };
+
+  // Zapisz/zaktualizuj w lokalnej bazie użytkowników
+  const users = getUsers();
+  const idx = users.findIndex(u => u.email === user.email && u.provider === 'google');
+  if (idx >= 0) users[idx] = { ...users[idx], name: user.name, picture: user.picture };
+  else users.push(user);
+  saveUsers(users);
+
+  setSession(user);
+  onLoginSuccess();
+}
+
+function triggerGoogleSignIn(buttonId) {
+  if (typeof google === 'undefined') {
+    showToast('Biblioteka Google nie załadowana — sprawdź połączenie.', 'error');
+    return;
+  }
+  if (!GOOGLE_CLIENT_ID || GOOGLE_CLIENT_ID.includes('REPLACE')) {
+    showToast('Brak Client ID — skonfiguruj Google Cloud Console.', 'error');
+    return;
+  }
+
+  const btn = document.getElementById(buttonId);
+  btn.disabled = true;
+  const orig = btn.innerHTML;
+  btn.innerHTML = '<span style="display:inline-flex;align-items:center;gap:6px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#4285F4" stroke-width="3" stroke-dasharray="31.4" stroke-dashoffset="31.4" style="animation:spin 1s linear infinite"><animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="0.8s" repeatCount="indefinite"/></circle></svg>Łączenie z Google…</span>';
+
+  try {
+    google.accounts.id.prompt(notification => {
+      btn.disabled = false;
+      btn.innerHTML = orig;
+      if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+        // Fallback: renderuj ukryty przycisk i kliknij go
+        const tmp = document.createElement('div');
+        tmp.style.cssText = 'position:fixed;top:-999px;left:-999px;';
+        document.body.appendChild(tmp);
+        google.accounts.id.renderButton(tmp, { type: 'standard', theme: 'outline', size: 'large' });
+        setTimeout(() => {
+          const gBtn = tmp.querySelector('div[role="button"]');
+          if (gBtn) gBtn.click();
+          else showToast('Zaloguj się przez popup Google.', 'warning');
+          setTimeout(() => tmp.remove(), 3000);
+        }, 300);
       }
-      resolve({ ok: true, user });
-    }, 800);
-  });
+    });
+  } catch (e) {
+    btn.disabled = false;
+    btn.innerHTML = orig;
+    showToast('Błąd Google Sign-In: ' + e.message, 'error');
+  }
 }
 
 function guestLogin() {
@@ -157,7 +227,6 @@ function showApp() {
   avatar.textContent = initials;
   avatar.className   = 'user-avatar';
   if (u.provider === 'google') avatar.classList.add('social-google');
-  if (u.provider === 'apple')  avatar.classList.add('social-apple');
   if (isGuest)                 avatar.classList.add('social-guest');
 
   // Banner gościa
@@ -721,28 +790,9 @@ function setupAuthEvents() {
     onLoginSuccess();
   });
 
-  /* ── Social login buttons (click + async) ──────────────── */
-  ['google-login', 'google-register'].forEach(id => {
-    document.getElementById(id).addEventListener('click', async function() {
-      this.disabled = true;
-      this.textContent = 'Łączenie…';
-      const result = await socialLogin('google');
-      this.disabled = false;
-      this.innerHTML = '<svg class="social-icon" viewBox="0 0 24 24" width="20" height="20"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A10.96 10.96 0 0 0 1 12c0 1.77.42 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg> Kontynuuj z Google';
-      if (result.ok) { setSession(result.user); onLoginSuccess(); }
-    });
-  });
-
-  ['apple-login', 'apple-register'].forEach(id => {
-    document.getElementById(id).addEventListener('click', async function() {
-      this.disabled = true;
-      this.textContent = 'Łączenie…';
-      const result = await socialLogin('apple');
-      this.disabled = false;
-      this.innerHTML = '<svg class="social-icon" viewBox="0 0 24 24" width="20" height="20"><path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" fill="currentColor"/></svg> Kontynuuj z Apple';
-      if (result.ok) { setSession(result.user); onLoginSuccess(); }
-    });
-  });
+  /* ── Przyciski Google Sign-In (click) ──────────────────── */
+  document.getElementById('google-login').addEventListener('click',    () => triggerGoogleSignIn('google-login'));
+  document.getElementById('google-register').addEventListener('click', () => triggerGoogleSignIn('google-register'));
 
   /* ── Tryb gościa (click) ────────────────────────────────── */
   document.getElementById('guest-btn').addEventListener('click', guestLogin);
@@ -1005,6 +1055,16 @@ function init() {
   // Najpierw zarejestruj eventy auth (zawsze dostępne)
   setupAuthEvents();
   setupEvents();
+
+  // Zainicjuj Google Identity Services (GIS)
+  if (typeof google !== 'undefined') {
+    initGoogleAuth();
+  } else {
+    // GIS script ładuje się asynchronicznie — czekamy na jego załadowanie
+    const gisScript = document.querySelector('script[src*="accounts.google.com/gsi/client"]');
+    if (gisScript) gisScript.addEventListener('load', initGoogleAuth);
+    else window.addEventListener('load', () => { if (typeof google !== 'undefined') initGoogleAuth(); });
+  }
 
   // Sprawdź czy jest zapisana sesja
   const session = getSession();

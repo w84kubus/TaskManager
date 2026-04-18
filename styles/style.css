@@ -1033,14 +1033,7 @@ footer {
   background: #f8faff;
 }
 
-.apple-btn:hover {
-  border-color: var(--text-primary);
-  background: var(--text-primary);
-  color: var(--bg-card);
-}
-
 [data-theme="dark"] .google-btn:hover { background: #1a2340; }
-[data-theme="dark"] .apple-btn:hover  { background: #e8edf8; color: #0d1117; }
 
 /* Divider */
 .auth-divider {
@@ -1194,7 +1187,6 @@ body.guest-mode main {
 }
 
 .user-avatar.social-google { background: #4285F4; }
-.user-avatar.social-apple  { background: #333; }
 
 .user-name {
   font-size: .85rem;
