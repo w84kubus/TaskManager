@@ -39,6 +39,7 @@ function saveState() {
   localStorage.setItem(userKey('tasks'), JSON.stringify(state.tasks));
   localStorage.setItem(userKey('dark'),  JSON.stringify(state.darkMode));
   localStorage.setItem(userKey('notif'), JSON.stringify(state.notifications));
+  firestoreSync(); // synchronizuj z chmurą
 }
 
 function loadState() {
@@ -53,6 +54,65 @@ function loadState() {
   } catch (e) {
     console.warn('[TaskManager] Błąd odczytu localStorage:', e);
   }
+}
+
+/* ============================================================
+   FIREBASE – konfiguracja i synchronizacja w chmurze
+   ============================================================ */
+const FIREBASE_CONFIG = {
+  apiKey:            'AIzaSyB9wNhtfhgXAepXE2cGxRECK4PQ3HVYYy8',
+  authDomain:        'taskmanager-6dcaf.firebaseapp.com',
+  projectId:         'taskmanager-6dcaf',
+  storageBucket:     'taskmanager-6dcaf.firebasestorage.app',
+  messagingSenderId: '749463900730',
+  appId:             '1:749463900730:web:85a386c0aa36c32dab9b03',
+};
+
+let _db = null;
+
+function initFirebase() {
+  try {
+    if (typeof firebase === 'undefined') return;
+    if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+    _db = firebase.firestore();
+  } catch (e) {
+    console.warn('[Firebase] Inicjalizacja nieudana:', e);
+  }
+}
+
+// ID dokumentu Firestore – email z zamienionymi znakami specjalnymi
+function firestoreDocId() {
+  if (!state.currentUser || state.currentUser.provider === 'guest') return null;
+  return state.currentUser.email.replace(/[@.]/g, '_');
+}
+
+// Wczytaj dane z Firestore (nadpisuje localStorage)
+async function firestoreLoad() {
+  const docId = firestoreDocId();
+  if (!_db || !docId) return;
+  try {
+    const doc = await _db.collection('users').doc(docId).get();
+    if (doc.exists) {
+      const d = doc.data();
+      if (Array.isArray(d.tasks))              state.tasks         = d.tasks;
+      if (typeof d.darkMode      === 'boolean') state.darkMode      = d.darkMode;
+      if (typeof d.notifications === 'boolean') state.notifications = d.notifications;
+    }
+  } catch (e) {
+    console.warn('[Firebase] Błąd odczytu:', e);
+  }
+}
+
+// Zapisz dane do Firestore (fire-and-forget)
+function firestoreSync() {
+  const docId = firestoreDocId();
+  if (!_db || !docId) return;
+  _db.collection('users').doc(docId).set({
+    tasks:         state.tasks,
+    darkMode:      state.darkMode,
+    notifications: state.notifications,
+    updatedAt:     firebase.firestore.FieldValue.serverTimestamp(),
+  }).catch(e => console.warn('[Firebase] Błąd zapisu:', e));
 }
 
 /* ============================================================
@@ -809,11 +869,12 @@ function setupAuthEvents() {
   });
 }
 
-function onLoginSuccess() {
-  // Załaduj dane użytkownika i pokaż aplikację
+async function onLoginSuccess() {
   state.tasks = [];
   state.darkMode = false;
   state.notifications = true;
+
+  // 1. Szybki odczyt z localStorage (offline-first)
   loadState();
   applyDarkMode(state.darkMode);
 
@@ -824,12 +885,26 @@ function onLoginSuccess() {
   renderTaskList();
   switchView('tasks');
   showApp();
+
   const isGuest = state.currentUser.provider === 'guest';
   showToast(
     isGuest ? 'Tryb gościa — zadania są lokalne 👤' : `Witaj, ${state.currentUser.name}! 👋`,
     isGuest ? 'warning' : 'success',
     3500
   );
+
+  // 2. Pobierz aktualne dane z Firestore (cloud-sync, tylko dla zalogowanych)
+  if (!isGuest) {
+    await firestoreLoad();
+    // Nadpisz localStorage świeżymi danymi z chmury
+    localStorage.setItem(userKey('tasks'), JSON.stringify(state.tasks));
+    localStorage.setItem(userKey('dark'),  JSON.stringify(state.darkMode));
+    localStorage.setItem(userKey('notif'), JSON.stringify(state.notifications));
+    applyDarkMode(state.darkMode);
+    document.getElementById('notifications-toggle').checked = state.notifications;
+    document.getElementById('notifications-toggle').setAttribute('aria-checked', String(state.notifications));
+    renderTaskList();
+  }
 
   // Przykładowe zadania dla nowego użytkownika
   if (state.tasks.length === 0) {
@@ -1039,7 +1114,7 @@ function setupEvents() {
    INICJALIZACJA
    ============================================================ */
 function init() {
-  // Najpierw zarejestruj eventy auth (zawsze dostępne)
+  initFirebase();   // połącz z Firestore
   setupAuthEvents();
   setupEvents();
 
