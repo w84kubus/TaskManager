@@ -145,8 +145,10 @@ input, select { font-family: inherit; }
    ============================================================ */
 #site-header {
   position: fixed;
-  inset-block-start: 0;
-  inset-inline: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
   z-index: 100;
   height: calc(var(--header-h) + var(--safe-top));
   padding-top: var(--safe-top);
@@ -234,7 +236,10 @@ nav ul {
    ============================================================ */
 main {
   max-width: 1120px;
+  width: 100%;
+  box-sizing: border-box;
   margin: 0 auto;
+  overflow-x: hidden;
   padding: calc(var(--header-h) + var(--safe-top) + var(--sp-xl)) var(--sp-xl) calc(var(--sp-2xl) + var(--safe-bottom));
 }
 
@@ -916,7 +921,8 @@ footer {
 
   .view-header h1 { font-size: 1.5rem; }
 
-  /* Formularz – selecty pełna szerokość */
+  /* Formularz – mniejszy padding + selecty pełna szerokość */
+  #task-form { padding: var(--sp-md); }
   .form-row                   { flex-direction: column; align-items: stretch; }
   .form-row .form-group       { width: 100%; flex: none; }
   .form-row select            { width: 100%; box-sizing: border-box; }
@@ -1710,6 +1716,43 @@ body.guest-mode main {
   display: flex;
   justify-content: flex-end;
   flex-shrink: 0;
+}
+
+/* ============================================================
+   PWA STANDALONE – jawne przepisanie układu dla trybu dodanego
+   do ekranu głównego (display-mode: standalone).
+   Eliminuje wszelkie różnice viewport iOS PWA vs. Safari.
+   ============================================================ */
+@media (display-mode: standalone) {
+  html, body {
+    overflow-x: hidden;
+    max-width: 100%;
+    width: 100%;
+  }
+
+  #app-wrapper {
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  /* Header: jawne pozycjonowanie fizyczne (failsafe) */
+  #site-header {
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+  }
+
+  /* Main: wymuś mobilne paddingi bez względu na viewport calc */
+  main {
+    overflow-x: hidden;
+    padding-left:  var(--sp-md);
+    padding-right: var(--sp-md);
+  }
+
+  /* Formularz: mniejszy padding w PWA */
+  #task-form { padding: var(--sp-md); }
 }
 
 /* ============================================================
