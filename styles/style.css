@@ -1017,6 +1017,7 @@ footer {
 
   .task-item       { padding: var(--sp-sm) var(--sp-md); }
   .task-meta       { display: none; }
+  .task-name       { white-space: normal; overflow: visible; text-overflow: clip; }
 
   .modal-content   { border-radius: var(--r-lg); }
 
