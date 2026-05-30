@@ -271,26 +271,16 @@ function translateAuthError(code) {
   return map[code] || 'Wystąpił błąd. Spróbuj ponownie.';
 }
 
-// Wykryj iOS / Android – na tych urządzeniach popup jest blokowany przez Safari
-const _isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ||
-                  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-
-// Logowanie Google przez Firebase Auth
+// Logowanie Google przez Firebase Auth – używamy redirect na wszystkich platformach
+// (popup powoduje błąd "The requested action is invalid." na /__/auth/handler)
 async function triggerGoogleSignIn() {
   if (!_auth) { showToast('Firebase nie załadowany — odśwież stronę.', 'error'); return; }
   const provider = new firebase.auth.GoogleAuthProvider();
   try {
-    if (_isMobile) {
-      // iOS Safari blokuje popup → używaj redirect (wraca do strony po auth)
-      await _auth.signInWithRedirect(provider);
-    } else {
-      await _auth.signInWithPopup(provider);
-      // onAuthStateChanged obsługuje resztę
-    }
+    await _auth.signInWithRedirect(provider);
+    // Po powrocie ze strony Google – getRedirectResult() w init() obsłuży wynik
   } catch (err) {
-    if (err.code !== 'auth/popup-closed-by-user') {
-      showToast(translateAuthError(err.code), 'error');
-    }
+    showToast(translateAuthError(err.code), 'error');
   }
 }
 
