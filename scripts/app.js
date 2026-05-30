@@ -271,17 +271,37 @@ function translateAuthError(code) {
   return map[code] || 'Wystąpił błąd. Spróbuj ponownie.';
 }
 
-// Logowanie Google przez Firebase Auth – używamy redirect na wszystkich platformach
-// (popup powoduje błąd "The requested action is invalid." na /__/auth/handler)
-async function triggerGoogleSignIn() {
+// Logowanie Google przez GIS (Google Identity Services)
+// Omija Firebase /__/auth/handler – działa bez Firebase Hosting
+function triggerGoogleSignIn() {
   if (!_auth) { showToast('Firebase nie załadowany — odśwież stronę.', 'error'); return; }
-  const provider = new firebase.auth.GoogleAuthProvider();
-  try {
-    await _auth.signInWithRedirect(provider);
-    // Po powrocie ze strony Google – getRedirectResult() w init() obsłuży wynik
-  } catch (err) {
-    showToast(translateAuthError(err.code), 'error');
+
+  if (!window.google?.accounts?.oauth2) {
+    showToast('Nie można załadować Google Sign-In. Odśwież stronę.', 'error');
+    return;
   }
+
+  const client = google.accounts.oauth2.initTokenClient({
+    client_id: '749463900730-3sj2t8q2n9veggn3uvf93jrioiqdh4f9.apps.googleusercontent.com',
+    scope: 'email profile',
+    callback: async (response) => {
+      if (response.error) {
+        if (response.error !== 'access_denied') {
+          showToast('Logowanie Google anulowane.', 'error');
+        }
+        return;
+      }
+      try {
+        const credential = firebase.auth.GoogleAuthProvider.credential(null, response.access_token);
+        await _auth.signInWithCredential(credential);
+        // onAuthStateChanged obsługuje resztę
+      } catch (err) {
+        showToast(translateAuthError(err.code), 'error');
+      }
+    },
+  });
+
+  client.requestAccessToken({ prompt: 'select_account' });
 }
 
 // Tryb gościa (bez Firebase Auth — tylko localStorage)
@@ -1553,12 +1573,6 @@ function init() {
     return;
   }
 
-  // Obsłuż wynik signInWithRedirect (powrót po Google OAuth na iOS/Android)
-  _auth.getRedirectResult().catch(err => {
-    if (err.code && err.code !== 'auth/no-current-user') {
-      showToast(translateAuthError(err.code), 'error');
-    }
-  });
 
   // Firebase Auth — nasłuchiwacz stanu sesji (zastępuje getSession/setSession)
   _auth.onAuthStateChanged(async (firebaseUser) => {
