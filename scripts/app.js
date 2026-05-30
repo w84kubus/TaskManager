@@ -271,13 +271,22 @@ function translateAuthError(code) {
   return map[code] || 'Wystąpił błąd. Spróbuj ponownie.';
 }
 
+// Wykryj iOS / Android – na tych urządzeniach popup jest blokowany przez Safari
+const _isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ||
+                  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
 // Logowanie Google przez Firebase Auth
 async function triggerGoogleSignIn() {
   if (!_auth) { showToast('Firebase nie załadowany — odśwież stronę.', 'error'); return; }
   const provider = new firebase.auth.GoogleAuthProvider();
   try {
-    await _auth.signInWithPopup(provider);
-    // onAuthStateChanged obsługuje resztę
+    if (_isMobile) {
+      // iOS Safari blokuje popup → używaj redirect (wraca do strony po auth)
+      await _auth.signInWithRedirect(provider);
+    } else {
+      await _auth.signInWithPopup(provider);
+      // onAuthStateChanged obsługuje resztę
+    }
   } catch (err) {
     if (err.code !== 'auth/popup-closed-by-user') {
       showToast(translateAuthError(err.code), 'error');
@@ -1553,6 +1562,13 @@ function init() {
     }
     return;
   }
+
+  // Obsłuż wynik signInWithRedirect (powrót po Google OAuth na iOS/Android)
+  _auth.getRedirectResult().catch(err => {
+    if (err.code && err.code !== 'auth/no-current-user') {
+      showToast(translateAuthError(err.code), 'error');
+    }
+  });
 
   // Firebase Auth — nasłuchiwacz stanu sesji (zastępuje getSession/setSession)
   _auth.onAuthStateChanged(async (firebaseUser) => {
