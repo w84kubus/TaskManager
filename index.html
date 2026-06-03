@@ -3,601 +3,890 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="description" content="TaskManager – aplikacja do zarządzania zadaniami. Dodawaj, filtruj i śledź postęp swoich zadań.">
-  <meta name="theme-color" content="#0d1038">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <meta name="description" content="TaskFlow – najpiękniejszy menedżer zadań. Kanban, Focus Mode, Analityka i więcej.">
+  <meta name="theme-color" content="#060810">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="TaskManager">
-  <title>TaskManager – Twoje zadania</title>
+  <meta name="apple-mobile-web-app-title" content="TaskFlow">
+  <title>TaskFlow – Your Command Center</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="apple-touch-icon" href="favicon.svg">
-  <link rel="stylesheet" href="styles/style.css?v=30">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles/style.css?v=60">
 </head>
 <body>
 
-  <!-- ═══════════════════════════════════════
-       EKRAN LOGOWANIA / REJESTRACJI
-  ════════════════════════════════════════ -->
-  <div id="auth-screen" class="auth-screen" aria-label="Logowanie i rejestracja">
-    <div class="auth-card">
-      <div class="auth-logo" aria-hidden="true">
-        <span class="logo-icon">✓</span>
-        <span class="logo-text">TaskManager</span>
-      </div>
-      <p class="auth-subtitle">Zaloguj się, aby zarządzać swoimi zadaniami</p>
-
-      <!-- Tabs: Logowanie / Rejestracja -->
-      <div class="auth-tabs" role="tablist" aria-label="Wybierz logowanie lub rejestrację">
-        <button class="auth-tab active" role="tab" data-auth-tab="login"
-                aria-selected="true" aria-controls="login-panel">Logowanie</button>
-        <button class="auth-tab" role="tab" data-auth-tab="register"
-                aria-selected="false" aria-controls="register-panel">Rejestracja</button>
-      </div>
-
-      <!-- Panel: Logowanie -->
-      <div id="login-panel" class="auth-panel" role="tabpanel" aria-label="Formularz logowania">
-        <div class="social-buttons">
-          <button class="social-btn google-btn" id="google-login" type="button" aria-label="Zaloguj się przez Google">
-            <svg class="social-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
-              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A10.96 10.96 0 0 0 1 12c0 1.77.42 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
-              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-            </svg>
-            Kontynuuj z Google
-          </button>
-        </div>
-
-        <div class="auth-divider" aria-hidden="true">
-          <span>lub zaloguj się e-mailem</span>
-        </div>
-
-        <form id="login-form" novalidate aria-label="Logowanie e-mailem">
-          <div class="form-group">
-            <label for="login-email">Adres e-mail</label>
-            <input type="email" id="login-email" placeholder="twoj@email.pl"
-                   aria-required="true" aria-describedby="login-email-error" autocomplete="email">
-            <span class="error-msg" id="login-email-error" role="alert" aria-live="polite"></span>
-          </div>
-          <div class="form-group">
-            <label for="login-password">Hasło</label>
-            <input type="password" id="login-password" placeholder="Wpisz hasło"
-                   aria-required="true" aria-describedby="login-password-error" autocomplete="current-password">
-            <span class="error-msg" id="login-password-error" role="alert" aria-live="polite"></span>
-          </div>
-          <button type="submit" class="btn btn-primary auth-submit">Zaloguj się</button>
-          <button type="button" class="forgot-link" id="forgot-btn">Zapomniałem hasła?</button>
-        </form>
-      </div>
-
-      <!-- Panel: Rejestracja -->
-      <div id="register-panel" class="auth-panel" role="tabpanel" aria-label="Formularz rejestracji" hidden>
-        <div class="social-buttons">
-          <button class="social-btn google-btn" id="google-register" type="button" aria-label="Zarejestruj się przez Google">
-            <svg class="social-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
-              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A10.96 10.96 0 0 0 1 12c0 1.77.42 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
-              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-            </svg>
-            Zarejestruj przez Google
-          </button>
-        </div>
-
-        <div class="auth-divider" aria-hidden="true">
-          <span>lub utwórz konto e-mailem</span>
-        </div>
-
-        <form id="register-form" novalidate aria-label="Rejestracja e-mailem">
-          <div class="form-group">
-            <label for="register-name">Imię</label>
-            <input type="text" id="register-name" placeholder="Twoje imię"
-                   aria-required="true" aria-describedby="register-name-error" autocomplete="given-name">
-            <span class="error-msg" id="register-name-error" role="alert" aria-live="polite"></span>
-          </div>
-          <div class="form-group">
-            <label for="register-email">Adres e-mail</label>
-            <input type="email" id="register-email" placeholder="twoj@email.pl"
-                   aria-required="true" aria-describedby="register-email-error" autocomplete="email">
-            <span class="error-msg" id="register-email-error" role="alert" aria-live="polite"></span>
-          </div>
-          <div class="form-group">
-            <label for="register-password">Hasło</label>
-            <input type="password" id="register-password" placeholder="Min. 6 znaków, 1 cyfra, 1 wielka litera"
-                   aria-required="true" aria-describedby="register-password-error" autocomplete="new-password">
-            <span class="error-msg" id="register-password-error" role="alert" aria-live="polite"></span>
-          </div>
-          <div class="form-group consent-group">
-            <label class="consent-label">
-              <input type="checkbox" id="register-consent" aria-required="true"
-                     aria-describedby="register-consent-error">
-              <span>Akceptuję
-                <button type="button" class="privacy-inline-link" id="open-privacy-reg">
-                  Politykę Prywatności
-                </button>
-                i wyrażam zgodę na przetwarzanie danych osobowych.
-              </span>
-            </label>
-            <span class="error-msg" id="register-consent-error" role="alert" aria-live="polite"></span>
-          </div>
-          <button type="submit" class="btn btn-primary auth-submit">Utwórz konto</button>
-        </form>
-      </div>
-
-      <!-- Panel: Reset hasła -->
-      <div id="forgot-panel" class="auth-panel" hidden aria-label="Resetowanie hasła">
-        <div class="forgot-icon" aria-hidden="true">🔑</div>
-        <p class="forgot-desc">
-          Podaj adres e-mail powiązany z kontem — wyślemy Ci link do ustawienia nowego hasła.
-        </p>
-        <form id="forgot-form" novalidate aria-label="Formularz resetowania hasła">
-          <div class="form-group">
-            <label for="forgot-email">Adres e-mail</label>
-            <input type="email" id="forgot-email" placeholder="twoj@email.pl"
-                   aria-required="true" aria-describedby="forgot-email-error" autocomplete="email">
-            <span class="error-msg" id="forgot-email-error" role="alert" aria-live="polite"></span>
-          </div>
-          <button type="submit" class="btn btn-primary auth-submit">Wyślij link resetujący</button>
-        </form>
-        <button type="button" class="guest-link" id="forgot-back-btn">← Wróć do logowania</button>
-      </div>
-
-      <!-- Przycisk trybu gościa – wewnątrz karty, zawsze widoczny -->
-      <div class="guest-divider" aria-hidden="true">lub</div>
-      <button id="guest-btn" class="guest-btn-prominent" type="button"
-              aria-label="Kontynuuj bez logowania jako gość">
-        👤 Kontynuuj bez logowania →
-      </button>
-
-    </div><!-- /.auth-card -->
+<!-- ════════════════════════════════════════════════
+     AUTH SCREEN
+════════════════════════════════════════════════ -->
+<div id="auth-screen" class="auth-screen" aria-label="Logowanie i rejestracja">
+  <div class="auth-bg-orbs" aria-hidden="true">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
   </div>
+  <div class="auth-card">
+    <div class="auth-logo" aria-hidden="true">
+      <span class="logo-mark">✦</span>
+      <span class="logo-text">TaskFlow</span>
+    </div>
+    <p class="auth-subtitle">Zaloguj się, aby zarządzać swoimi zadaniami</p>
 
-  <!-- ═══════════════════════════════════════
-       EKRAN WERYFIKACJI E-MAIL
-  ════════════════════════════════════════ -->
-  <div id="verify-screen" class="auth-screen" hidden aria-label="Weryfikacja adresu e-mail">
-    <div class="auth-card verify-card">
+    <div class="auth-tabs" role="tablist" aria-label="Wybierz logowanie lub rejestrację">
+      <button class="auth-tab active" role="tab" data-auth-tab="login"
+              aria-selected="true" aria-controls="login-panel">Logowanie</button>
+      <button class="auth-tab" role="tab" data-auth-tab="register"
+              aria-selected="false" aria-controls="register-panel">Rejestracja</button>
+    </div>
 
-      <div class="verify-icon-wrap" id="verify-icon-wrap" aria-hidden="true">📧</div>
-
-      <h2 id="verify-title" class="verify-title">Potwierdź adres e-mail</h2>
-
-      <p id="verify-desc" class="verify-desc">
-        Wysłaliśmy link weryfikacyjny na<br>
-        <strong id="verify-email-addr"></strong>
-      </p>
-
-      <div class="verify-steps">
-        <div class="verify-step">
-          <span class="verify-step-num">1</span>
-          <span>Otwórz skrzynkę e-mail</span>
-        </div>
-        <div class="verify-step">
-          <span class="verify-step-num">2</span>
-          <span>Kliknij link weryfikacyjny od TaskManager</span>
-        </div>
-        <div class="verify-step">
-          <span class="verify-step-num">3</span>
-          <span>Wróć tutaj i naciśnij przycisk poniżej</span>
-        </div>
+    <!-- Panel: Logowanie -->
+    <div id="login-panel" class="auth-panel" role="tabpanel" aria-label="Formularz logowania">
+      <div class="social-buttons">
+        <button class="social-btn google-btn" id="google-login" type="button" aria-label="Zaloguj się przez Google">
+          <svg class="social-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
+            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A10.96 10.96 0 0 0 1 12c0 1.77.42 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+          </svg>
+          Kontynuuj z Google
+        </button>
       </div>
+      <div class="auth-divider" aria-hidden="true"><span>lub zaloguj się e-mailem</span></div>
+      <form id="login-form" novalidate aria-label="Logowanie e-mailem">
+        <div class="form-group">
+          <label for="login-email">Adres e-mail</label>
+          <input type="email" id="login-email" placeholder="twoj@email.pl"
+                 aria-required="true" aria-describedby="login-email-error" autocomplete="email">
+          <span class="error-msg" id="login-email-error" role="alert" aria-live="polite"></span>
+        </div>
+        <div class="form-group">
+          <label for="login-password">Hasło</label>
+          <input type="password" id="login-password" placeholder="Wpisz hasło"
+                 aria-required="true" aria-describedby="login-password-error" autocomplete="current-password">
+          <span class="error-msg" id="login-password-error" role="alert" aria-live="polite"></span>
+        </div>
+        <button type="submit" class="btn btn-primary auth-submit">Zaloguj się</button>
+        <button type="button" class="forgot-link" id="forgot-btn">Zapomniałem hasła?</button>
+      </form>
+    </div>
 
-      <p class="verify-hint">
-        <small>Nie widzisz wiadomości? Sprawdź folder <strong>Spam / Oferty / Powiadomienia</strong>.</small>
-      </p>
+    <!-- Panel: Rejestracja -->
+    <div id="register-panel" class="auth-panel" role="tabpanel" aria-label="Formularz rejestracji" hidden>
+      <div class="social-buttons">
+        <button class="social-btn google-btn" id="google-register" type="button" aria-label="Zarejestruj się przez Google">
+          <svg class="social-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
+            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A10.96 10.96 0 0 0 1 12c0 1.77.42 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+          </svg>
+          Zarejestruj przez Google
+        </button>
+      </div>
+      <div class="auth-divider" aria-hidden="true"><span>lub utwórz konto e-mailem</span></div>
+      <form id="register-form" novalidate aria-label="Rejestracja e-mailem">
+        <div class="form-group">
+          <label for="register-name">Imię</label>
+          <input type="text" id="register-name" placeholder="Twoje imię"
+                 aria-required="true" aria-describedby="register-name-error" autocomplete="given-name">
+          <span class="error-msg" id="register-name-error" role="alert" aria-live="polite"></span>
+        </div>
+        <div class="form-group">
+          <label for="register-email">Adres e-mail</label>
+          <input type="email" id="register-email" placeholder="twoj@email.pl"
+                 aria-required="true" aria-describedby="register-email-error" autocomplete="email">
+          <span class="error-msg" id="register-email-error" role="alert" aria-live="polite"></span>
+        </div>
+        <div class="form-group">
+          <label for="register-password">Hasło</label>
+          <input type="password" id="register-password" placeholder="Min. 6 znaków, 1 cyfra, 1 wielka litera"
+                 aria-required="true" aria-describedby="register-password-error" autocomplete="new-password">
+          <span class="error-msg" id="register-password-error" role="alert" aria-live="polite"></span>
+        </div>
+        <div class="form-group consent-group">
+          <label class="consent-label">
+            <input type="checkbox" id="register-consent" aria-required="true"
+                   aria-describedby="register-consent-error">
+            <span>Akceptuję
+              <button type="button" class="privacy-inline-link" id="open-privacy-reg">Politykę Prywatności</button>
+              i wyrażam zgodę na przetwarzanie danych osobowych.
+            </span>
+          </label>
+          <span class="error-msg" id="register-consent-error" role="alert" aria-live="polite"></span>
+        </div>
+        <button type="submit" class="btn btn-primary auth-submit">Utwórz konto</button>
+      </form>
+    </div>
 
-      <button id="verify-check-btn" class="btn btn-primary auth-submit" type="button">
-        ✓ Potwierdziłem — zaloguj mnie
-      </button>
+    <!-- Panel: Reset hasła -->
+    <div id="forgot-panel" class="auth-panel" hidden aria-label="Resetowanie hasła">
+      <div class="forgot-icon" aria-hidden="true">🔑</div>
+      <p class="forgot-desc">Podaj adres e-mail powiązany z kontem — wyślemy Ci link do ustawienia nowego hasła.</p>
+      <form id="forgot-form" novalidate aria-label="Formularz resetowania hasła">
+        <div class="form-group">
+          <label for="forgot-email">Adres e-mail</label>
+          <input type="email" id="forgot-email" placeholder="twoj@email.pl"
+                 aria-required="true" aria-describedby="forgot-email-error" autocomplete="email">
+          <span class="error-msg" id="forgot-email-error" role="alert" aria-live="polite"></span>
+        </div>
+        <button type="submit" class="btn btn-primary auth-submit">Wyślij link resetujący</button>
+      </form>
+      <button type="button" class="guest-link" id="forgot-back-btn">← Wróć do logowania</button>
+    </div>
 
-      <button id="verify-resend-btn" class="btn btn-secondary verify-resend" type="button">
-        Wyślij link ponownie
-      </button>
+    <div class="guest-divider" aria-hidden="true">lub</div>
+    <button id="guest-btn" class="guest-btn-prominent" type="button" aria-label="Kontynuuj bez logowania jako gość">
+      👤 Kontynuuj bez logowania →
+    </button>
+  </div>
+</div>
 
-      <button id="verify-back-btn" class="guest-link" type="button">
-        Użyj innego konta
+<!-- ════════════════════════════════════════════════
+     VERIFY SCREEN
+════════════════════════════════════════════════ -->
+<div id="verify-screen" class="auth-screen" hidden aria-label="Weryfikacja adresu e-mail">
+  <div class="auth-card verify-card">
+    <div class="verify-icon-wrap" id="verify-icon-wrap" aria-hidden="true">📧</div>
+    <h2 id="verify-title" class="verify-title">Potwierdź adres e-mail</h2>
+    <p id="verify-desc" class="verify-desc">
+      Wysłaliśmy link weryfikacyjny na<br>
+      <strong id="verify-email-addr"></strong>
+    </p>
+    <div class="verify-steps">
+      <div class="verify-step"><span class="verify-step-num">1</span><span>Otwórz skrzynkę e-mail</span></div>
+      <div class="verify-step"><span class="verify-step-num">2</span><span>Kliknij link weryfikacyjny od TaskFlow</span></div>
+      <div class="verify-step"><span class="verify-step-num">3</span><span>Wróć tutaj i naciśnij przycisk poniżej</span></div>
+    </div>
+    <p class="verify-hint"><small>Nie widzisz wiadomości? Sprawdź folder <strong>Spam / Oferty / Powiadomienia</strong>.</small></p>
+    <button id="verify-check-btn" class="btn btn-primary auth-submit" type="button">✓ Potwierdziłem — zaloguj mnie</button>
+    <button id="verify-resend-btn" class="btn btn-secondary verify-resend" type="button">Wyślij link ponownie</button>
+    <button id="verify-back-btn" class="guest-link" type="button">Użyj innego konta</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     APP WRAPPER
+════════════════════════════════════════════════ -->
+<div id="app-wrapper" hidden>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar" aria-label="Nawigacja boczna">
+    <div class="sidebar-top">
+      <div class="sidebar-logo">
+        <span class="sidebar-logo-mark" aria-hidden="true">✦</span>
+        <span class="sidebar-logo-text">TaskFlow</span>
+      </div>
+      <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Zwiń / rozwiń pasek boczny" title="Zwiń pasek">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M15 18l-6-6 6-6"/>
+        </svg>
       </button>
     </div>
-  </div>
 
-  <!-- ═══════════════════════════════════════
-       GŁÓWNA APLIKACJA (ukryta do logowania)
-  ════════════════════════════════════════ -->
-  <div id="app-wrapper" hidden>
+    <button class="sidebar-new-btn" id="sidebar-new-btn" aria-label="Dodaj nowe zadanie">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      <span>Nowe zadanie</span>
+    </button>
 
-  <header id="site-header">
-    <div class="header-inner">
-      <div class="logo" aria-label="Logo TaskManager">
-        <span class="logo-icon" aria-hidden="true">✓</span>
-        <span class="logo-text">TaskManager</span>
+    <nav class="sidebar-nav" aria-label="Główna nawigacja">
+      <div class="sidebar-nav-group">
+        <div class="sidebar-nav-label">WIDOKI</div>
+        <button class="sidebar-nav-item" data-view="dashboard" aria-label="Dashboard">
+          <svg class="nav-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+          <span>Dashboard</span>
+        </button>
+        <button class="sidebar-nav-item" data-view="tasks" aria-label="Zadania">
+          <svg class="nav-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          <span>Zadania</span>
+        </button>
+        <button class="sidebar-nav-item" data-view="today" aria-label="Dzisiaj">
+          <svg class="nav-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <span>Dzisiaj</span>
+        </button>
+        <button class="sidebar-nav-item" data-view="upcoming" aria-label="Nadchodzące">
+          <svg class="nav-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span>Nadchodzące</span>
+        </button>
+        <button class="sidebar-nav-item" data-view="starred" aria-label="Ulubione">
+          <svg class="nav-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <span>Ulubione</span>
+        </button>
       </div>
 
-      <div class="header-breadcrumb" id="header-breadcrumb" aria-label="Lokalizacja">
-        <span>Zadania</span>
-        <span class="bc-sep" aria-hidden="true">›</span>
-        <span class="bc-current">Dzisiaj</span>
+      <div class="sidebar-nav-group">
+        <div class="sidebar-nav-label">NARZĘDZIA</div>
+        <button class="sidebar-nav-item" data-view="kanban" aria-label="Kanban">
+          <svg class="nav-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="5" height="18" rx="1"/><rect x="10" y="3" width="5" height="12" rx="1"/><rect x="17" y="3" width="5" height="15" rx="1"/></svg>
+          <span>Kanban</span>
+        </button>
+        <button class="sidebar-nav-item" data-view="calendar" aria-label="Kalendarz">
+          <svg class="nav-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><circle cx="12" cy="16" r="1" fill="currentColor"/></svg>
+          <span>Kalendarz</span>
+        </button>
+        <button class="sidebar-nav-item" data-view="focus" aria-label="Focus Mode">
+          <svg class="nav-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg>
+          <span>Focus Mode</span>
+        </button>
+        <button class="sidebar-nav-item" data-view="analytics" aria-label="Analityka">
+          <svg class="nav-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          <span>Analityka</span>
+        </button>
       </div>
 
-      <!-- nav: widoczna tylko na mobile (≤768px) -->
-      <nav aria-label="Główna nawigacja">
-        <ul role="list">
-          <li>
-            <a href="#" class="nav-link active" data-view="tasks"
-               aria-current="page" aria-label="Zadania">
-              <span class="nav-icon" aria-hidden="true">📋</span>
-              <span class="nav-label">Zadania</span>
-            </a>
-          </li>
-          <li>
-            <a href="#" class="nav-link" data-view="stats" aria-label="Statystyki">
-              <span class="nav-icon" aria-hidden="true">📊</span>
-              <span class="nav-label">Statystyki</span>
-            </a>
-          </li>
-          <li>
-            <a href="#" class="nav-link" data-view="settings" aria-label="Ustawienia">
-              <span class="nav-icon" aria-hidden="true">⚙️</span>
-              <span class="nav-label">Ustawienia</span>
-            </a>
-          </li>
-        </ul>
-      </nav>
+      <div class="sidebar-nav-group">
+        <div class="sidebar-nav-label">USTAWIENIA</div>
+        <button class="sidebar-nav-item" data-view="settings" aria-label="Ustawienia">
+          <svg class="nav-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <span>Ustawienia</span>
+        </button>
+      </div>
+    </nav>
 
-      <div class="header-spacer"></div>
+    <div class="sidebar-projects" id="sidebar-projects">
+      <div class="sidebar-nav-label">PROJEKTY</div>
+      <div class="sidebar-projects-list" id="sidebar-projects-list"></div>
+      <button class="sidebar-add-project" id="add-project-btn" aria-label="Dodaj projekt">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <span>Dodaj projekt</span>
+      </button>
+    </div>
 
-      <div class="user-menu" id="user-menu" aria-label="Menu użytkownika">
+    <div class="sidebar-bottom">
+      <div class="sidebar-streak" id="sidebar-streak">
+        <span class="streak-fire" aria-hidden="true">🔥</span>
+        <span class="streak-label">Streak: <strong id="streak-count">0</strong> dni</span>
+      </div>
+      <div class="sidebar-user">
         <div class="user-avatar" id="user-avatar" aria-hidden="true"></div>
         <span class="user-name" id="user-name"></span>
         <button class="btn-logout" id="logout-btn" aria-label="Wyloguj się" title="Wyloguj">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-            <polyline points="16 17 21 12 16 7"/>
-            <line x1="21" y1="12" x2="9" y2="12"/>
-          </svg>
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
         </button>
       </div>
     </div>
-  </header>
-
-  <!-- ═══════════════════════════════════════
-       SIDEBAR — lewa nawigacja ikonowa (desktop)
-  ════════════════════════════════════════ -->
-  <aside class="sidebar" aria-label="Nawigacja boczna">
-    <button class="sidebar-icon active" data-view="tasks" aria-label="Zadania" title="Zadania">
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
-        <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
-      </svg>
-    </button>
-    <button class="sidebar-icon" data-view="stats" aria-label="Statystyki" title="Statystyki">
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <line x1="18" y1="20" x2="18" y2="10"/>
-        <line x1="12" y1="20" x2="12" y2="4"/>
-        <line x1="6"  y1="20" x2="6"  y2="14"/>
-        <line x1="2"  y1="20" x2="22" y2="20"/>
-      </svg>
-    </button>
-    <div class="sidebar-spacer"></div>
-    <button class="sidebar-icon" data-view="settings" aria-label="Ustawienia" title="Ustawienia">
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <circle cx="12" cy="12" r="3"/>
-        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-      </svg>
-    </button>
   </aside>
 
-  <!-- Banner trybu gościa -->
-  <div id="guest-banner" class="guest-banner" hidden aria-live="polite">
-    <span class="guest-banner-icon" aria-hidden="true">👤</span>
-    <span class="guest-banner-text">
-      Korzystasz jako <strong>Gość</strong> — zadania są zapisane tylko lokalnie w tej przeglądarce.
-    </span>
-    <button id="guest-banner-login" class="guest-banner-btn" type="button">
-      Zaloguj się / Zarejestruj
-    </button>
-    <button id="guest-banner-close" class="guest-banner-close" type="button"
-            aria-label="Zamknij powiadomienie">×</button>
-  </div>
+  <!-- MAIN LAYOUT -->
+  <div class="app-layout" id="app-layout">
 
-  <main id="main-content">
-
-    <!-- ═══════════════════════════════════════
-         WIDOK 1 – KANBAN BOARD
-    ════════════════════════════════════════ -->
-    <section id="tasks" class="view" aria-label="Tablica Kanban">
-
-      <div class="kanban-header">
-        <p class="kanban-breadcrumb">Zadania › Dzisiaj</p>
-        <h1 class="kanban-title">Task Management</h1>
-      </div>
-
-      <!-- Formularz dodawania -->
-      <form id="task-form" novalidate aria-label="Formularz dodawania zadania">
-        <div class="form-group full-width">
-          <label for="task-name">Nowe zadanie</label>
-          <input
-            type="text"
-            id="task-name"
-            name="task-name"
-            placeholder="Wpisz nazwę zadania (min. 2 znaki)…"
-            aria-required="true"
-            aria-describedby="name-error"
-            autocomplete="off"
-            maxlength="120"
-          >
-          <span class="error-msg" id="name-error" role="alert" aria-live="polite"></span>
+    <!-- TOPBAR -->
+    <header id="site-header" class="topbar">
+      <div class="topbar-left">
+        <button class="topbar-menu-btn" id="mobile-menu-btn" aria-label="Menu">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div class="header-breadcrumb" id="header-breadcrumb" aria-label="Lokalizacja">
+          <span>Dashboard</span>
         </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label for="task-priority">Priorytet</label>
-            <select id="task-priority" name="task-priority" aria-label="Wybierz priorytet">
-              <option value="low">🟢 Niski</option>
-              <option value="medium" selected>🟡 Średni</option>
-              <option value="high">🔴 Wysoki</option>
+      </div>
+      <div class="topbar-right">
+        <button class="topbar-icon-btn" id="search-btn" aria-label="Szukaj (/)">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <span class="topbar-kbd" aria-hidden="true">/</span>
+        </button>
+        <div class="mini-timer" id="mini-timer" hidden>
+          <span class="mini-timer-icon" aria-hidden="true">⏱</span>
+          <span id="mini-timer-display">25:00</span>
+        </div>
+        <div class="topbar-user">
+          <div class="topbar-avatar" id="topbar-avatar" aria-hidden="true"></div>
+        </div>
+      </div>
+    </header>
+
+    <!-- GUEST BANNER -->
+    <div id="guest-banner" class="guest-banner" hidden aria-live="polite">
+      <span class="guest-banner-icon" aria-hidden="true">👤</span>
+      <span class="guest-banner-text">Korzystasz jako <strong>Gość</strong> — zadania zapisane tylko lokalnie.</span>
+      <button id="guest-banner-login" class="guest-banner-btn" type="button">Zaloguj się / Zarejestruj</button>
+      <button id="guest-banner-close" class="guest-banner-close" type="button" aria-label="Zamknij">×</button>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <main id="main-content" class="main-content">
+
+      <!-- ════════════ DASHBOARD ════════════ -->
+      <section id="dashboard" class="view" aria-label="Dashboard" hidden>
+        <div class="dashboard-greeting">
+          <h1 id="greeting-text" class="greeting-title">Dzień dobry!</h1>
+          <p id="greeting-date" class="greeting-date"></p>
+        </div>
+
+        <div class="dashboard-stats-row">
+          <div class="dash-stat-card">
+            <div class="dash-stat-label">Dzisiaj</div>
+            <div class="dash-stat-value" id="dash-stat-today">0</div>
+            <div class="dash-stat-sub">zadań na dziś</div>
+          </div>
+          <div class="dash-stat-card dash-stat-overdue">
+            <div class="dash-stat-label">Zaległe</div>
+            <div class="dash-stat-value" id="dash-stat-overdue">0</div>
+            <div class="dash-stat-sub">po terminie</div>
+          </div>
+          <div class="dash-stat-card dash-stat-streak">
+            <div class="dash-stat-label">Streak</div>
+            <div class="dash-stat-value" id="dash-stat-streak">🔥 0</div>
+            <div class="dash-stat-sub">dni z rzędu</div>
+          </div>
+          <div class="dash-stat-card dash-stat-done">
+            <div class="dash-stat-label">Ukończone</div>
+            <div class="dash-stat-value" id="dash-stat-week">0</div>
+            <div class="dash-stat-sub">w tym tygodniu</div>
+          </div>
+        </div>
+
+        <div class="dashboard-grid">
+          <div class="dash-widget">
+            <div class="dash-widget-header">
+              <h2 class="dash-widget-title">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                Dzisiaj
+              </h2>
+              <button class="dash-widget-link" data-view="today">Zobacz wszystkie</button>
+            </div>
+            <div id="dash-today-list" class="dash-task-list"></div>
+          </div>
+
+          <div class="dash-widget">
+            <div class="dash-widget-header">
+              <h2 class="dash-widget-title">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                Nadchodzące
+              </h2>
+              <button class="dash-widget-link" data-view="upcoming">Zobacz więcej</button>
+            </div>
+            <div id="dash-upcoming-list" class="dash-task-list"></div>
+          </div>
+
+          <div class="dash-widget">
+            <div class="dash-widget-header">
+              <h2 class="dash-widget-title">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Szybkie dodanie
+              </h2>
+            </div>
+            <form id="quick-add-form" class="quick-add-form" novalidate>
+              <div class="quick-add-row">
+                <input type="text" id="quick-add-input" placeholder="Co chcesz zrobić?" autocomplete="off" maxlength="120">
+                <button type="submit" class="quick-add-btn" aria-label="Dodaj zadanie">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                </button>
+              </div>
+              <div class="quick-add-opts">
+                <select id="quick-add-priority" aria-label="Priorytet">
+                  <option value="low">🟢 Niski</option>
+                  <option value="medium" selected>🟡 Średni</option>
+                  <option value="high">🔴 Wysoki</option>
+                  <option value="urgent">🔴 Pilny</option>
+                </select>
+                <input type="date" id="quick-add-date" aria-label="Termin">
+              </div>
+            </form>
+          </div>
+
+          <div class="dash-widget">
+            <div class="dash-widget-header">
+              <h2 class="dash-widget-title">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                Postęp tygodnia
+              </h2>
+            </div>
+            <div id="week-chart" class="week-chart" aria-label="Wykres postępu tygodnia"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════════════ TASKS VIEW ════════════ -->
+      <section id="tasks" class="view" aria-label="Zadania" hidden>
+        <div class="view-header-row">
+          <div>
+            <h1 class="view-title" id="tasks-view-title">Zadania</h1>
+            <p class="view-subtitle" id="tasks-view-subtitle">Wszystkie twoje zadania</p>
+          </div>
+          <button class="btn btn-primary btn-add-task" id="add-task-btn-tasks" aria-label="Nowe zadanie">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Nowe zadanie
+          </button>
+        </div>
+
+        <div class="task-controls-bar">
+          <div class="filter-chips" role="group" aria-label="Filtry">
+            <button class="chip active" data-filter="all" aria-pressed="true">Wszystkie</button>
+            <button class="chip" data-filter="active" aria-pressed="false">Aktywne</button>
+            <button class="chip" data-filter="done" aria-pressed="false">Ukończone</button>
+            <button class="chip" data-filter="overdue" aria-pressed="false">Zaległe</button>
+          </div>
+          <div class="task-controls-right">
+            <div class="search-wrapper">
+              <svg class="search-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="search" id="search-input" class="task-search" placeholder="Szukaj…" aria-label="Szukaj zadania">
+            </div>
+            <select id="sort-select" class="task-sort" aria-label="Sortuj">
+              <option value="date-desc">Najnowsze</option>
+              <option value="date-asc">Najstarsze</option>
+              <option value="priority-high">Priorytet ↑</option>
+              <option value="priority-low">Priorytet ↓</option>
+              <option value="alpha-asc">A → Z</option>
+              <option value="alpha-desc">Z → A</option>
+              <option value="due-date">Termin</option>
+            </select>
+            <select id="group-select" class="task-sort" aria-label="Grupuj">
+              <option value="none">Bez grupowania</option>
+              <option value="priority">Priorytet</option>
+              <option value="status">Status</option>
+              <option value="project">Projekt</option>
             </select>
           </div>
-          <div class="form-group">
-            <label for="task-category">Kategoria</label>
-            <select id="task-category" name="task-category" aria-label="Wybierz kategorię">
-              <option value="personal">👤 Osobiste</option>
-              <option value="work">💼 Praca</option>
-              <option value="shopping">🛒 Zakupy</option>
-              <option value="health">❤️ Zdrowie</option>
-              <option value="other">📦 Inne</option>
-            </select>
+        </div>
+
+        <div id="task-list-container" class="task-list-container">
+          <ul id="task-list" class="task-list-ul" aria-label="Lista zadań"></ul>
+          <div id="empty-state" class="empty-state" hidden>
+            <div class="empty-state-icon" aria-hidden="true">
+              <svg viewBox="0 0 120 120" width="120" height="120" fill="none">
+                <circle cx="60" cy="60" r="50" stroke="var(--accent-blue)" stroke-width="2" stroke-dasharray="8 4" opacity="0.3"/>
+                <path d="M40 55 L55 70 L80 45" stroke="var(--accent-purple)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/>
+                <circle cx="60" cy="60" r="20" stroke="var(--accent-blue)" stroke-width="1.5" opacity="0.2"/>
+              </svg>
+            </div>
+            <h3 class="empty-state-title">Brak zadań</h3>
+            <p class="empty-state-desc">Dodaj pierwsze zadanie używając przycisku powyżej lub skrótu <kbd>N</kbd></p>
           </div>
-          <button type="submit" class="btn btn-primary" aria-label="Dodaj nowe zadanie">
-            <span aria-hidden="true">＋</span> Dodaj
+        </div>
+      </section>
+
+      <!-- ════════════ TODAY VIEW ════════════ -->
+      <section id="today" class="view" aria-label="Dzisiaj" hidden>
+        <div class="view-header-row">
+          <div>
+            <h1 class="view-title">Dzisiaj</h1>
+            <p class="view-subtitle" id="today-subtitle"></p>
+          </div>
+          <button class="btn btn-primary btn-add-task" id="add-task-btn-today" aria-label="Nowe zadanie">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Nowe zadanie
           </button>
         </div>
-      </form>
-
-      <!-- Filtry i wyszukiwanie -->
-      <div class="task-controls" role="toolbar" aria-label="Filtry i sortowanie">
-        <div class="filter-buttons" role="group" aria-label="Filtruj według statusu">
-          <button class="filter-btn active" data-filter="all"    aria-pressed="true">Wszystkie</button>
-          <button class="filter-btn"        data-filter="active" aria-pressed="false">Aktywne</button>
-          <button class="filter-btn"        data-filter="done"   aria-pressed="false">Ukończone</button>
+        <ul class="task-list-ul" id="today-list" aria-label="Zadania na dziś"></ul>
+        <div class="empty-state" id="today-empty" hidden>
+          <div class="empty-state-icon" aria-hidden="true">✨</div>
+          <h3 class="empty-state-title">Żadnych zadań na dziś!</h3>
+          <p class="empty-state-desc">Masz wolne lub zapomnij dodać zadania z terminem na dziś.</p>
         </div>
-        <div class="sort-search">
-          <input type="search" id="search-input"
-            placeholder="Szukaj zadania…" aria-label="Wyszukaj zadanie">
-          <select id="sort-select" aria-label="Sortuj zadania">
-            <option value="date-desc">Najnowsze</option>
-            <option value="date-asc">Najstarsze</option>
-            <option value="priority-high">Priorytet ↑</option>
-            <option value="priority-low">Priorytet ↓</option>
-            <option value="alpha-asc">A → Z</option>
-            <option value="alpha-desc">Z → A</option>
-          </select>
-        </div>
-      </div>
+      </section>
 
-      <!-- ── Kanban Board ── -->
-      <div class="kanban-board" id="kanban-board" aria-label="Tablica kanban">
-
-        <div class="kanban-column" data-status="draft" aria-label="Kolumna Draft">
-          <div class="kanban-col-header">
-            <span class="kanban-col-title">Draft</span>
-            <span class="kanban-col-count" id="count-draft">0</span>
+      <!-- ════════════ UPCOMING VIEW ════════════ -->
+      <section id="upcoming" class="view" aria-label="Nadchodzące" hidden>
+        <div class="view-header-row">
+          <div>
+            <h1 class="view-title">Nadchodzące</h1>
+            <p class="view-subtitle">Zadania z przyszłymi terminami</p>
           </div>
-          <div class="kanban-col-body" id="col-draft" role="list"></div>
         </div>
+        <ul class="task-list-ul" id="upcoming-list" aria-label="Nadchodzące zadania"></ul>
+        <div class="empty-state" id="upcoming-empty" hidden>
+          <div class="empty-state-icon" aria-hidden="true">📅</div>
+          <h3 class="empty-state-title">Brak nadchodzących zadań</h3>
+          <p class="empty-state-desc">Dodaj zadania z terminami aby je tutaj zobaczyć.</p>
+        </div>
+      </section>
 
-        <div class="kanban-column" data-status="in-progress" aria-label="Kolumna In Progress">
-          <div class="kanban-col-header">
-            <span class="kanban-col-title">In Progress</span>
-            <span class="kanban-col-count" id="count-in-progress">0</span>
+      <!-- ════════════ STARRED VIEW ════════════ -->
+      <section id="starred" class="view" aria-label="Ulubione" hidden>
+        <div class="view-header-row">
+          <div>
+            <h1 class="view-title">Ulubione</h1>
+            <p class="view-subtitle">Oznaczone gwiazdką zadania</p>
           </div>
-          <div class="kanban-col-body" id="col-in-progress" role="list"></div>
         </div>
+        <ul class="task-list-ul" id="starred-list" aria-label="Ulubione zadania"></ul>
+        <div class="empty-state" id="starred-empty" hidden>
+          <div class="empty-state-icon" aria-hidden="true">⭐</div>
+          <h3 class="empty-state-title">Brak ulubionych</h3>
+          <p class="empty-state-desc">Kliknij gwiazdkę przy zadaniu aby dodać je do ulubionych.</p>
+        </div>
+      </section>
 
-        <div class="kanban-column" data-status="editing" aria-label="Kolumna Editing">
-          <div class="kanban-col-header">
-            <span class="kanban-col-title">Editing</span>
-            <span class="kanban-col-count" id="count-editing">0</span>
+      <!-- ════════════ KANBAN ════════════ -->
+      <section id="kanban" class="view" aria-label="Kanban" hidden>
+        <div class="view-header-row">
+          <div>
+            <h1 class="view-title">Kanban</h1>
+            <p class="view-subtitle">Zarządzaj przepływem pracy</p>
           </div>
-          <div class="kanban-col-body" id="col-editing" role="list"></div>
         </div>
-
-        <div class="kanban-column" data-status="done" aria-label="Kolumna Done">
-          <div class="kanban-col-header">
-            <span class="kanban-col-title">Done</span>
-            <span class="kanban-col-count" id="count-done">0</span>
+        <div class="kanban-board" id="kanban-board" aria-label="Tablica kanban">
+          <div class="kanban-column" data-status="todo" aria-label="Do zrobienia">
+            <div class="kanban-col-header">
+              <span class="kanban-col-dot" style="background:var(--status-todo)"></span>
+              <span class="kanban-col-title">Todo</span>
+              <span class="kanban-col-count badge" id="count-todo">0</span>
+            </div>
+            <div class="kanban-col-body" id="col-todo" role="list"></div>
+            <button class="kanban-add-btn" data-col="todo" aria-label="Dodaj kartę w Todo">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Dodaj kartę
+            </button>
           </div>
-          <div class="kanban-col-body" id="col-done" role="list"></div>
-        </div>
-
-      </div><!-- /.kanban-board -->
-
-      <!-- Ukryte elementy zachowane dla kompatybilności z JS -->
-      <ul id="task-list" hidden aria-hidden="true"></ul>
-      <div id="empty-state" hidden aria-hidden="true"></div>
-
-    </section>
-
-    <!-- ═══════════════════════════════════════
-         WIDOK 2 – STATYSTYKI
-    ════════════════════════════════════════ -->
-    <section id="stats" class="view" aria-label="Statystyki zadań" hidden>
-      <div class="view-header">
-        <h1>Statystyki</h1>
-        <p class="subtitle">Przegląd Twoich postępów</p>
-      </div>
-
-      <div class="stats-grid" role="list" aria-label="Karty statystyk">
-        <div class="stat-card" role="listitem">
-          <div class="stat-icon" aria-hidden="true">📊</div>
-          <div class="stat-value" id="stat-total">0</div>
-          <div class="stat-label">Wszystkich zadań</div>
-        </div>
-        <div class="stat-card" role="listitem">
-          <div class="stat-icon" aria-hidden="true">⏳</div>
-          <div class="stat-value" id="stat-active">0</div>
-          <div class="stat-label">Aktywnych</div>
-        </div>
-        <div class="stat-card" role="listitem">
-          <div class="stat-icon" aria-hidden="true">✅</div>
-          <div class="stat-value" id="stat-done">0</div>
-          <div class="stat-label">Ukończonych</div>
-        </div>
-        <div class="stat-card stat-card--accent" role="listitem">
-          <div class="stat-icon" aria-hidden="true">🎯</div>
-          <div class="stat-value" id="stat-percent">0%</div>
-          <div class="stat-label">Procent ukończenia</div>
-        </div>
-      </div>
-
-      <div class="stats-charts">
-        <div class="chart-box" aria-label="Wykres zadań według kategorii">
-          <h2>Według kategorii</h2>
-          <div id="category-chart" class="bar-chart" role="img" aria-label="Słupkowy wykres kategorii"></div>
-        </div>
-        <div class="chart-box" aria-label="Wykres zadań według priorytetu">
-          <h2>Według priorytetu</h2>
-          <div id="priority-chart" class="bar-chart" role="img" aria-label="Słupkowy wykres priorytetów"></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ═══════════════════════════════════════
-         WIDOK 3 – USTAWIENIA
-    ════════════════════════════════════════ -->
-    <section id="settings" class="view" aria-label="Ustawienia aplikacji" hidden>
-      <div class="view-header">
-        <h1>Ustawienia</h1>
-        <p class="subtitle">Dostosuj aplikację do swoich potrzeb</p>
-      </div>
-
-      <div class="settings-grid">
-        <div class="setting-card">
-          <div class="setting-info">
-            <h2>Tryb ciemny</h2>
-            <p>Przełącz między jasnym a ciemnym motywem interfejsu</p>
+          <div class="kanban-column" data-status="doing" aria-label="W trakcie">
+            <div class="kanban-col-header">
+              <span class="kanban-col-dot" style="background:var(--status-doing)"></span>
+              <span class="kanban-col-title">In Progress</span>
+              <span class="kanban-col-count badge" id="count-doing">0</span>
+            </div>
+            <div class="kanban-col-body" id="col-doing" role="list"></div>
+            <button class="kanban-add-btn" data-col="doing" aria-label="Dodaj kartę w In Progress">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Dodaj kartę
+            </button>
           </div>
-          <label class="toggle-switch" aria-label="Przełącz tryb ciemny">
-            <input
-              type="checkbox"
-              id="dark-mode-toggle"
-              role="switch"
-              aria-checked="false"
-            >
-            <span class="toggle-slider" aria-hidden="true"></span>
-          </label>
-        </div>
-
-        <div class="setting-card">
-          <div class="setting-info">
-            <h2>Powiadomienia</h2>
-            <p>Wyświetlaj komunikaty toast po każdej akcji</p>
+          <div class="kanban-column" data-status="review" aria-label="Przegląd">
+            <div class="kanban-col-header">
+              <span class="kanban-col-dot" style="background:var(--status-review)"></span>
+              <span class="kanban-col-title">Review</span>
+              <span class="kanban-col-count badge" id="count-review">0</span>
+            </div>
+            <div class="kanban-col-body" id="col-review" role="list"></div>
+            <button class="kanban-add-btn" data-col="review" aria-label="Dodaj kartę w Review">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Dodaj kartę
+            </button>
           </div>
-          <label class="toggle-switch" aria-label="Włącz powiadomienia">
-            <input
-              type="checkbox"
-              id="notifications-toggle"
-              role="switch"
-              aria-checked="true"
-              checked
-            >
-            <span class="toggle-slider" aria-hidden="true"></span>
-          </label>
-        </div>
-
-        <div class="setting-card setting-card--danger">
-          <div class="setting-info">
-            <h2>Wyczyść dane</h2>
-            <p>Trwale usuń wszystkie zadania i zresetuj ustawienia aplikacji</p>
+          <div class="kanban-column" data-status="done" aria-label="Ukończone">
+            <div class="kanban-col-header">
+              <span class="kanban-col-dot" style="background:var(--status-done)"></span>
+              <span class="kanban-col-title">Done</span>
+              <span class="kanban-col-count badge" id="count-done">0</span>
+            </div>
+            <div class="kanban-col-body" id="col-done" role="list"></div>
+            <button class="kanban-add-btn" data-col="done" aria-label="Dodaj kartę w Done">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Dodaj kartę
+            </button>
           </div>
-          <button id="clear-data-btn" class="btn btn-danger" aria-label="Wyczyść wszystkie dane aplikacji">
-            Wyczyść dane
-          </button>
         </div>
+      </section>
 
-        <div class="setting-card setting-card--danger" id="delete-account-card">
-          <div class="setting-info">
-            <h2>Usuń konto</h2>
-            <p>Trwale usuń konto i wszystkie powiązane dane — operacja nieodwracalna (prawo do bycia zapomnianym)</p>
+      <!-- ════════════ CALENDAR ════════════ -->
+      <section id="calendar" class="view" aria-label="Kalendarz" hidden>
+        <div class="view-header-row">
+          <div>
+            <h1 class="view-title">Kalendarz</h1>
+            <p class="view-subtitle" id="cal-month-label"></p>
           </div>
-          <button id="delete-account-btn" class="btn btn-danger" aria-label="Trwale usuń konto">
-            Usuń konto
-          </button>
-        </div>
-
-        <div class="setting-card">
-          <div class="setting-info">
-            <h2>Eksportuj JSON</h2>
-            <p>Pobierz kopię zapasową swoich zadań w formacie JSON</p>
+          <div class="cal-nav">
+            <button class="btn btn-secondary btn-sm" id="cal-prev" aria-label="Poprzedni miesiąc">‹</button>
+            <button class="btn btn-secondary btn-sm" id="cal-today-btn" aria-label="Dzisiaj">Dziś</button>
+            <button class="btn btn-secondary btn-sm" id="cal-next" aria-label="Następny miesiąc">›</button>
           </div>
-          <button id="export-btn" class="btn btn-secondary" aria-label="Eksportuj zadania do pliku JSON">
-            Eksportuj JSON
-          </button>
         </div>
-
-        <div class="setting-card">
-          <div class="setting-info">
-            <h2>Eksportuj TXT</h2>
-            <p>Pobierz czytelną listę zadań w formacie tekstowym</p>
+        <div class="calendar-layout">
+          <div class="calendar-grid-wrap">
+            <div class="cal-weekdays">
+              <span>Pn</span><span>Wt</span><span>Śr</span><span>Cz</span><span>Pt</span><span>So</span><span>Nd</span>
+            </div>
+            <div class="cal-grid" id="cal-grid" role="grid" aria-label="Siatka kalendarza"></div>
           </div>
-          <button id="export-txt-btn" class="btn btn-secondary" aria-label="Eksportuj zadania do pliku TXT">
-            Eksportuj TXT
-          </button>
+          <div class="cal-day-panel" id="cal-day-panel" aria-label="Zadania dnia" hidden>
+            <div class="cal-day-panel-header">
+              <h3 id="cal-day-title" class="cal-day-title"></h3>
+              <button class="cal-panel-close" id="cal-panel-close" aria-label="Zamknij">×</button>
+            </div>
+            <ul id="cal-day-tasks" class="task-list-ul cal-day-tasks"></ul>
+            <div id="cal-day-empty" class="cal-day-empty" hidden>Brak zadań tego dnia</div>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-  </main>
+      <!-- ════════════ FOCUS MODE ════════════ -->
+      <section id="focus" class="view focus-view" aria-label="Focus Mode" hidden>
+        <div class="focus-center">
+          <div class="focus-mode-tabs">
+            <button class="focus-mode-tab active" data-mode="work">Focus</button>
+            <button class="focus-mode-tab" data-mode="short">Krótka przerwa</button>
+            <button class="focus-mode-tab" data-mode="long">Długa przerwa</button>
+          </div>
 
-  <!-- ═══════════════════════════════════════
-       MODAL – EDYCJA ZADANIA
-  ════════════════════════════════════════ -->
-  <div
-    id="modal"
-    class="modal"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="modal-title"
-    hidden
-  >
+          <div class="focus-timer-wrap" aria-label="Timer Pomodoro">
+            <svg class="focus-ring-svg" viewBox="0 0 220 220" aria-hidden="true">
+              <defs>
+                <linearGradient id="focusGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#4f88ff"/>
+                  <stop offset="100%" stop-color="#9366ff"/>
+                </linearGradient>
+              </defs>
+              <circle class="focus-ring-bg" cx="110" cy="110" r="96"/>
+              <circle class="focus-ring-progress" id="focus-ring" cx="110" cy="110" r="96"
+                      stroke-dasharray="603" stroke-dashoffset="0"/>
+            </svg>
+            <div class="focus-timer-inner">
+              <div class="focus-timer-display" id="focus-timer-display" aria-live="off">25:00</div>
+              <div class="focus-timer-label" id="focus-timer-label">Focus</div>
+            </div>
+          </div>
+
+          <div class="focus-sessions" id="focus-sessions" aria-label="Sesje" role="list">
+            <div class="focus-session-dot" role="listitem" aria-label="Sesja 1"></div>
+            <div class="focus-session-dot" role="listitem" aria-label="Sesja 2"></div>
+            <div class="focus-session-dot" role="listitem" aria-label="Sesja 3"></div>
+            <div class="focus-session-dot" role="listitem" aria-label="Sesja 4"></div>
+          </div>
+
+          <div class="focus-controls">
+            <button class="focus-btn focus-btn-reset" id="focus-reset-btn" aria-label="Reset">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
+            </button>
+            <button class="focus-btn focus-btn-main" id="focus-start-btn" aria-label="Start / Pauza">
+              <svg id="focus-play-icon" viewBox="0 0 24 24" width="28" height="28" fill="currentColor" aria-hidden="true"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              <svg id="focus-pause-icon" viewBox="0 0 24 24" width="28" height="28" fill="currentColor" aria-hidden="true" hidden><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+            </button>
+            <button class="focus-btn focus-btn-task" id="focus-pick-task-btn" aria-label="Wybierz zadanie">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            </button>
+          </div>
+
+          <div class="focus-active-task" id="focus-active-task" hidden>
+            <span class="focus-task-label">Aktywne zadanie:</span>
+            <span id="focus-task-name" class="focus-task-name"></span>
+          </div>
+        </div>
+
+        <!-- Task picker overlay -->
+        <div class="focus-picker-overlay" id="focus-picker-overlay" hidden>
+          <div class="focus-picker-card">
+            <div class="focus-picker-header">
+              <h3>Wybierz zadanie</h3>
+              <button class="modal-close" id="focus-picker-close" aria-label="Zamknij">×</button>
+            </div>
+            <input type="search" id="focus-picker-search" placeholder="Szukaj zadania…" aria-label="Szukaj">
+            <ul id="focus-picker-list" class="focus-picker-list"></ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════════════ ANALYTICS ════════════ -->
+      <section id="analytics" class="view" aria-label="Analityka" hidden>
+        <div class="view-header-row">
+          <div>
+            <h1 class="view-title">Analityka</h1>
+            <p class="view-subtitle">Twoje statystyki i postępy</p>
+          </div>
+        </div>
+
+        <div class="analytics-stats-row">
+          <div class="an-stat-card">
+            <div class="an-stat-icon" aria-hidden="true">📋</div>
+            <div class="an-stat-value" id="stat-total">0</div>
+            <div class="an-stat-label">Wszystkich</div>
+          </div>
+          <div class="an-stat-card">
+            <div class="an-stat-icon" aria-hidden="true">✅</div>
+            <div class="an-stat-value" id="stat-done">0</div>
+            <div class="an-stat-label">Ukończonych</div>
+          </div>
+          <div class="an-stat-card">
+            <div class="an-stat-icon" aria-hidden="true">🎯</div>
+            <div class="an-stat-value" id="stat-percent">0%</div>
+            <div class="an-stat-label">Wskaźnik</div>
+          </div>
+          <div class="an-stat-card">
+            <div class="an-stat-icon" aria-hidden="true">🔥</div>
+            <div class="an-stat-value" id="stat-best-streak">0</div>
+            <div class="an-stat-label">Najlepszy streak</div>
+          </div>
+        </div>
+
+        <div class="analytics-grid">
+          <div class="analytics-widget">
+            <h2 class="analytics-widget-title">Aktywność 7 dni</h2>
+            <div id="activity-chart" class="activity-bar-chart" aria-label="Wykres aktywności 7 dni"></div>
+          </div>
+
+          <div class="analytics-widget">
+            <h2 class="analytics-widget-title">Priorytety</h2>
+            <div class="priority-donut-wrap">
+              <div class="priority-donut" id="priority-donut" aria-label="Wykres priorytetów"></div>
+              <div id="priority-legend" class="priority-legend"></div>
+            </div>
+          </div>
+
+          <div class="analytics-widget analytics-widget-full">
+            <h2 class="analytics-widget-title">Według kategorii</h2>
+            <div id="category-chart" class="bar-chart" role="img" aria-label="Słupkowy wykres kategorii"></div>
+          </div>
+
+          <div class="analytics-widget analytics-widget-full">
+            <h2 class="analytics-widget-title">Heatmapa aktywności (28 dni)</h2>
+            <div id="heatmap" class="heatmap" aria-label="Heatmapa aktywności"></div>
+          </div>
+        </div>
+
+        <!-- Legacy compat elements -->
+        <div id="priority-chart" class="bar-chart" hidden aria-hidden="true"></div>
+        <div class="stat-card" hidden><div id="stat-active">0</div></div>
+      </section>
+
+      <!-- ════════════ SETTINGS ════════════ -->
+      <section id="settings" class="view" aria-label="Ustawienia" hidden>
+        <div class="view-header-row">
+          <div>
+            <h1 class="view-title">Ustawienia</h1>
+            <p class="view-subtitle">Dostosuj TaskFlow do swoich potrzeb</p>
+          </div>
+        </div>
+
+        <div class="settings-grid">
+          <div class="settings-group">
+            <div class="settings-group-title">Wygląd</div>
+            <div class="setting-card">
+              <div class="setting-info">
+                <h3>Tryb ciemny</h3>
+                <p>Przełącz między jasnym a ciemnym motywem</p>
+              </div>
+              <label class="toggle-switch" aria-label="Przełącz tryb ciemny">
+                <input type="checkbox" id="dark-mode-toggle" role="switch" aria-checked="true" checked>
+                <span class="toggle-slider" aria-hidden="true"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="settings-group">
+            <div class="settings-group-title">Powiadomienia</div>
+            <div class="setting-card">
+              <div class="setting-info">
+                <h3>Toast powiadomienia</h3>
+                <p>Wyświetlaj komunikaty po każdej akcji</p>
+              </div>
+              <label class="toggle-switch" aria-label="Włącz powiadomienia">
+                <input type="checkbox" id="notifications-toggle" role="switch" aria-checked="true" checked>
+                <span class="toggle-slider" aria-hidden="true"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="settings-group">
+            <div class="settings-group-title">Pomodoro</div>
+            <div class="setting-card setting-card-row">
+              <div class="setting-info">
+                <h3>Czas Focus</h3>
+                <p>Czas trwania sesji focus (minuty)</p>
+              </div>
+              <input type="number" id="pomo-work" class="setting-number" min="1" max="120" value="25" aria-label="Czas Focus">
+            </div>
+            <div class="setting-card setting-card-row">
+              <div class="setting-info">
+                <h3>Krótka przerwa</h3>
+                <p>Czas trwania krótkiej przerwy (minuty)</p>
+              </div>
+              <input type="number" id="pomo-short" class="setting-number" min="1" max="60" value="5" aria-label="Krótka przerwa">
+            </div>
+            <div class="setting-card setting-card-row">
+              <div class="setting-info">
+                <h3>Długa przerwa</h3>
+                <p>Czas trwania długiej przerwy (minuty)</p>
+              </div>
+              <input type="number" id="pomo-long" class="setting-number" min="1" max="120" value="15" aria-label="Długa przerwa">
+            </div>
+          </div>
+
+          <div class="settings-group">
+            <div class="settings-group-title">Eksport danych</div>
+            <div class="setting-card">
+              <div class="setting-info">
+                <h3>Eksportuj JSON</h3>
+                <p>Pobierz kopię zapasową zadań w formacie JSON</p>
+              </div>
+              <button id="export-btn" class="btn btn-secondary" aria-label="Eksportuj JSON">Eksportuj JSON</button>
+            </div>
+            <div class="setting-card">
+              <div class="setting-info">
+                <h3>Eksportuj TXT</h3>
+                <p>Pobierz czytelną listę zadań w formacie tekstowym</p>
+              </div>
+              <button id="export-txt-btn" class="btn btn-secondary" aria-label="Eksportuj TXT">Eksportuj TXT</button>
+            </div>
+          </div>
+
+          <div class="settings-group">
+            <div class="settings-group-title">Strefa niebezpieczna</div>
+            <div class="setting-card setting-card--danger">
+              <div class="setting-info">
+                <h3>Wyczyść dane</h3>
+                <p>Trwale usuń wszystkie zadania i zresetuj ustawienia</p>
+              </div>
+              <button id="clear-data-btn" class="btn btn-danger" aria-label="Wyczyść dane">Wyczyść dane</button>
+            </div>
+            <div class="setting-card setting-card--danger" id="delete-account-card">
+              <div class="setting-info">
+                <h3>Usuń konto</h3>
+                <p>Trwale usuń konto i wszystkie powiązane dane (RODO)</p>
+              </div>
+              <button id="delete-account-btn" class="btn btn-danger" aria-label="Usuń konto">Usuń konto</button>
+            </div>
+          </div>
+
+          <div class="settings-group">
+            <div class="settings-group-title">Informacje</div>
+            <div class="setting-card">
+              <div class="setting-info">
+                <h3>Polityka Prywatności</h3>
+                <p>Przeczytaj jak przetwarzamy Twoje dane</p>
+              </div>
+              <button id="open-privacy-footer" class="btn btn-secondary" aria-label="Polityka prywatności">Czytaj</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div><!-- /.app-layout -->
+
+  <!-- MODAL: EDIT TASK -->
+  <div id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" hidden>
     <div class="modal-overlay" id="modal-overlay" aria-hidden="true"></div>
-    <div class="modal-content">
+    <div class="modal-content modal-task">
       <div class="modal-header">
         <h2 id="modal-title">Edytuj zadanie</h2>
-        <button
-          class="modal-close"
-          id="modal-close"
-          aria-label="Zamknij okno edycji"
-        >×</button>
+        <button class="modal-close" id="modal-close" aria-label="Zamknij">×</button>
       </div>
-
-      <form id="edit-form" novalidate aria-label="Formularz edycji zadania">
+      <form id="edit-form" novalidate>
         <input type="hidden" id="edit-task-id">
-
         <div class="form-group">
           <label for="edit-task-name">Nazwa zadania</label>
-          <input
-            type="text"
-            id="edit-task-name"
-            aria-required="true"
-            aria-describedby="edit-name-error"
-            maxlength="120"
-          >
+          <input type="text" id="edit-task-name" aria-required="true" aria-describedby="edit-name-error" maxlength="120">
           <span class="error-msg" id="edit-name-error" role="alert" aria-live="polite"></span>
         </div>
-
+        <div class="form-group">
+          <label for="edit-task-desc">Opis</label>
+          <textarea id="edit-task-desc" rows="3" placeholder="Opcjonalny opis zadania…" maxlength="500"></textarea>
+        </div>
         <div class="form-row">
           <div class="form-group">
             <label for="edit-task-priority">Priorytet</label>
-            <select id="edit-task-priority" aria-label="Zmień priorytet zadania">
+            <select id="edit-task-priority">
               <option value="low">🟢 Niski</option>
               <option value="medium">🟡 Średni</option>
               <option value="high">🔴 Wysoki</option>
+              <option value="urgent">🔴 Pilny</option>
             </select>
           </div>
           <div class="form-group">
+            <label for="edit-task-status">Status</label>
+            <select id="edit-task-status">
+              <option value="todo">Todo</option>
+              <option value="doing">In Progress</option>
+              <option value="review">Review</option>
+              <option value="done">Done</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
             <label for="edit-task-category">Kategoria</label>
-            <select id="edit-task-category" aria-label="Zmień kategorię zadania">
+            <select id="edit-task-category">
               <option value="personal">👤 Osobiste</option>
               <option value="work">💼 Praca</option>
               <option value="shopping">🛒 Zakupy</option>
@@ -605,8 +894,25 @@
               <option value="other">📦 Inne</option>
             </select>
           </div>
+          <div class="form-group">
+            <label for="edit-task-due">Termin</label>
+            <input type="date" id="edit-task-due">
+          </div>
         </div>
-
+        <div class="form-group">
+          <label for="edit-task-tags">Tagi (rozdzielone przecinkiem)</label>
+          <input type="text" id="edit-task-tags" placeholder="praca, ważne, projekt-x" maxlength="200">
+        </div>
+        <div class="subtasks-section">
+          <div class="subtasks-header">
+            <label>Podzadania</label>
+            <button type="button" class="btn-add-subtask" id="add-subtask-btn" aria-label="Dodaj podzadanie">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Dodaj
+            </button>
+          </div>
+          <ul id="subtasks-list" class="subtasks-list"></ul>
+        </div>
         <div class="modal-actions">
           <button type="button" class="btn btn-secondary" id="modal-cancel">Anuluj</button>
           <button type="submit" class="btn btn-primary">Zapisz zmiany</button>
@@ -615,9 +921,68 @@
     </div>
   </div>
 
-  <!-- ═══════════════════════════════════════
-       MODAL – POTWIERDZENIE
-  ════════════════════════════════════════ -->
+  <!-- MODAL: ADD TASK -->
+  <div id="add-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="add-modal-title" hidden>
+    <div class="modal-overlay" id="add-modal-overlay" aria-hidden="true"></div>
+    <div class="modal-content modal-task">
+      <div class="modal-header">
+        <h2 id="add-modal-title">Nowe zadanie</h2>
+        <button class="modal-close" id="add-modal-close" aria-label="Zamknij">×</button>
+      </div>
+      <form id="task-form" novalidate>
+        <div class="form-group">
+          <label for="task-name">Nazwa zadania</label>
+          <input type="text" id="task-name" placeholder="Wpisz nazwę zadania…" aria-required="true" aria-describedby="name-error" autocomplete="off" maxlength="120">
+          <span class="error-msg" id="name-error" role="alert" aria-live="polite"></span>
+        </div>
+        <div class="form-group">
+          <label for="task-desc">Opis</label>
+          <textarea id="task-desc" rows="2" placeholder="Opcjonalny opis…" maxlength="500"></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="task-priority">Priorytet</label>
+            <select id="task-priority" name="task-priority">
+              <option value="low">🟢 Niski</option>
+              <option value="medium" selected>🟡 Średni</option>
+              <option value="high">🔴 Wysoki</option>
+              <option value="urgent">🔴 Pilny</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="task-category">Kategoria</label>
+            <select id="task-category" name="task-category">
+              <option value="personal">👤 Osobiste</option>
+              <option value="work">💼 Praca</option>
+              <option value="shopping">🛒 Zakupy</option>
+              <option value="health">❤️ Zdrowie</option>
+              <option value="other">📦 Inne</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="task-due">Termin</label>
+            <input type="date" id="task-due">
+          </div>
+          <div class="form-group">
+            <label for="task-due-time">Godzina</label>
+            <input type="time" id="task-due-time">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="task-tags">Tagi</label>
+          <input type="text" id="task-tags" placeholder="tag1, tag2, tag3" maxlength="200">
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" id="add-modal-cancel">Anuluj</button>
+          <button type="submit" class="btn btn-primary">Dodaj zadanie</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: CONFIRM -->
   <div id="confirm-modal" class="modal" role="alertdialog" aria-modal="true"
        aria-labelledby="confirm-title" aria-describedby="confirm-message" hidden>
     <div class="modal-overlay" id="confirm-overlay" aria-hidden="true"></div>
@@ -626,106 +991,104 @@
       <p id="confirm-message" class="confirm-message"></p>
       <div class="modal-actions">
         <button type="button" class="btn btn-secondary" id="confirm-cancel">Anuluj</button>
-        <button type="button" class="btn btn-danger"    id="confirm-ok">Potwierdź</button>
+        <button type="button" class="btn btn-danger" id="confirm-ok">Potwierdź</button>
       </div>
     </div>
   </div>
 
-  <!-- Toast notifications container -->
+  <!-- SEARCH OVERLAY -->
+  <div id="search-overlay" class="search-overlay" hidden role="dialog" aria-modal="true" aria-label="Wyszukiwarka">
+    <div class="search-overlay-backdrop" id="search-overlay-backdrop"></div>
+    <div class="search-overlay-card">
+      <div class="search-overlay-input-wrap">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="search" id="search-overlay-input" placeholder="Szukaj zadań…" aria-label="Wyszukaj zadanie" autocomplete="off">
+        <kbd aria-label="Escape">Esc</kbd>
+      </div>
+      <ul id="search-overlay-results" class="search-overlay-results" aria-label="Wyniki wyszukiwania"></ul>
+    </div>
+  </div>
+
+  <!-- MODAL: PROJECT -->
+  <div id="project-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="project-modal-title" hidden>
+    <div class="modal-overlay" id="project-modal-overlay" aria-hidden="true"></div>
+    <div class="modal-content" style="max-width:400px">
+      <div class="modal-header">
+        <h2 id="project-modal-title">Nowy projekt</h2>
+        <button class="modal-close" id="project-modal-close" aria-label="Zamknij">×</button>
+      </div>
+      <div class="form-group">
+        <label for="project-name-input">Nazwa projektu</label>
+        <input type="text" id="project-name-input" placeholder="Np. Praca, Dom, Studia…" maxlength="40">
+      </div>
+      <div class="form-group">
+        <label for="project-emoji-input">Emoji</label>
+        <input type="text" id="project-emoji-input" placeholder="📁" maxlength="2" style="max-width:80px">
+      </div>
+      <div class="form-group">
+        <label>Kolor</label>
+        <div class="project-color-swatches" id="project-color-picker"></div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" id="project-modal-cancel">Anuluj</button>
+        <button type="button" class="btn btn-primary" id="project-modal-save">Utwórz projekt</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST CONTAINER -->
   <div id="toast-container" aria-live="polite" aria-atomic="false"></div>
 
-  <footer>
-    <div class="footer-inner">
-      <div class="footer-copy">
-        <p>&copy; 2026 TaskManager. Wszelkie prawa zastrzeżone.</p>
-        <p>
-          <button type="button" class="footer-link" id="open-privacy-footer">Polityka Prywatności</button>
-        </p>
-      </div>
-      <p class="footer-sub">
-        Zbudowany z <span aria-label="pasją">❤️</span> używając czystego HTML, CSS i JavaScript
-      </p>
+</div><!-- /#app-wrapper -->
+
+<!-- PRIVACY MODAL -->
+<div id="privacy-modal" class="privacy-modal" role="dialog" aria-modal="true"
+     aria-labelledby="privacy-modal-title" hidden>
+  <div class="privacy-modal-inner">
+    <div class="privacy-modal-header">
+      <h2 id="privacy-modal-title">Polityka Prywatności</h2>
+      <button id="privacy-close-btn" class="modal-close" aria-label="Zamknij">×</button>
     </div>
-  </footer>
-
-  </div><!-- /#app-wrapper -->
-
-  <!-- ═══════════════════════════════════════
-       MODAL – POLITYKA PRYWATNOŚCI
-  ════════════════════════════════════════ -->
-  <div id="privacy-modal" class="privacy-modal" role="dialog" aria-modal="true"
-       aria-labelledby="privacy-modal-title" hidden>
-    <div class="privacy-modal-inner">
-      <div class="privacy-modal-header">
-        <h2 id="privacy-modal-title">Polityka Prywatności</h2>
-        <button id="privacy-close-btn" class="modal-close" aria-label="Zamknij politykę prywatności">×</button>
-      </div>
-      <div class="privacy-modal-body">
-
-        <p class="privacy-updated">Ostatnia aktualizacja: 18 kwietnia 2026 r.</p>
-
-        <h3>1. Administrator danych osobowych</h3>
-        <p>Administratorem danych osobowych jest właściciel aplikacji TaskManager dostępnej pod adresem <strong>https://w84kubus.github.io/TaskManager/</strong> (dalej: „Administrator"). Kontakt: profil GitHub <a href="https://github.com/w84kubus" target="_blank" rel="noopener">github.com/w84kubus</a>.</p>
-
-        <h3>2. Jakie dane zbieramy</h3>
-        <ul>
-          <li><strong>Adres e-mail</strong> — wymagany do rejestracji i logowania</li>
-          <li><strong>Imię</strong> — podawane dobrowolnie przy rejestracji, wyświetlane w interfejsie</li>
-          <li><strong>Treść zadań</strong> — zadania dodawane przez użytkownika (mogą zawierać dane osobowe)</li>
-          <li><strong>Ustawienia aplikacji</strong> — tryb ciemny, preferencje powiadomień</li>
-        </ul>
-        <p>Nie zbieramy danych o lokalizacji, numerów telefonów ani informacji płatniczych.</p>
-
-        <h3>3. Cel i podstawa prawna przetwarzania</h3>
-        <ul>
-          <li>Świadczenie usługi (obsługa konta, synchronizacja zadań) — <strong>art. 6 ust. 1 lit. b RODO</strong> (wykonanie umowy)</li>
-          <li>Wysyłka e-maila weryfikacyjnego i linku resetowania hasła — <strong>art. 6 ust. 1 lit. b RODO</strong></li>
-          <li>Przetwarzanie na podstawie zgody udzielonej przy rejestracji — <strong>art. 6 ust. 1 lit. a RODO</strong></li>
-        </ul>
-
-        <h3>4. Procesorzy danych (podmioty trzecie)</h3>
-        <p>Dane są przechowywane w usługach Google LLC w ramach platformy <strong>Firebase</strong>:</p>
-        <ul>
-          <li><strong>Firebase Authentication</strong> — zarządzanie kontami i sesjami</li>
-          <li><strong>Firebase Firestore</strong> — przechowywanie zadań i ustawień</li>
-        </ul>
-        <p>Google LLC stosuje standardowe klauzule umowne (SCC) zapewniające ochronę danych zgodną z RODO. Polityka prywatności Google: <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">policies.google.com/privacy</a>.</p>
-
-        <h3>5. Okres przechowywania danych</h3>
-        <p>Dane są przechowywane do momentu <strong>usunięcia konta</strong> przez użytkownika. Usunięcie konta powoduje trwałe usunięcie wszystkich danych z Firebase Authentication i Firestore. Opcja usunięcia konta dostępna jest w sekcji <strong>Ustawienia → Usuń konto</strong>.</p>
-
-        <h3>6. Prawa użytkownika (RODO)</h3>
-        <ul>
-          <li><strong>Prawo dostępu</strong> — możesz pobrać swoje dane (Ustawienia → Eksportuj JSON)</li>
-          <li><strong>Prawo do sprostowania</strong> — możesz edytować swoje zadania w aplikacji</li>
-          <li><strong>Prawo do usunięcia</strong> — usuń konto w Ustawienia → Usuń konto</li>
-          <li><strong>Prawo do przenoszenia</strong> — eksport danych w formacie JSON lub TXT</li>
-          <li><strong>Prawo do cofnięcia zgody</strong> — możesz usunąć konto w dowolnym momencie</li>
-          <li><strong>Prawo do skargi</strong> — możesz złożyć skargę do Prezesa UODO (<a href="https://uodo.gov.pl" target="_blank" rel="noopener">uodo.gov.pl</a>)</li>
-        </ul>
-
-        <h3>7. Pliki cookie i pamięć lokalna</h3>
-        <p>Aplikacja nie używa plików cookie. Korzysta z <strong>localStorage</strong> przeglądarki wyłącznie do przechowywania informacji o sesji gościa i lokalnych ustawień. Dane te nie są przesyłane do zewnętrznych serwerów przez samą aplikację.</p>
-
-        <h3>8. Bezpieczeństwo danych</h3>
-        <p>Hasła nigdy nie są przechowywane w postaci jawnej — są hashowane przez Firebase Authentication. Dostęp do danych w Firestore jest chroniony regułami bezpieczeństwa: każdy użytkownik ma dostęp wyłącznie do własnych danych (<code>request.auth.uid == userId</code>). Komunikacja z serwerami Firebase odbywa się wyłącznie przez szyfrowane połączenie HTTPS.</p>
-
-        <h3>9. Zmiany w polityce prywatności</h3>
-        <p>O istotnych zmianach w polityce prywatności użytkownicy zostaną poinformowani przez toast powiadomienie w aplikacji lub e-mail. Aktualna wersja zawsze dostępna jest pod przyciskiem „Polityka Prywatności" w stopce aplikacji.</p>
-
-      </div>
-      <div class="privacy-modal-footer">
-        <button type="button" class="btn btn-primary" id="privacy-accept-btn">Rozumiem</button>
-      </div>
+    <div class="privacy-modal-body">
+      <p class="privacy-updated">Ostatnia aktualizacja: 18 kwietnia 2026 r.</p>
+      <h3>1. Administrator danych osobowych</h3>
+      <p>Administratorem danych jest właściciel aplikacji TaskFlow (<strong>https://w84kubus.github.io/TaskManager/</strong>). Kontakt: <a href="https://github.com/w84kubus" target="_blank" rel="noopener">github.com/w84kubus</a>.</p>
+      <h3>2. Jakie dane zbieramy</h3>
+      <ul>
+        <li><strong>Adres e-mail</strong> — wymagany do rejestracji i logowania</li>
+        <li><strong>Imię</strong> — podawane dobrowolnie przy rejestracji</li>
+        <li><strong>Treść zadań</strong> — zadania dodawane przez użytkownika</li>
+        <li><strong>Ustawienia aplikacji</strong> — tryb ciemny, preferencje powiadomień</li>
+      </ul>
+      <h3>3. Cel i podstawa prawna przetwarzania</h3>
+      <ul>
+        <li>Świadczenie usługi — <strong>art. 6 ust. 1 lit. b RODO</strong></li>
+        <li>Wysyłka e-maila weryfikacyjnego — <strong>art. 6 ust. 1 lit. b RODO</strong></li>
+        <li>Przetwarzanie na podstawie zgody — <strong>art. 6 ust. 1 lit. a RODO</strong></li>
+      </ul>
+      <h3>4. Procesorzy danych</h3>
+      <p>Dane są przechowywane w usługach Google LLC (Firebase Authentication, Firebase Firestore). Google stosuje SCC zgodne z RODO.</p>
+      <h3>5. Prawa użytkownika (RODO)</h3>
+      <ul>
+        <li><strong>Prawo dostępu</strong> — eksport JSON (Ustawienia → Eksportuj JSON)</li>
+        <li><strong>Prawo do usunięcia</strong> — Ustawienia → Usuń konto</li>
+        <li><strong>Prawo do przenoszenia</strong> — eksport JSON / TXT</li>
+        <li><strong>Prawo do skargi</strong> — <a href="https://uodo.gov.pl" target="_blank" rel="noopener">uodo.gov.pl</a></li>
+      </ul>
+      <h3>6. Bezpieczeństwo</h3>
+      <p>Hasła hashowane przez Firebase Auth. Dostęp do Firestore chroniony regułami bezpieczeństwa. Komunikacja przez HTTPS.</p>
+    </div>
+    <div class="privacy-modal-footer">
+      <button type="button" class="btn btn-primary" id="privacy-accept-btn">Rozumiem</button>
     </div>
   </div>
+</div>
 
-  <!-- Google Identity Services (GIS) – Google Sign-In bez Firebase Hosting -->
-  <script src="https://accounts.google.com/gsi/client" async></script>
-  <!-- Firebase SDK (compat) -->
-  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-auth-compat.js"></script>
-  <script src="scripts/app.js?v=11"></script>
+<!-- Scripts -->
+<script src="https://accounts.google.com/gsi/client" async></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-auth-compat.js"></script>
+<script src="scripts/app.js?v=60"></script>
 </body>
 </html>
