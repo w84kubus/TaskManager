@@ -1,17 +1,19 @@
 <!DOCTYPE html>
-<html lang="pl">
+<html lang="pl" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="description" content="TaskManager – aplikacja do zarządzania zadaniami. Dodawaj, filtruj i śledź postęp swoich zadań.">
-  <meta name="theme-color" content="#5a6bff">
+  <meta name="theme-color" content="#0d1038">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="TaskManager">
   <title>TaskManager – Twoje zadania</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="apple-touch-icon" href="favicon.svg">
-  <link rel="stylesheet" href="styles/style.css?v=25">
+  <link rel="stylesheet" href="styles/style.css?v=30">
 </head>
 <body>
 
@@ -211,31 +213,40 @@
         <span class="logo-icon" aria-hidden="true">✓</span>
         <span class="logo-text">TaskManager</span>
       </div>
+
+      <div class="header-breadcrumb" id="header-breadcrumb" aria-label="Lokalizacja">
+        <span>Zadania</span>
+        <span class="bc-sep" aria-hidden="true">›</span>
+        <span class="bc-current">Dzisiaj</span>
+      </div>
+
+      <!-- nav: widoczna tylko na mobile (≤768px) -->
       <nav aria-label="Główna nawigacja">
         <ul role="list">
           <li>
             <a href="#" class="nav-link active" data-view="tasks"
-               aria-current="page" aria-label="Przejdź do widoku zadań">
+               aria-current="page" aria-label="Zadania">
               <span class="nav-icon" aria-hidden="true">📋</span>
               <span class="nav-label">Zadania</span>
             </a>
           </li>
           <li>
-            <a href="#" class="nav-link" data-view="stats"
-               aria-label="Przejdź do statystyk">
+            <a href="#" class="nav-link" data-view="stats" aria-label="Statystyki">
               <span class="nav-icon" aria-hidden="true">📊</span>
               <span class="nav-label">Statystyki</span>
             </a>
           </li>
           <li>
-            <a href="#" class="nav-link" data-view="settings"
-               aria-label="Przejdź do ustawień">
+            <a href="#" class="nav-link" data-view="settings" aria-label="Ustawienia">
               <span class="nav-icon" aria-hidden="true">⚙️</span>
               <span class="nav-label">Ustawienia</span>
             </a>
           </li>
         </ul>
       </nav>
+
+      <div class="header-spacer"></div>
+
       <div class="user-menu" id="user-menu" aria-label="Menu użytkownika">
         <div class="user-avatar" id="user-avatar" aria-hidden="true"></div>
         <span class="user-name" id="user-name"></span>
@@ -249,6 +260,33 @@
       </div>
     </div>
   </header>
+
+  <!-- ═══════════════════════════════════════
+       SIDEBAR — lewa nawigacja ikonowa (desktop)
+  ════════════════════════════════════════ -->
+  <aside class="sidebar" aria-label="Nawigacja boczna">
+    <button class="sidebar-icon active" data-view="tasks" aria-label="Zadania" title="Zadania">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+        <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+      </svg>
+    </button>
+    <button class="sidebar-icon" data-view="stats" aria-label="Statystyki" title="Statystyki">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <line x1="18" y1="20" x2="18" y2="10"/>
+        <line x1="12" y1="20" x2="12" y2="4"/>
+        <line x1="6"  y1="20" x2="6"  y2="14"/>
+        <line x1="2"  y1="20" x2="22" y2="20"/>
+      </svg>
+    </button>
+    <div class="sidebar-spacer"></div>
+    <button class="sidebar-icon" data-view="settings" aria-label="Ustawienia" title="Ustawienia">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+      </svg>
+    </button>
+  </aside>
 
   <!-- Banner trybu gościa -->
   <div id="guest-banner" class="guest-banner" hidden aria-live="polite">
@@ -266,17 +304,19 @@
   <main id="main-content">
 
     <!-- ═══════════════════════════════════════
-         WIDOK 1 – LISTA ZADAŃ
+         WIDOK 1 – KANBAN BOARD
     ════════════════════════════════════════ -->
-    <section id="tasks" class="view" aria-label="Lista zadań">
-      <div class="view-header">
-        <h1>Moje zadania</h1>
-        <p class="subtitle">Organizuj i śledź postęp swoich zadań</p>
+    <section id="tasks" class="view" aria-label="Tablica Kanban">
+
+      <div class="kanban-header">
+        <p class="kanban-breadcrumb">Zadania › Dzisiaj</p>
+        <h1 class="kanban-title">Task Management</h1>
       </div>
 
+      <!-- Formularz dodawania -->
       <form id="task-form" novalidate aria-label="Formularz dodawania zadania">
         <div class="form-group full-width">
-          <label for="task-name">Nazwa zadania</label>
+          <label for="task-name">Nowe zadanie</label>
           <input
             type="text"
             id="task-name"
@@ -289,11 +329,10 @@
           >
           <span class="error-msg" id="name-error" role="alert" aria-live="polite"></span>
         </div>
-
         <div class="form-row">
           <div class="form-group">
             <label for="task-priority">Priorytet</label>
-            <select id="task-priority" name="task-priority" aria-label="Wybierz priorytet zadania">
+            <select id="task-priority" name="task-priority" aria-label="Wybierz priorytet">
               <option value="low">🟢 Niski</option>
               <option value="medium" selected>🟡 Średni</option>
               <option value="high">🔴 Wysoki</option>
@@ -301,7 +340,7 @@
           </div>
           <div class="form-group">
             <label for="task-category">Kategoria</label>
-            <select id="task-category" name="task-category" aria-label="Wybierz kategorię zadania">
+            <select id="task-category" name="task-category" aria-label="Wybierz kategorię">
               <option value="personal">👤 Osobiste</option>
               <option value="work">💼 Praca</option>
               <option value="shopping">🛒 Zakupy</option>
@@ -310,24 +349,21 @@
             </select>
           </div>
           <button type="submit" class="btn btn-primary" aria-label="Dodaj nowe zadanie">
-            <span aria-hidden="true">＋</span> Dodaj zadanie
+            <span aria-hidden="true">＋</span> Dodaj
           </button>
         </div>
       </form>
 
+      <!-- Filtry i wyszukiwanie -->
       <div class="task-controls" role="toolbar" aria-label="Filtry i sortowanie">
-        <div class="filter-buttons" role="group" aria-label="Filtruj zadania według statusu">
-          <button class="filter-btn active" data-filter="all" aria-pressed="true">Wszystkie</button>
-          <button class="filter-btn" data-filter="active" aria-pressed="false">Aktywne</button>
-          <button class="filter-btn" data-filter="done" aria-pressed="false">Ukończone</button>
+        <div class="filter-buttons" role="group" aria-label="Filtruj według statusu">
+          <button class="filter-btn active" data-filter="all"    aria-pressed="true">Wszystkie</button>
+          <button class="filter-btn"        data-filter="active" aria-pressed="false">Aktywne</button>
+          <button class="filter-btn"        data-filter="done"   aria-pressed="false">Ukończone</button>
         </div>
         <div class="sort-search">
-          <input
-            type="search"
-            id="search-input"
-            placeholder="Szukaj zadania…"
-            aria-label="Wyszukaj zadanie po nazwie"
-          >
+          <input type="search" id="search-input"
+            placeholder="Szukaj zadania…" aria-label="Wyszukaj zadanie">
           <select id="sort-select" aria-label="Sortuj zadania">
             <option value="date-desc">Najnowsze</option>
             <option value="date-asc">Najstarsze</option>
@@ -339,15 +375,47 @@
         </div>
       </div>
 
-      <ul id="task-list" aria-label="Lista zadań" role="list">
-        <!-- JS wypełni listę -->
-      </ul>
+      <!-- ── Kanban Board ── -->
+      <div class="kanban-board" id="kanban-board" aria-label="Tablica kanban">
 
-      <div id="empty-state" class="empty-state" aria-live="polite" hidden>
-        <span class="empty-icon" aria-hidden="true">📭</span>
-        <p>Brak zadań do wyświetlenia</p>
-        <small>Dodaj pierwsze zadanie powyżej lub zmień filtry</small>
-      </div>
+        <div class="kanban-column" data-status="draft" aria-label="Kolumna Draft">
+          <div class="kanban-col-header">
+            <span class="kanban-col-title">Draft</span>
+            <span class="kanban-col-count" id="count-draft">0</span>
+          </div>
+          <div class="kanban-col-body" id="col-draft" role="list"></div>
+        </div>
+
+        <div class="kanban-column" data-status="in-progress" aria-label="Kolumna In Progress">
+          <div class="kanban-col-header">
+            <span class="kanban-col-title">In Progress</span>
+            <span class="kanban-col-count" id="count-in-progress">0</span>
+          </div>
+          <div class="kanban-col-body" id="col-in-progress" role="list"></div>
+        </div>
+
+        <div class="kanban-column" data-status="editing" aria-label="Kolumna Editing">
+          <div class="kanban-col-header">
+            <span class="kanban-col-title">Editing</span>
+            <span class="kanban-col-count" id="count-editing">0</span>
+          </div>
+          <div class="kanban-col-body" id="col-editing" role="list"></div>
+        </div>
+
+        <div class="kanban-column" data-status="done" aria-label="Kolumna Done">
+          <div class="kanban-col-header">
+            <span class="kanban-col-title">Done</span>
+            <span class="kanban-col-count" id="count-done">0</span>
+          </div>
+          <div class="kanban-col-body" id="col-done" role="list"></div>
+        </div>
+
+      </div><!-- /.kanban-board -->
+
+      <!-- Ukryte elementy zachowane dla kompatybilności z JS -->
+      <ul id="task-list" hidden aria-hidden="true"></ul>
+      <div id="empty-state" hidden aria-hidden="true"></div>
+
     </section>
 
     <!-- ═══════════════════════════════════════
@@ -658,6 +726,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-auth-compat.js"></script>
-  <script src="scripts/app.js?v=10"></script>
+  <script src="scripts/app.js?v=11"></script>
 </body>
 </html>
