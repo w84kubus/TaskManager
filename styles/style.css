@@ -43,11 +43,11 @@
   --shadow-md: 0 4px 16px rgba(60,35,10,.10), 0 2px 6px rgba(60,35,10,.06);
   --shadow-lg: 0 12px 40px rgba(60,35,10,.14), 0 4px 12px rgba(60,35,10,.07);
 
-  /* Shape — sharp notebook edges */
-  --r-sm:   2px;
-  --r-md:   3px;
-  --r-lg:   5px;
-  --r-xl:   6px;
+  /* Shape — sharp notebook, zero rounding */
+  --r-sm:   0px;
+  --r-md:   0px;
+  --r-lg:   0px;
+  --r-xl:   0px;
   --r-full: 9999px;
 
   /* Spacing */
@@ -138,7 +138,26 @@ input, select { font-family: inherit; }
 :focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
-  border-radius: 3px;
+  border-radius: 0;
+}
+
+/* Force sharp edges on all form controls — overrides browser defaults */
+input, select, textarea, button {
+  border-radius: 0 !important;
+  -webkit-border-radius: 0 !important;
+}
+
+/* Restore ONLY the toggle switch */
+.toggle-slider,
+.toggle-slider::before {
+  border-radius: 9999px !important;
+}
+
+/* Restore circles for avatars / step numbers */
+.user-avatar,
+.topbar-avatar,
+.verify-step-num {
+  border-radius: 50% !important;
 }
 
 /* ── App wrapper ────────────────────────────────────────────── */
@@ -257,7 +276,7 @@ nav ul {
   bottom: 3px; left: .9rem; right: .9rem;
   height: 2px;
   background: var(--accent);
-  border-radius: var(--r-full);
+  border-radius: 0;
 }
 
 .nav-icon { font-style: normal; }
@@ -619,12 +638,12 @@ input.error { border-color: var(--danger) !important; }
   color: var(--text-muted);
 }
 
-/* Checkbox */
+/* Checkbox — square like a real notebook */
 .task-checkbox {
   flex-shrink: 0;
-  width: 20px; height: 20px;
+  width: 18px; height: 18px;
   border: 2px solid var(--border);
-  border-radius: 50%;
+  border-radius: 0;
   display: flex; align-items: center; justify-content: center;
   font-size: .65rem;
   color: #fff;
@@ -641,6 +660,7 @@ input.error { border-color: var(--danger) !important; }
 .task-item.done .task-checkbox {
   background: var(--success);
   border-color: var(--success);
+  border-radius: 0;
 }
 
 /* Task content */
@@ -877,14 +897,14 @@ input.error { border-color: var(--danger) !important; }
   flex: 1;
   height: 8px;
   background: var(--bg-muted);
-  border-radius: var(--r-full);
+  border-radius: 0;
   overflow: hidden;
 }
 
 .bar-fill {
   height: 100%;
   background: var(--accent);
-  border-radius: var(--r-full);
+  border-radius: 0;
   transition: width .65s cubic-bezier(.4, 0, .2, 1);
 }
 
