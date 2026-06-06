@@ -571,6 +571,9 @@ function getVisibleTasks() {
     case 'alpha-desc':    list.sort((a, b) => b.name.localeCompare(a.name, 'pl')); break;
   }
 
+  // Ukończone zawsze na końcu (niezależnie od sortowania)
+  list.sort((a, b) => (a.done ? 1 : 0) - (b.done ? 1 : 0));
+
   return list;
 }
 
