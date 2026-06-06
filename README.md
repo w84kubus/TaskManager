@@ -8,6 +8,18 @@ Aplikacja webowa do zarządzania zadaniami — dodawaj, edytuj, filtruj i śled�
 
 ---
 
+## Screenshots
+
+| Logowanie | Lista zadań |
+|-----------|-------------|
+| ![Logowanie](screenshots/screen-1.png) | ![Zadania](screenshots/screen-2.png) |
+
+| Statystyki | Ustawienia |
+|------------|------------|
+| ![Statystyki](screenshots/screen-3.png) | ![Ustawienia](screenshots/screen-4.png) |
+
+---
+
 ## Funkcjonalności
 
 ### 🔐 Logowanie i konto (Firebase Auth)
