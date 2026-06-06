@@ -2,7 +2,7 @@
 
 Aplikacja webowa do zarządzania zadaniami — dodawaj, edytuj, filtruj i śledź postęp swoich zadań. Dane synchronizują się w czasie rzeczywistym między wszystkimi urządzeniami.
 
-## Demo
+## Aplikacja
 
 🌐 **https://w84kubus.github.io/TaskManager/**
 
