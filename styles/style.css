@@ -43,11 +43,11 @@
   --shadow-md: 0 4px 16px rgba(60,35,10,.10), 0 2px 6px rgba(60,35,10,.06);
   --shadow-lg: 0 12px 40px rgba(60,35,10,.14), 0 4px 12px rgba(60,35,10,.07);
 
-  /* Shape */
-  --r-sm:   4px;
-  --r-md:   8px;
-  --r-lg:   14px;
-  --r-xl:   22px;
+  /* Shape — sharp notebook edges */
+  --r-sm:   2px;
+  --r-md:   3px;
+  --r-lg:   5px;
+  --r-xl:   6px;
   --r-full: 9999px;
 
   /* Spacing */
@@ -526,13 +526,13 @@ input.error { border-color: var(--danger) !important; }
   gap: 2px;
   background: var(--bg-card);
   padding: 3px;
-  border-radius: var(--r-full);
+  border-radius: var(--r-md);
   border: 1.5px solid var(--border);
 }
 
 .filter-btn {
   padding: .36rem var(--sp-md);
-  border-radius: var(--r-full);
+  border-radius: var(--r-sm);
   font-size: .78rem;
   font-weight: 600;
   color: var(--text-secondary);
@@ -1256,7 +1256,7 @@ footer {
 .auth-tabs {
   display: flex;
   background: var(--bg-subtle);
-  border-radius: var(--r-full);
+  border-radius: var(--r-md);
   padding: 3px;
   margin-bottom: var(--sp-xl);
   border: 1.5px solid var(--border);
@@ -1265,7 +1265,7 @@ footer {
 .auth-tab {
   flex: 1;
   padding: .5rem;
-  border-radius: var(--r-full);
+  border-radius: var(--r-sm);
   font-size: .84rem;
   font-weight: 600;
   color: var(--text-secondary);
@@ -1414,7 +1414,7 @@ footer {
   color: var(--text-secondary);
   background: var(--bg-subtle);
   border: 1.5px solid var(--border);
-  border-radius: var(--r-lg);
+  border-radius: var(--r-md);
   cursor: pointer;
   transition: border-color var(--tr-normal), background var(--tr-normal),
               color var(--tr-normal), transform var(--tr-fast);
