@@ -22,7 +22,7 @@ const state = {
   filter:        'all',
   sort:          'date-desc',
   search:        '',
-  darkMode:      true,   // dark by default
+  darkMode:      false,
   notifications: true,
   currentUser:   null,   // { email, name, provider, uid }
 };
@@ -517,7 +517,6 @@ function addTask(name, priority, category) {
     priority,
     category,
     done:      false,
-    status:    'draft',
     createdAt: Date.now(),
   };
   state.tasks.unshift(task);
@@ -536,42 +535,9 @@ function toggleTask(id) {
   const task = state.tasks.find(t => t.id === id);
   if (!task) return null;
   task.done = !task.done;
-  task.status = task.done ? 'done' : 'draft';
   saveState();
   firestoreSetTask(task);
   return task;
-}
-
-/* ── Kanban helpers ────────────────────────────────────────── */
-const TASK_STATUSES = ['draft', 'in-progress', 'editing', 'done'];
-
-function getTaskStatus(task) {
-  if (task.status && TASK_STATUSES.includes(task.status)) return task.status;
-  return task.done ? 'done' : 'draft';
-}
-
-function advanceTaskStatus(id) {
-  const task = state.tasks.find(t => t.id === id);
-  if (!task) return null;
-  const cur  = getTaskStatus(task);
-  const next = TASK_STATUSES[(TASK_STATUSES.indexOf(cur) + 1) % TASK_STATUSES.length];
-  task.status = next;
-  task.done   = (next === 'done');
-  saveState();
-  firestoreSetTask(task);
-  return task;
-}
-
-function taskProgress(task) {
-  const s = getTaskStatus(task);
-  if (task.progress !== undefined) return task.progress;
-  if (s === 'done')  return 100;
-  if (s === 'draft') return 0;
-  /* deterministic pseudo-random from task id */
-  let h = 0;
-  for (let i = 0; i < task.id.length; i++) h = (h * 31 + task.id.charCodeAt(i)) | 0;
-  const base = Math.abs(h) % 51 + 20;          // 20-70
-  return s === 'in-progress' ? base : Math.min(92, base + 22);
 }
 
 function editTask(id, patch) {
@@ -634,103 +600,59 @@ function escHtml(str) {
 }
 
 /* ============================================================
-   TWORZENIE KARTY ZADANIA (kanban)
+   RENDEROWANIE LISTY ZADAŃ
    ============================================================ */
-const STATUS_DISPLAY = {
-  'draft':       '● Draft',
-  'in-progress': '● In Progress',
-  'editing':     '● Editing',
-  'done':        '✓ Done',
-};
-
-function createTaskCard(task) {
-  const status   = getTaskStatus(task);
-  const progress = taskProgress(task);
-  const showBar  = (status === 'in-progress' || status === 'editing');
-
-  const div = document.createElement('div');
-  div.className      = `task-card${task.done ? ' done' : ''}`;
-  div.dataset.id     = task.id;
-  div.dataset.status = status;
-  div.dataset.priority = task.priority;
-  div.setAttribute('role', 'listitem');
-
-  div.innerHTML = `
-    <div class="task-card-top">
-      <div class="task-card-name">${escHtml(task.name)}</div>
-      <div class="task-card-menu" aria-label="Akcje">
-        <button class="task-card-btn edit"
-          data-action="edit" aria-label="Edytuj" title="Edytuj">✎</button>
-        <button class="task-card-btn delete"
-          data-action="delete" aria-label="Usuń" title="Usuń">✕</button>
-      </div>
-    </div>
-    <div class="task-card-tags">
-      <span class="task-tag task-tag-category"
-        aria-label="Kategoria: ${CATEGORY_LABEL[task.category] || task.category}">
-        ${escHtml(CATEGORY_LABEL[task.category] || task.category)}
-      </span>
-      <span class="task-tag task-tag-priority-${task.priority}"
-        aria-label="Priorytet: ${PRIORITY_LABEL[task.priority]}">
-        ${PRIORITY_LABEL[task.priority]}
-      </span>
-    </div>
-    ${showBar ? `
-    <div class="task-card-progress">
-      <div class="task-card-progress-label">
-        <span>Postęp</span><span>${progress}%</span>
-      </div>
-      <div class="task-card-progress-track"
-        role="progressbar" aria-valuenow="${progress}"
-        aria-valuemin="0" aria-valuemax="100">
-        <div class="task-card-progress-fill" style="width:${progress}%"></div>
-      </div>
-    </div>` : ''}
-    <div class="task-card-bottom">
-      <span class="task-card-date">${relativeTime(task.createdAt)}</span>
-      <button class="task-card-status-btn"
-        data-action="advance-status"
-        title="Przesuń do następnego etapu"
-        aria-label="Status: ${STATUS_DISPLAY[status]}. Kliknij aby zmienić.">
-        ${STATUS_DISPLAY[status]}
-      </button>
-    </div>
-  `;
-
-  return div;
-}
-
-/* ============================================================
-   RENDEROWANIE KANBAN
-   ============================================================ */
-function renderKanban() {
-  const allTasks = getVisibleTasks();
-
-  TASK_STATUSES.forEach(status => {
-    const colBody  = document.getElementById(`col-${status}`);
-    const colCount = document.getElementById(`count-${status}`);
-    if (!colBody) return;
-
-    const colTasks = allTasks.filter(t => getTaskStatus(t) === status);
-    if (colCount) colCount.textContent = colTasks.length;
-
-    colBody.innerHTML = '';
-
-    if (colTasks.length === 0) {
-      const empty = document.createElement('div');
-      empty.className = 'kanban-col-empty';
-      empty.innerHTML = '<span class="kanban-col-empty-icon">○</span>Brak zadań';
-      colBody.appendChild(empty);
-      return;
-    }
-
-    colTasks.forEach(task => colBody.appendChild(createTaskCard(task)));
-  });
-}
-
-/* ─── Alias dla całej reszty JS która woła renderTaskList() ─── */
 function renderTaskList() {
-  renderKanban();
+  const ul         = document.getElementById('task-list');
+  const emptyState = document.getElementById('empty-state');
+  const tasks      = getVisibleTasks();
+
+  ul.innerHTML = '';
+
+  if (tasks.length === 0) {
+    emptyState.hidden = false;
+    return;
+  }
+
+  emptyState.hidden = true;
+
+  tasks.forEach(task => {
+    const li = document.createElement('li');
+    li.className  = `task-item${task.done ? ' done' : ''}`;
+    li.dataset.id = task.id;
+    li.setAttribute('role', 'listitem');
+
+    li.innerHTML = `
+      <button class="task-checkbox" data-action="toggle"
+        aria-label="${task.done ? 'Oznacz jako aktywne' : 'Oznacz jako ukończone'}"
+        title="${task.done ? 'Cofnij' : 'Ukończ'}"
+      >${task.done ? '✓' : ''}</button>
+
+      <div class="task-content">
+        <div class="task-name">${escHtml(task.name)}</div>
+        <div class="task-meta">
+          <span class="badge badge-${task.priority}"
+                aria-label="Priorytet: ${PRIORITY_LABEL[task.priority]}">
+            ${PRIORITY_LABEL[task.priority]}
+          </span>
+          <span class="badge badge-cat"
+                aria-label="Kategoria: ${CATEGORY_LABEL[task.category]}">
+            ${CATEGORY_LABEL[task.category]}
+          </span>
+          <span class="task-date">${relativeTime(task.createdAt)}</span>
+        </div>
+      </div>
+
+      <div class="task-actions">
+        <button class="task-btn edit"   data-action="edit"
+                aria-label="Edytuj zadanie: ${escHtml(task.name)}" title="Edytuj">✎</button>
+        <button class="task-btn delete" data-action="delete"
+                aria-label="Usuń zadanie: ${escHtml(task.name)}"  title="Usuń">✕</button>
+      </div>
+    `;
+
+    ul.appendChild(li);
+  });
 }
 
 /* ============================================================
@@ -788,20 +710,13 @@ function renderBarChart(id, counts, labels) {
 /* ============================================================
    NAWIGACJA MIĘDZY WIDOKAMI
    ============================================================ */
-const VIEW_BREADCRUMB = {
-  tasks:    ['Zadania', 'Dzisiaj'],
-  stats:    ['Statystyki', 'Przegląd'],
-  settings: ['Ustawienia', 'Konfiguracja'],
-};
-
 function switchView(viewId) {
   document.querySelectorAll('.view').forEach(s => {
     s.hidden = true;
     s.classList.remove('active');
   });
 
-  /* sync nav-link (mobile) i sidebar-icon (desktop) */
-  document.querySelectorAll('.nav-link, .sidebar-icon[data-view]').forEach(a => {
+  document.querySelectorAll('.nav-link').forEach(a => {
     const isActive = a.dataset.view === viewId;
     a.classList.toggle('active', isActive);
     a.setAttribute('aria-current', isActive ? 'page' : 'false');
@@ -811,17 +726,6 @@ function switchView(viewId) {
   if (target) {
     target.hidden = false;
     target.classList.add('active');
-  }
-
-  /* breadcrumb w headerze */
-  const bc = document.getElementById('header-breadcrumb');
-  if (bc && VIEW_BREADCRUMB[viewId]) {
-    const [parent, current] = VIEW_BREADCRUMB[viewId];
-    bc.innerHTML = `
-      <span>${escHtml(parent)}</span>
-      <span class="bc-sep" aria-hidden="true">›</span>
-      <span class="bc-current">${escHtml(current)}</span>
-    `;
   }
 
   if (viewId === 'stats') renderStats();
@@ -1105,7 +1009,7 @@ function applyDarkMode(enabled) {
 
   // Aktualizuj kolor paska statusu iOS
   const themeMeta = document.querySelector('meta[name="theme-color"]');
-  if (themeMeta) themeMeta.content = enabled ? '#0d1038' : '#7c5cfc';
+  if (themeMeta) themeMeta.content = enabled ? '#161b27' : '#5a6bff';
 
   const toggle = document.getElementById('dark-mode-toggle');
   if (toggle) {
@@ -1435,55 +1339,13 @@ async function onLoginSuccess(isFreshLogin = true) {
    ============================================================ */
 function setupEvents() {
 
-  /* ── Nawigacja: nav-link (mobile) ─────────────────────── */
+  /* ── Nawigacja (click) ─────────────────────────────────── */
   document.querySelectorAll('.nav-link').forEach(link => {
     link.addEventListener('click', e => {
       e.preventDefault();                // event.preventDefault() #1
       switchView(link.dataset.view);
     });
   });
-
-  /* ── Nawigacja: sidebar (desktop) ─────────────────────── */
-  document.querySelectorAll('.sidebar-icon[data-view]').forEach(icon => {
-    icon.addEventListener('click', () => switchView(icon.dataset.view));
-  });
-
-  /* ── Akcje na kanban board (click – delegacja) ─────────── */
-  const kanbanBoard = document.getElementById('kanban-board');
-  if (kanbanBoard) {
-    kanbanBoard.addEventListener('click', e => {
-      const btn    = e.target.closest('[data-action]');
-      if (!btn) return;
-      const card   = btn.closest('.task-card');
-      const taskId = card?.dataset.id;
-      if (!taskId) return;
-
-      switch (btn.dataset.action) {
-        case 'advance-status': {
-          const task = advanceTaskStatus(taskId);
-          if (task?.done) showToast('Zadanie ukończone! 🎉', 'success');
-          renderKanban();
-          break;
-        }
-        case 'edit':
-          openModal(taskId);
-          break;
-        case 'delete': {
-          const task = state.tasks.find(t => t.id === taskId);
-          if (!task) break;
-          card.style.transition = 'opacity .2s, transform .2s';
-          card.style.opacity    = '0';
-          card.style.transform  = 'scale(.94)';
-          setTimeout(() => {
-            removeTask(taskId);
-            renderKanban();
-            showToast(`Usunięto: „${task.name}"`, 'warning');
-          }, 200);
-          break;
-        }
-      }
-    });
-  }
 
   /* ── Formularz dodawania (submit) ──────────────────────── */
   document.getElementById('task-form').addEventListener('submit', e => {
@@ -1507,8 +1369,43 @@ function setupEvents() {
     nameInput.focus();
   });
 
-  /* ── Stary #task-list: pusty handler (element ukryty, kanban go zastąpił) ── */
-  /* Kanban events są powyżej w "Akcje na kanban board" */
+  /* ── Akcje na liście zadań (click – delegacja) ─────────── */
+  document.getElementById('task-list').addEventListener('click', e => {
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+
+    const li     = btn.closest('.task-item');
+    const taskId = li?.dataset.id;
+    if (!taskId) return;
+
+    switch (btn.dataset.action) {
+
+      case 'toggle': {
+        const task = toggleTask(taskId);
+        if (task?.done) showToast('Zadanie ukończone! 🎉', 'success');
+        renderTaskList();
+        break;
+      }
+
+      case 'delete': {
+        const task = state.tasks.find(t => t.id === taskId);
+        if (!task) break;
+        li.style.transition = 'opacity .2s, transform .2s';
+        li.style.opacity    = '0';
+        li.style.transform  = 'translateX(20px)';
+        setTimeout(() => {
+          removeTask(taskId);
+          renderTaskList();
+          showToast(`Usunięto: „${task.name}"`, 'warning');
+        }, 200);
+        break;
+      }
+
+      case 'edit':
+        openModal(taskId);
+        break;
+    }
+  });
 
   /* ── Przyciski filtrów (click) ─────────────────────────── */
   document.querySelectorAll('.filter-btn').forEach(btn => {
