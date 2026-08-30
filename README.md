@@ -187,6 +187,8 @@ service cloud.firestore {
 
 ---
 
-## Authors
+## Author
 
-Team project — see commit history for details.
+**Jakub Bondel** — creator and maintainer of TaskManager.
+
+[![GitHub](https://img.shields.io/badge/GitHub-w84kubus-181717?logo=github&logoColor=white)](https://github.com/w84kubus)
