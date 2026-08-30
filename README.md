@@ -1,14 +1,38 @@
-# TaskManager
+<p align="center">
+  <img src="favicon.svg" width="96" height="96" alt="TaskManager logo" />
+</p>
 
-🇬🇧 **English** · [🇵🇱 Czytaj po polsku](README.pl.md)
+<h1 align="center">TaskManager</h1>
 
-A web app for managing tasks — add, edit, filter and track the progress of your tasks. Data syncs in real time across all your devices.
+<p align="center">
+  A focused task manager — add, filter and track your tasks in real time.
+  <br />
+  🇬🇧 <strong>English</strong> · <a href="README.pl.md">🇵🇱 Czytaj po polsku</a>
+  <br />
+  <a href="https://w84kubus.github.io/TaskManager/"><strong>🌐 w84kubus.github.io/TaskManager</strong></a>
+</p>
 
-## App
-
-🌐 **https://w84kubus.github.io/TaskManager/**
+<p align="center">
+  <img src="https://img.shields.io/badge/HTML5-E34F26?logo=html5&logoColor=white" alt="HTML5" />
+  <img src="https://img.shields.io/badge/CSS3-1572B6?logo=css3&logoColor=white" alt="CSS3" />
+  <img src="https://img.shields.io/badge/JavaScript-ES6+-F7DF1E?logo=javascript&logoColor=black" alt="JavaScript ES6+" />
+  <img src="https://img.shields.io/badge/Firebase-Auth+Firestore-FFCA28?logo=firebase&logoColor=black" alt="Firebase" />
+  <img src="https://img.shields.io/badge/i18n-PL%2FEN-22C55E" alt="i18n PL/EN" />
+  <img src="https://img.shields.io/badge/GDPR-compliant-22C55E" alt="GDPR compliant" />
+</p>
 
 ---
+
+## About the app
+
+**TaskManager** is a task management web app built to stay out of your way — no framework, no build step, just a fast list you can trust. It answers four questions the moment you open it:
+
+1. 📋 **What do I need to do today?**
+2. 🎯 **What's most urgent right now?**
+3. ✅ **What have I already finished?**
+4. 📊 **How is my progress trending?**
+
+Everything is entered by hand and synced in real time — no calendar imports, no auto-scheduling. A task you deliberately typed in is a task you're more likely to actually do.
 
 ## Screenshots
 
@@ -20,109 +44,101 @@ A web app for managing tasks — add, edit, filter and track the progress of you
 |------------|----------|
 | ![Statistics](screenshots/screen-3.png) | ![Settings](screenshots/screen-4.png) |
 
----
-
 ## Features
 
-### 🔐 Sign-in and account (Firebase Auth)
-- **Google** — sign-in via Google OAuth popup
-- **Email / password** — registration with validation, stored in Firebase Auth
-- **Email verification** — verification link sent on registration; no access without confirmation
-- **Password reset** — "Forgot your password?" sends a reset link by email
-- Session persists across page reloads/closures
-- Data isolated per account (`request.auth.uid == userId`)
-- Guest mode — local access with no account required
+### Sign-in and account
+- **Google** - sign-in via Google OAuth popup
+- **Email / password** - registration with validation, stored in Firebase Auth
+- **Email verification** - verification link sent on registration; no access without confirmation
+- **Password reset** - "Forgot your password?" sends a reset link by email
+- **Guest mode** - local access with no account required, data stays in the browser
 
-### ☁️ Cloud sync (Firebase Firestore)
+### Cloud sync
 - **Real-time** task synchronization (`onSnapshot`)
-- Each task is its own document (no conflicts on concurrent writes)
+- Each task is its own Firestore document - no conflicts on concurrent writes
 - Dark mode and notification preferences synced across devices
-- Error messages surfaced on permission issues
+- Data isolated per account (`request.auth.uid == userId`)
 
-### 📋 3 app views
-- **Tasks** — add, edit, delete, mark as done (active tasks always shown above completed ones)
-- **Statistics** — summary cards + bar charts (by category, by priority)
-- **Settings** — dark mode, notifications, JSON/TXT export, clear data, delete account
-
-### 🎛️ Interactivity
+### Tasks
+- Add, edit, delete, mark as done - active tasks always shown above completed ones
 - Filtering (all / active / done) + live search
-- Sorting (date, priority, alphabetical)
-- Dark mode saved to Firestore (sync) and localStorage (fallback)
-- Task edit modal, confirmation modal replacing the native `confirm()`
-- Toast notifications with auto-hide
+- Sorting by date, priority, or alphabetically
+- Confirmation modal replacing the native `confirm()`
 
-### 🌐 Bilingual interface (PL/EN)
-- Language toggle button in the app header and on the sign-in screen
-- The entire interface is translated: forms, buttons, messages, statistics, settings, Privacy Policy
+### Statistics
+- Summary cards - total, active, completed, completion rate
+- Bar charts by category and by priority
+
+### Bilingual interface (PL/EN)
+- Language toggle in the header and on the sign-in screen
+- The entire interface is translated, including the Privacy Policy
 - Language choice remembered in `localStorage`
 
-### 📤 Data export
-- **JSON** — full backup with metadata
-- **TXT** — readable, formatted task list (adapted to the selected language)
+### Data export
+- **JSON** - full backup with metadata
+- **TXT** - readable, formatted task list, in the selected language
 
-### ⚖️ GDPR compliance
-- **Privacy Policy** — full text available in the footer and at registration (9 sections: controller, data collected, purpose, legal basis, Firebase/Google as processor, retention, user rights, localStorage, security)
-- **Consent at registration** — mandatory checkbox linking to the policy
-- **Delete account** — permanently removes the Firebase Auth account + all Firestore data + localStorage (right to be forgotten, GDPR Art. 17)
-- **Data export** — JSON/TXT fulfilling the right to data portability
+### GDPR compliance
+- Full Privacy Policy in the footer and at registration (9 sections)
+- Mandatory consent checkbox at registration
+- **Delete account** - permanently removes the Firebase Auth account and all Firestore data
+- Data export as the right to portability
 
-### 📱 Mobile and PWA-ready
-- Custom SVG icon (favicon + apple-touch-icon)
-- `meta theme-color` — system status bar color on iOS/Android, updated with dark mode
-- `viewport-fit=cover` + `env(safe-area-inset-*)` — notch / Dynamic Island support
-- `apple-mobile-web-app-capable` — add to home screen
-- At ≤480px (iPhone): emoji-only navigation, compact header, side safe-area padding
-- Sticky footer — always pinned to the bottom of the screen
-
----
+### Mobile
+- iOS safe-area support (notch / Dynamic Island)
+- `apple-mobile-web-app-capable` for adding to the home screen
+- Compact, icon-only navigation on small screens
 
 ## Tech stack
 
-| Requirement | Implementation |
+| Layer | Technology |
 |---|---|
-| Semantic HTML5 | `<header>`, `<nav>`, `<main>`, `<section>` ×3, `<footer>` |
-| Accessibility attributes | 60+ `aria-*`, `role`, `alt` |
-| Hand-written CSS (no frameworks) | 1000+ lines of plain CSS |
-| Flexbox ×3 | header-inner, form-row, task-item |
-| CSS Grid ×2 | stats-grid (4 col.), settings-grid (2 col.) |
-| Media queries ×2 | 768px (tablet), 480px (mobile) |
-| Transitions / animations ×3+ | logo hover, buttons, slideIn, fadeUp, modalPop, toast |
-| CSS variables | 40+ variables (light + dark) + `safe-area env()` |
-| i18n (PL/EN) | custom translation system (`data-i18n`, JS dictionary) |
-| Icons | [Phosphor Icons](https://phosphoricons.com/) (MIT), inlined as a local SVG sprite — no external requests |
-| Firebase Auth | email + Google OAuth + verification + password reset |
-| Firebase Firestore | real-time sync, per-task subcollection |
-| Secure Firestore rules | `request.auth.uid == userId` |
-| DOM manipulation | `createElement`, `innerHTML`, `appendChild` |
-| Event listeners ×4 types | `click`, `submit`, `input`, `scroll` |
-| RegExp validation | `/^[\p{L}\p{N}\s\-.,!?()]{2,120}$/u` |
-| `event.preventDefault()` | ×3 (forms, navigation) |
-| `localStorage` | offline fallback + per-device dark mode + language preference |
-| Async (`setTimeout` / `Promise`) | toasts, JSON/TXT export, account deletion |
+| Markup | Semantic HTML5 |
+| Styling | Hand-written CSS (no framework) - CSS variables, Flexbox, Grid |
+| Logic | Vanilla JavaScript (ES6+), no build step |
+| Auth | Firebase Authentication (email + Google OAuth) |
+| Database | Cloud Firestore (real-time sync) |
+| i18n | Custom translation system (`data-i18n`, JS dictionary) |
+| Icons | [Phosphor Icons](https://phosphoricons.com/) (MIT), inlined as a local SVG sprite |
+| Fonts | Fraunces (display), Instrument Sans (UI) |
+| Hosting | GitHub Pages |
 
----
-
-## File structure
+## Architecture
 
 ```
-Task Manager/
-├── index.html            # Main HTML page
-├── favicon.svg           # App icon (SVG)
+TaskManager/
+├── index.html          # Markup, SVG icon sprite, all views and modals
+├── favicon.svg          # App icon
 ├── styles/
-│   └── style.css         # Stylesheet (1000+ lines)
+│   └── style.css        # Full stylesheet (theming, layout, components)
 ├── scripts/
-│   └── app.js            # App logic + i18n dictionary
-├── README.md              # README (English)
-└── README.pl.md           # README (Polish)
+│   └── app.js             # App state, Firebase, rendering, i18n dictionary
+├── screenshots/            # README screenshots
+├── README.md                # This file
+└── README.pl.md               # Polish version
 ```
 
----
+### Key design decisions
 
-## Running it
+- **No framework, no build step** - plain HTML/CSS/JS deployed straight to GitHub Pages. Nothing to compile, nothing to break.
+- **One task = one Firestore document** - avoids write conflicts and keeps sync simple; `onSnapshot` handles the rest.
+- **Offline-first reads** - `localStorage` is read first on load, then reconciled with Firestore once it responds.
+- **i18n via attributes, not a library** - `data-i18n` / `data-i18n-placeholder` / `data-i18n-html` on elements, applied in one pass by `applyLanguage()`; zero dependencies.
+- **Nuclear border-radius reset** - every element is squared off by default (`* { border-radius: 0 }`), with two deliberate exceptions (the toggle switch, avatars) for a sharp "notebook" look.
 
-Open **https://w84kubus.github.io/TaskManager/** in your browser.
+## Running it locally
 
-Or run it locally:
+### Requirements
+- Any modern browser
+- A Firebase project with Authentication (email/password + Google) and Firestore enabled
+
+### Setup
+```bash
+git clone https://github.com/w84kubus/TaskManager.git
+cd TaskManager
+```
+
+Open `index.html` directly, or serve it locally:
 ```bash
 # Node.js
 npx serve .
@@ -131,11 +147,9 @@ npx serve .
 python -m http.server 3000
 ```
 
----
+Firebase config lives directly in `scripts/app.js` (`FIREBASE_CONFIG`) - swap in your own project's keys to run it against your own backend.
 
-## Firebase configuration
-
-### Firestore rules (Firebase Console → Firestore → Rules)
+### Firestore rules
 ```
 rules_version = '2';
 service cloud.firestore {
@@ -147,45 +161,27 @@ service cloud.firestore {
 }
 ```
 
-### Authorized domains (Authentication → Settings → Authorized domains)
+### Authorized domains
 - `localhost`
 - `w84kubus.github.io`
 
-### Enabled sign-in methods (Authentication → Sign-in method)
-- Email/Password ✅
-- Google ✅
-
-### Email templates (Authentication → Templates)
-| Template | Subject |
-|---|---|
-| Email address verification | `Potwierdź swój adres e-mail – TaskManager` |
-| Password reset | `Zresetuj hasło – TaskManager` |
-
----
-
 ## Testing
 
-| Browser / scenario | Status |
+| Scenario | Status |
 |---|---|
-| Chrome (desktop) | ✅ |
-| Firefox (desktop) | ✅ |
-| Safari iOS (iPhone) | ✅ |
-| iPhone 16 Pro — mobile header | ✅ |
-| Responsive ≤480px | ✅ |
-| Responsive ≤768px | ✅ |
-| Responsive desktop | ✅ |
+| Chrome / Firefox / Safari (desktop) | ✅ |
+| Safari iOS | ✅ |
+| Responsive ≤480px / ≤768px / desktop | ✅ |
 | Real-time sync (Firestore) | ✅ |
 | Registration + email verification | ✅ |
 | Google OAuth sign-in | ✅ |
-| Password reset | ✅ |
 | Account deletion (GDPR) | ✅ |
-| Dark mode sync across devices | ✅ |
-| JSON / TXT export | ✅ |
-| Guest mode (localStorage) | ✅ |
 | PL/EN language switching | ✅ |
 | Console — 0 errors | ✅ |
 
----
+## License
+
+Personal project. Source code public for educational purposes.
 
 ## Author
 
