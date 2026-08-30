@@ -89,6 +89,7 @@ Aplikacja webowa do zarządzania zadaniami — dodawaj, edytuj, filtruj i śled�
 | Transitions / animations ×3+ | logo hover, przyciski, slideIn, fadeUp, modalPop, toast |
 | CSS Variables | 40+ zmiennych (light + dark) + `safe-area env()` |
 | i18n (PL/EN) | własny system tłumaczeń (`data-i18n`, słownik JS) |
+| Ikony | [Phosphor Icons](https://phosphoricons.com/) (MIT), wbudowane jako lokalny sprite SVG — bez zewnętrznych zapytań |
 | Firebase Auth | email + Google OAuth + weryfikacja + reset hasła |
 | Firebase Firestore | real-time sync, per-task subcollection |
 | Bezpieczne reguły Firestore | `request.auth.uid == userId` |

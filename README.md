@@ -89,6 +89,7 @@ A web app for managing tasks — add, edit, filter and track the progress of you
 | Transitions / animations ×3+ | logo hover, buttons, slideIn, fadeUp, modalPop, toast |
 | CSS variables | 40+ variables (light + dark) + `safe-area env()` |
 | i18n (PL/EN) | custom translation system (`data-i18n`, JS dictionary) |
+| Icons | [Phosphor Icons](https://phosphoricons.com/) (MIT), inlined as a local SVG sprite — no external requests |
 | Firebase Auth | email + Google OAuth + verification + password reset |
 | Firebase Firestore | real-time sync, per-task subcollection |
 | Secure Firestore rules | `request.auth.uid == userId` |
