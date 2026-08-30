@@ -186,6 +186,23 @@ input, select, textarea, button {
   border-radius: 50% !important;
 }
 
+/* ================================================================
+   IKONY SVG — spójny system zamiast emoji
+   Domyślnie skalują się z font-size otoczenia (1em×1em);
+   konkretne miejsca doprecyzowują rozmiar/kolor osobno.
+================================================================ */
+.icon {
+  width: 1em;
+  height: 1em;
+  display: inline-block;
+  vertical-align: -0.15em;
+  flex-shrink: 0;
+  stroke: currentColor;
+  fill: none;
+}
+
+.footer-heart { color: var(--accent); }
+
 /* ── App wrapper ────────────────────────────────────────────── */
 #app-wrapper {
   display: flex;
@@ -250,6 +267,8 @@ input, select, textarea, button {
   flex-shrink: 0;
   transition: transform var(--tr-normal), box-shadow var(--tr-normal);
 }
+
+.logo-icon .icon { width: 58%; height: 58%; stroke-width: 2.4; }
 
 .logo:hover .logo-icon {
   transform: rotate(-6deg) scale(1.08);
@@ -723,6 +742,8 @@ input.error { border-color: var(--danger) !important; }
   border-radius: 0;
 }
 
+.task-checkbox .icon { stroke-width: 3; }
+
 /* Task content */
 .task-content {
   flex: 1;
@@ -747,6 +768,9 @@ input.error { border-color: var(--danger) !important; }
 
 /* Badges — outlined editorial style */
 .badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
   font-size: .65rem;
   padding: 2px 8px;
   border-radius: var(--r-sm);
@@ -755,6 +779,9 @@ input.error { border-color: var(--danger) !important; }
   text-transform: uppercase;
   border: 1px solid;
 }
+
+.badge .icon { width: .85em; height: .85em; }
+.badge-cat .icon { stroke-width: 2.2; }
 
 .badge-high {
   color: var(--prio-high);
@@ -1194,6 +1221,8 @@ input.error { border-color: var(--danger) !important; }
 }
 
 .toast.out { animation: toastOut .3s ease forwards; }
+
+.toast-icon { width: 17px; height: 17px; stroke-width: 2.1; }
 
 /* ================================================================
    FOOTER

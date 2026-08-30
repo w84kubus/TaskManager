@@ -17,12 +17,7 @@ const I18N = {
       title: 'TaskManager – Twoje zadania',
       description: 'TaskManager – aplikacja do zarządzania zadaniami. Dodawaj, filtruj i śledź postęp swoich zadań.',
     },
-    priority: { low: '🟢 Niski', medium: '🟡 Średni', high: '🔴 Wysoki' },
     priorityLabel: { low: 'Niski', medium: 'Średni', high: 'Wysoki' },
-    category: {
-      personal: '👤 Osobiste', work: '💼 Praca', shopping: '🛒 Zakupy',
-      health: '❤️ Zdrowie', other: '📦 Inne',
-    },
     categoryLabel: {
       personal: 'Osobiste', work: 'Praca', shopping: 'Zakupy',
       health: 'Zdrowie', other: 'Inne',
@@ -67,7 +62,7 @@ const I18N = {
       step2: 'Kliknij link weryfikacyjny od TaskManager',
       step3: 'Wróć tutaj i naciśnij przycisk poniżej',
       hintHtml: 'Nie widzisz wiadomości? Sprawdź folder <strong>Spam / Oferty / Powiadomienia</strong>.',
-      checkBtn: '✓ Potwierdziłem — zaloguj mnie',
+      checkBtn: 'Potwierdziłem — zaloguj mnie',
       checkBtnChecking: 'Sprawdzam…',
       resendBtn: 'Wyślij link ponownie',
       resendBtnSending: 'Wysyłanie…',
@@ -178,31 +173,31 @@ const I18N = {
       added: 'Dodano: „{name}"',
       deleted: 'Usunięto: „{name}"',
       updated: 'Zadanie zaktualizowane!',
-      completed: 'Zadanie ukończone! 🎉',
+      completed: 'Zadanie ukończone!',
       allCleared: 'Wszystkie dane zostały wyczyszczone.',
-      darkOn: 'Tryb ciemny włączony 🌙',
-      darkOff: 'Tryb jasny włączony ☀️',
+      darkOn: 'Tryb ciemny włączony',
+      darkOff: 'Tryb jasny włączony',
       exportJsonDone: 'Eksport JSON zakończony!',
       exportJsonError: 'Błąd podczas eksportu JSON.',
       exportTxtDone: 'Eksport TXT zakończony!',
       exportTxtError: 'Błąd podczas eksportu TXT.',
-      welcomeBack: 'Witaj, {name}! 👋',
-      guestWelcome: 'Tryb gościa — zadania są lokalne 👤',
-      verifyEmailSentAfterRegister: '📧 Wysłano link weryfikacyjny na {email} — kliknij go, aby potwierdzić konto',
-      verifyEmailReminder: '📧 Adres e-mail niezweryfikowany — sprawdź skrzynkę i kliknij link',
-      verifyResent: '📧 Wysłano ponownie — sprawdź skrzynkę i folder Spam',
+      welcomeBack: 'Witaj, {name}!',
+      guestWelcome: 'Tryb gościa — zadania są lokalne',
+      verifyEmailSentAfterRegister: 'Wysłano link weryfikacyjny na {email} — kliknij go, aby potwierdzić konto',
+      verifyEmailReminder: 'Adres e-mail niezweryfikowany — sprawdź skrzynkę i kliknij link',
+      verifyResent: 'Wysłano ponownie — sprawdź skrzynkę i folder Spam',
       verifyTooMany: 'Zbyt wiele prób — poczekaj chwilę i spróbuj ponownie',
       verifyResendError: 'Błąd wysyłania — spróbuj ponownie',
       verifyNotYet: 'E-mail jeszcze nie zweryfikowany — kliknij link w wiadomości',
       verifyCheckError: 'Błąd sprawdzania — spróbuj ponownie',
-      resetLinkSent: '📧 Wysłano link resetowania hasła na {email} — sprawdź skrzynkę',
+      resetLinkSent: 'Wysłano link resetowania hasła na {email} — sprawdź skrzynkę',
       firebaseNotLoaded: 'Firebase nie załadowany — odśwież stronę.',
       googleLoadError: 'Nie można załadować Google Sign-In. Odśwież stronę.',
       googleCancelled: 'Logowanie Google anulowane.',
-      syncNoPermission: '⚠️ Sync: brak uprawnień Firestore — sprawdź reguły',
-      firestoreNoPermission: '⚠️ Firestore: brak uprawnień — sprawdź reguły bezpieczeństwa',
-      syncInactiveNoPermission: '⚠️ Sync nieaktywny — brak uprawnień Firestore',
-      synced: '☁️ Zsynchronizowano',
+      syncNoPermission: 'Sync: brak uprawnień Firestore — sprawdź reguły',
+      firestoreNoPermission: 'Firestore: brak uprawnień — sprawdź reguły bezpieczeństwa',
+      syncInactiveNoPermission: 'Sync nieaktywny — brak uprawnień Firestore',
+      synced: 'Zsynchronizowano',
       accountDeleted: 'Konto zostało trwale usunięte.',
       accountDeleteReauth: 'Ze względów bezpieczeństwa zaloguj się ponownie i spróbuj jeszcze raz.',
       accountDeleteError: 'Błąd usuwania konta — spróbuj ponownie.',
@@ -265,12 +260,7 @@ const I18N = {
       title: 'TaskManager – Your Tasks',
       description: 'TaskManager – a task management app. Add, filter and track the progress of your tasks.',
     },
-    priority: { low: '🟢 Low', medium: '🟡 Medium', high: '🔴 High' },
     priorityLabel: { low: 'Low', medium: 'Medium', high: 'High' },
-    category: {
-      personal: '👤 Personal', work: '💼 Work', shopping: '🛒 Shopping',
-      health: '❤️ Health', other: '📦 Other',
-    },
     categoryLabel: {
       personal: 'Personal', work: 'Work', shopping: 'Shopping',
       health: 'Health', other: 'Other',
@@ -315,7 +305,7 @@ const I18N = {
       step2: 'Click the verification link from TaskManager',
       step3: 'Come back here and press the button below',
       hintHtml: 'Don’t see the email? Check your <strong>Spam / Promotions / Notifications</strong> folder.',
-      checkBtn: '✓ I’ve confirmed — sign me in',
+      checkBtn: 'I’ve confirmed — sign me in',
       checkBtnChecking: 'Checking…',
       resendBtn: 'Resend link',
       resendBtnSending: 'Sending…',
@@ -426,31 +416,31 @@ const I18N = {
       added: 'Added: "{name}"',
       deleted: 'Deleted: "{name}"',
       updated: 'Task updated!',
-      completed: 'Task completed! 🎉',
+      completed: 'Task completed!',
       allCleared: 'All data has been cleared.',
-      darkOn: 'Dark mode enabled 🌙',
-      darkOff: 'Light mode enabled ☀️',
+      darkOn: 'Dark mode enabled',
+      darkOff: 'Light mode enabled',
       exportJsonDone: 'JSON export complete!',
       exportJsonError: 'Error during JSON export.',
       exportTxtDone: 'TXT export complete!',
       exportTxtError: 'Error during TXT export.',
-      welcomeBack: 'Welcome, {name}! 👋',
-      guestWelcome: 'Guest mode — tasks are stored locally 👤',
-      verifyEmailSentAfterRegister: '📧 A verification link was sent to {email} — click it to confirm your account',
-      verifyEmailReminder: '📧 Email not verified — check your inbox and click the link',
-      verifyResent: '📧 Resent — check your inbox and Spam folder',
+      welcomeBack: 'Welcome, {name}!',
+      guestWelcome: 'Guest mode — tasks are stored locally',
+      verifyEmailSentAfterRegister: 'A verification link was sent to {email} — click it to confirm your account',
+      verifyEmailReminder: 'Email not verified — check your inbox and click the link',
+      verifyResent: 'Resent — check your inbox and Spam folder',
       verifyTooMany: 'Too many attempts — please wait a moment and try again',
       verifyResendError: 'Failed to send — please try again',
       verifyNotYet: 'Email not verified yet — click the link in the message',
       verifyCheckError: 'Error checking status — please try again',
-      resetLinkSent: '📧 Password reset link sent to {email} — check your inbox',
+      resetLinkSent: 'Password reset link sent to {email} — check your inbox',
       firebaseNotLoaded: 'Firebase failed to load — refresh the page.',
       googleLoadError: 'Could not load Google Sign-In. Refresh the page.',
       googleCancelled: 'Google sign-in cancelled.',
-      syncNoPermission: '⚠️ Sync: Firestore permission denied — check your rules',
-      firestoreNoPermission: '⚠️ Firestore: permission denied — check your security rules',
-      syncInactiveNoPermission: '⚠️ Sync inactive — Firestore permission denied',
-      synced: '☁️ Synced',
+      syncNoPermission: 'Sync: Firestore permission denied — check your rules',
+      firestoreNoPermission: 'Firestore: permission denied — check your security rules',
+      syncInactiveNoPermission: 'Sync inactive — Firestore permission denied',
+      synced: 'Synced',
       accountDeleted: 'Your account has been permanently deleted.',
       accountDeleteReauth: 'For security reasons, please sign in again and retry.',
       accountDeleteError: 'Error deleting account — please try again.',
@@ -552,12 +542,9 @@ let _lastVerifyState = null; // { email, source }
 function updateLangToggleButtons() {
   const current = state.lang;
   const target  = current === 'pl' ? 'en' : 'pl';
-  const flag    = target === 'en' ? '🇬🇧' : '🇵🇱';
   const label   = target === 'en' ? 'EN' : 'PL';
   document.querySelectorAll('.lang-toggle').forEach(btn => {
-    const flagEl  = btn.querySelector('.lang-flag');
     const labelEl = btn.querySelector('.lang-label');
-    if (flagEl)  flagEl.textContent  = flag;
     if (labelEl) labelEl.textContent = label;
     btn.setAttribute('aria-label', I18N[current].auth.langToggleAria);
   });
@@ -969,13 +956,13 @@ function showEmailVerification(email, source) {
   if (source === 'login') {
     // Konto niezweryfikowane — blokada dostępu
     card.classList.add('blocked');
-    iconWrap.textContent = '🔒';
+    iconWrap.innerHTML   = iconSvg('icon-lock');
     titleEl.textContent  = t('verify.blockedTitle');
     descEl.innerHTML     = t('verify.blockedDescHtml', { email: safeEmail });
   } else {
     // Świeża rejestracja — poinformuj o wysłaniu linku
     card.classList.remove('blocked');
-    iconWrap.textContent = '📧';
+    iconWrap.innerHTML   = iconSvg('icon-mail');
     titleEl.textContent  = t('verify.freshTitle');
     descEl.innerHTML     = t('verify.freshDescHtml', { email: safeEmail });
   }
@@ -1010,9 +997,10 @@ async function resendVerificationEmail() {
 async function checkEmailVerification() {
   const user = _auth?.currentUser;
   if (!user) return;
-  const btn = document.getElementById('verify-check-btn');
-  btn.disabled    = true;
-  btn.textContent = t('verify.checkBtnChecking');
+  const btn      = document.getElementById('verify-check-btn');
+  const labelEl  = document.getElementById('verify-check-btn-label');
+  btn.disabled   = true;
+  labelEl.textContent = t('verify.checkBtnChecking');
   try {
     await user.reload(); // odśwież dane użytkownika z serwera
     if (_auth.currentUser.emailVerified) {
@@ -1025,8 +1013,8 @@ async function checkEmailVerification() {
   } catch (e) {
     showToast(t('toast.verifyCheckError'), 'error');
   } finally {
-    btn.disabled    = false;
-    btn.textContent = t('verify.checkBtn');
+    btn.disabled   = false;
+    labelEl.textContent = t('verify.checkBtn');
   }
 }
 
@@ -1041,11 +1029,12 @@ function showApp() {
 
   nameEl.textContent = isGuest ? t('userMenu.guestMode') : u.name;
 
-  const initials = isGuest
-    ? '👤'
-    : u.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
-  avatar.textContent = initials;
-  avatar.className   = 'user-avatar';
+  if (isGuest) {
+    avatar.innerHTML = iconSvg('icon-user');
+  } else {
+    avatar.textContent = u.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+  }
+  avatar.className = 'user-avatar';
   if (u.provider === 'google') avatar.classList.add('social-google');
   if (isGuest)                 avatar.classList.add('social-guest');
 
@@ -1202,6 +1191,21 @@ function escHtml(str) {
 }
 
 /* ============================================================
+   IKONY SVG — spójny system zamiast emoji (sprite w index.html)
+   ============================================================ */
+function iconSvg(name, extraClass = '') {
+  return `<svg class="icon${extraClass ? ' ' + extraClass : ''}" aria-hidden="true"><use href="#${name}"/></svg>`;
+}
+
+const CATEGORY_ICON = {
+  personal: 'icon-user',
+  work:     'icon-briefcase',
+  shopping: 'icon-shopping-cart',
+  health:   'icon-heart',
+  other:    'icon-package',
+};
+
+/* ============================================================
    RENDEROWANIE LISTY ZADAŃ
    ============================================================ */
 function renderTaskList() {
@@ -1228,18 +1232,18 @@ function renderTaskList() {
       <button class="task-checkbox" data-action="toggle"
         aria-label="${task.done ? t('tasks.toggleToActive') : t('tasks.toggleToDone')}"
         title="${task.done ? t('tasks.titleDone') : t('tasks.titleUndone')}"
-      >${task.done ? '✓' : ''}</button>
+      >${task.done ? iconSvg('icon-check') : ''}</button>
 
       <div class="task-content">
         <div class="task-name">${escHtml(task.name)}</div>
         <div class="task-meta">
           <span class="badge badge-${task.priority}"
                 aria-label="${priorityLabel(task.priority)}">
-            ${priorityLabel(task.priority)}
+            ${iconSvg('icon-dot')} ${priorityLabel(task.priority)}
           </span>
           <span class="badge badge-cat"
                 aria-label="${categoryLabel(task.category)}">
-            ${categoryLabel(task.category)}
+            ${iconSvg(CATEGORY_ICON[task.category])} ${categoryLabel(task.category)}
           </span>
           <span class="task-date">${relativeTime(task.createdAt)}</span>
         </div>
@@ -1247,9 +1251,9 @@ function renderTaskList() {
 
       <div class="task-actions">
         <button class="task-btn edit"   data-action="edit"
-                aria-label="${t('tasks.editAria', { name: escHtml(task.name) })}" title="${t('tasks.editTitle')}">✎</button>
+                aria-label="${t('tasks.editAria', { name: escHtml(task.name) })}" title="${t('tasks.editTitle')}">${iconSvg('icon-edit')}</button>
         <button class="task-btn delete" data-action="delete"
-                aria-label="${t('tasks.deleteAria', { name: escHtml(task.name) })}"  title="${t('tasks.deleteTitle')}">✕</button>
+                aria-label="${t('tasks.deleteAria', { name: escHtml(task.name) })}"  title="${t('tasks.deleteTitle')}">${iconSvg('icon-x')}</button>
       </div>
     `;
 
@@ -1422,8 +1426,8 @@ function showToast(message, type = 'success', duration = 3200) {
   toast.className = `toast ${type}`;
   toast.setAttribute('role', 'status');
 
-  const icons = { success: '✓', warning: '⚠', error: '✕' };
-  toast.innerHTML = `<span aria-hidden="true">${icons[type] || '•'}</span>${escHtml(message)}`;
+  const icons = { success: 'icon-check', warning: 'icon-alert-triangle', error: 'icon-x' };
+  toast.innerHTML = `${iconSvg(icons[type] || 'icon-check', 'toast-icon')}${escHtml(message)}`;
 
   container.appendChild(toast);
 
