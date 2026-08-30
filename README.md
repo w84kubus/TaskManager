@@ -1,8 +1,10 @@
 # TaskManager
 
-Aplikacja webowa do zarządzania zadaniami — dodawaj, edytuj, filtruj i śledź postęp swoich zadań. Dane synchronizują się w czasie rzeczywistym między wszystkimi urządzeniami.
+🇬🇧 **English** · [🇵🇱 Czytaj po polsku](README.pl.md)
 
-## Aplikacja
+A web app for managing tasks — add, edit, filter and track the progress of your tasks. Data syncs in real time across all your devices.
+
+## App
 
 🌐 **https://w84kubus.github.io/TaskManager/**
 
@@ -10,109 +12,116 @@ Aplikacja webowa do zarządzania zadaniami — dodawaj, edytuj, filtruj i śled�
 
 ## Screenshots
 
-| Logowanie | Lista zadań |
-|-----------|-------------|
-| ![Logowanie](screenshots/screen-1.png) | ![Zadania](screenshots/screen-2.png) |
+| Sign in | Task list |
+|---------|-----------|
+| ![Sign in](screenshots/screen-1.png) | ![Tasks](screenshots/screen-2.png) |
 
-| Statystyki | Ustawienia |
-|------------|------------|
-| ![Statystyki](screenshots/screen-3.png) | ![Ustawienia](screenshots/screen-4.png) |
-
----
-
-## Funkcjonalności
-
-### 🔐 Logowanie i konto (Firebase Auth)
-- **Google** — logowanie przez popup Google OAuth
-- **E-mail / hasło** — rejestracja z walidacją + zapis w Firebase Auth
-- **Weryfikacja e-mail** — link weryfikacyjny przy rejestracji; bez potwierdzenia brak dostępu
-- **Reset hasła** — „Zapomniałem hasła?" wysyła link resetujący na e-mail
-- Sesja persystuje po zamknięciu/odświeżeniu strony
-- Dane izolowane per-konto (`request.auth.uid == userId`)
-- Tryb gościa — dostęp lokalny bez zakładania konta
-
-### ☁️ Synchronizacja w chmurze (Firebase Firestore)
-- Synchronizacja zadań w **czasie rzeczywistym** (`onSnapshot`)
-- Każde zadanie = osobny dokument (brak konfliktów przy równoczesnym zapisie)
-- Dark mode i powiadomienia synchronizowane między urządzeniami
-- Komunikaty błędów przy problemach z uprawnieniami
-
-### 📋 3 widoki aplikacji
-- **Zadania** — dodawanie, edycja, usuwanie, oznaczanie jako ukończone
-- **Statystyki** — karty podsumowujące + wykresy słupkowe (kategorie, priorytety)
-- **Ustawienia** — dark mode, powiadomienia, eksport JSON/TXT, wyczyść dane, usuń konto
-
-### 🎛️ Interaktywność
-- Filtrowanie (wszystkie / aktywne / ukończone) + wyszukiwanie live
-- Sortowanie (data, priorytet, alfabet)
-- Dark mode z zapisem w Firestore (sync) i localStorage (fallback)
-- Modal edycji zadania, modal potwierdzenia zamiast natywnego `confirm()`
-- Toast notifications z auto-hide
-
-### 📤 Eksport danych
-- **JSON** — pełna kopia zapasowa z metadanymi
-- **TXT** — czytelna lista zadań z formatowaniem
-
-### ⚖️ Zgodność z RODO (GDPR)
-- **Polityka Prywatności** — pełna treść dostępna w stopce i przy rejestracji (9 sekcji: administrator, dane, cel, podstawa prawna, Firebase/Google jako procesor, retencja, prawa użytkownika, localStorage, bezpieczeństwo)
-- **Zgoda przy rejestracji** — obowiązkowy checkbox z linkiem do polityki
-- **Usuń konto** — trwałe usunięcie konta Firebase Auth + wszystkich danych Firestore + localStorage (prawo do bycia zapomnianym, art. 17 RODO)
-- **Eksport danych** — JSON/TXT jako realizacja prawa do przenoszenia danych
-
-### 📱 Mobile i PWA-ready
-- Własna ikona SVG (favicon + apple-touch-icon)
-- `meta theme-color` — kolor paska systemowego iOS/Android, aktualizowany przy dark mode
-- `viewport-fit=cover` + `env(safe-area-inset-*)` — obsługa notcha / Dynamic Island
-- `apple-mobile-web-app-capable` — dodawanie do ekranu głównego
-- Na ≤480px (iPhone): nawigacja emoji-only, kompaktowy header, boczne safe-area paddingi
-- Sticky footer — zawsze przyklejony do dołu ekranu
+| Statistics | Settings |
+|------------|----------|
+| ![Statistics](screenshots/screen-3.png) | ![Settings](screenshots/screen-4.png) |
 
 ---
 
-## Technologie
+## Features
 
-| Wymaganie | Realizacja |
+### 🔐 Sign-in and account (Firebase Auth)
+- **Google** — sign-in via Google OAuth popup
+- **Email / password** — registration with validation, stored in Firebase Auth
+- **Email verification** — verification link sent on registration; no access without confirmation
+- **Password reset** — "Forgot your password?" sends a reset link by email
+- Session persists across page reloads/closures
+- Data isolated per account (`request.auth.uid == userId`)
+- Guest mode — local access with no account required
+
+### ☁️ Cloud sync (Firebase Firestore)
+- **Real-time** task synchronization (`onSnapshot`)
+- Each task is its own document (no conflicts on concurrent writes)
+- Dark mode and notification preferences synced across devices
+- Error messages surfaced on permission issues
+
+### 📋 3 app views
+- **Tasks** — add, edit, delete, mark as done (active tasks always shown above completed ones)
+- **Statistics** — summary cards + bar charts (by category, by priority)
+- **Settings** — dark mode, notifications, JSON/TXT export, clear data, delete account
+
+### 🎛️ Interactivity
+- Filtering (all / active / done) + live search
+- Sorting (date, priority, alphabetical)
+- Dark mode saved to Firestore (sync) and localStorage (fallback)
+- Task edit modal, confirmation modal replacing the native `confirm()`
+- Toast notifications with auto-hide
+
+### 🌐 Bilingual interface (PL/EN)
+- Language toggle button in the app header and on the sign-in screen
+- The entire interface is translated: forms, buttons, messages, statistics, settings, Privacy Policy
+- Language choice remembered in `localStorage`
+
+### 📤 Data export
+- **JSON** — full backup with metadata
+- **TXT** — readable, formatted task list (adapted to the selected language)
+
+### ⚖️ GDPR compliance
+- **Privacy Policy** — full text available in the footer and at registration (9 sections: controller, data collected, purpose, legal basis, Firebase/Google as processor, retention, user rights, localStorage, security)
+- **Consent at registration** — mandatory checkbox linking to the policy
+- **Delete account** — permanently removes the Firebase Auth account + all Firestore data + localStorage (right to be forgotten, GDPR Art. 17)
+- **Data export** — JSON/TXT fulfilling the right to data portability
+
+### 📱 Mobile and PWA-ready
+- Custom SVG icon (favicon + apple-touch-icon)
+- `meta theme-color` — system status bar color on iOS/Android, updated with dark mode
+- `viewport-fit=cover` + `env(safe-area-inset-*)` — notch / Dynamic Island support
+- `apple-mobile-web-app-capable` — add to home screen
+- At ≤480px (iPhone): emoji-only navigation, compact header, side safe-area padding
+- Sticky footer — always pinned to the bottom of the screen
+
+---
+
+## Tech stack
+
+| Requirement | Implementation |
 |---|---|
-| HTML5 semantyczny | `<header>`, `<nav>`, `<main>`, `<section>` ×3, `<footer>` |
-| Atrybuty dostępności | 60+ `aria-*`, `role`, `alt` |
-| Własne CSS (bez frameworków) | 1000+ linii czystego CSS |
+| Semantic HTML5 | `<header>`, `<nav>`, `<main>`, `<section>` ×3, `<footer>` |
+| Accessibility attributes | 60+ `aria-*`, `role`, `alt` |
+| Hand-written CSS (no frameworks) | 1000+ lines of plain CSS |
 | Flexbox ×3 | header-inner, form-row, task-item |
-| CSS Grid ×2 | stats-grid (4 kol.), settings-grid (2 kol.) |
+| CSS Grid ×2 | stats-grid (4 col.), settings-grid (2 col.) |
 | Media queries ×2 | 768px (tablet), 480px (mobile) |
-| Transitions / animations ×3+ | logo hover, przyciski, slideIn, fadeUp, modalPop, toast |
-| CSS Variables | 40+ zmiennych (light + dark) + `safe-area env()` |
-| Firebase Auth | email + Google OAuth + weryfikacja + reset hasła |
+| Transitions / animations ×3+ | logo hover, buttons, slideIn, fadeUp, modalPop, toast |
+| CSS variables | 40+ variables (light + dark) + `safe-area env()` |
+| i18n (PL/EN) | custom translation system (`data-i18n`, JS dictionary) |
+| Firebase Auth | email + Google OAuth + verification + password reset |
 | Firebase Firestore | real-time sync, per-task subcollection |
-| Bezpieczne reguły Firestore | `request.auth.uid == userId` |
+| Secure Firestore rules | `request.auth.uid == userId` |
 | DOM manipulation | `createElement`, `innerHTML`, `appendChild` |
-| Event listeners ×4 typy | `click`, `submit`, `input`, `scroll` |
-| Walidacja RegExp | `/^[\p{L}\p{N}\s\-.,!?()]{2,120}$/u` |
-| `event.preventDefault()` | ×3 (formularze, nawigacja) |
-| `localStorage` | fallback offline + dark mode per-device |
-| Async (`setTimeout` / `Promise`) | toast, eksport JSON/TXT, usuwanie konta |
+| Event listeners ×4 types | `click`, `submit`, `input`, `scroll` |
+| RegExp validation | `/^[\p{L}\p{N}\s\-.,!?()]{2,120}$/u` |
+| `event.preventDefault()` | ×3 (forms, navigation) |
+| `localStorage` | offline fallback + per-device dark mode + language preference |
+| Async (`setTimeout` / `Promise`) | toasts, JSON/TXT export, account deletion |
 
 ---
 
-## Struktura plików
+## File structure
 
 ```
 Task Manager/
-├── index.html            # Główna strona HTML
-├── favicon.svg           # Ikona aplikacji (SVG)
+├── index.html            # Main HTML page
+├── favicon.svg           # App icon (SVG)
 ├── styles/
-│   └── style.css         # Arkusz stylów (1000+ linii)
+│   └── style.css         # Stylesheet (1000+ lines)
 ├── scripts/
-│   └── app.js            # Logika aplikacji
-└── README.md
+│   └── app.js            # App logic + i18n dictionary
+├── README.md              # README (English)
+└── README.pl.md           # README (Polish)
 ```
 
 ---
 
-## Uruchomienie
+## Running it
 
-Otwórz **https://w84kubus.github.io/TaskManager/** w przeglądarce.
+Open **https://w84kubus.github.io/TaskManager/** in your browser.
 
-Lub lokalnie:
+Or run it locally:
 ```bash
 # Node.js
 npx serve .
@@ -123,9 +132,9 @@ python -m http.server 3000
 
 ---
 
-## Konfiguracja Firebase
+## Firebase configuration
 
-### Reguły Firestore (Firebase Console → Firestore → Rules)
+### Firestore rules (Firebase Console → Firestore → Rules)
 ```
 rules_version = '2';
 service cloud.firestore {
@@ -137,45 +146,46 @@ service cloud.firestore {
 }
 ```
 
-### Autoryzowane domeny (Authentication → Settings → Authorized domains)
+### Authorized domains (Authentication → Settings → Authorized domains)
 - `localhost`
 - `w84kubus.github.io`
 
-### Włączone metody logowania (Authentication → Sign-in method)
+### Enabled sign-in methods (Authentication → Sign-in method)
 - Email/Password ✅
 - Google ✅
 
-### Szablony e-mail (Authentication → Templates)
-| Szablon | Subject |
+### Email templates (Authentication → Templates)
+| Template | Subject |
 |---|---|
 | Email address verification | `Potwierdź swój adres e-mail – TaskManager` |
 | Password reset | `Zresetuj hasło – TaskManager` |
 
 ---
 
-## Testy
+## Testing
 
-| Przeglądarka / scenariusz | Status |
+| Browser / scenario | Status |
 |---|---|
 | Chrome (desktop) | ✅ |
 | Firefox (desktop) | ✅ |
 | Safari iOS (iPhone) | ✅ |
 | iPhone 16 Pro — mobile header | ✅ |
-| Responsywność ≤480px | ✅ |
-| Responsywność ≤768px | ✅ |
-| Responsywność desktop | ✅ |
-| Sync real-time (Firestore) | ✅ |
-| Rejestracja + weryfikacja e-mail | ✅ |
-| Logowanie Google OAuth | ✅ |
-| Reset hasła | ✅ |
-| Usunięcie konta (RODO) | ✅ |
-| Dark mode sync między urządzeniami | ✅ |
-| Eksport JSON / TXT | ✅ |
-| Tryb gościa (localStorage) | ✅ |
-| Konsola — 0 błędów | ✅ |
+| Responsive ≤480px | ✅ |
+| Responsive ≤768px | ✅ |
+| Responsive desktop | ✅ |
+| Real-time sync (Firestore) | ✅ |
+| Registration + email verification | ✅ |
+| Google OAuth sign-in | ✅ |
+| Password reset | ✅ |
+| Account deletion (GDPR) | ✅ |
+| Dark mode sync across devices | ✅ |
+| JSON / TXT export | ✅ |
+| Guest mode (localStorage) | ✅ |
+| PL/EN language switching | ✅ |
+| Console — 0 errors | ✅ |
 
 ---
 
-## Autorzy
+## Authors
 
-Projekt zespołowy — szczegóły w historii commitów.
+Team project — see commit history for details.

@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;1,9..144,300;1,9..144,700;1,9..144,900&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles/style.css?v=73">
+  <link rel="stylesheet" href="styles/style.css?v=75">
 </head>
 <body>
 
@@ -23,18 +23,22 @@
   ════════════════════════════════════════ -->
   <div id="auth-screen" class="auth-screen" aria-label="Logowanie i rejestracja">
     <div class="auth-card">
+      <button type="button" id="lang-toggle-auth" class="lang-toggle lang-toggle--auth" aria-label="Switch language to English">
+        <span class="lang-flag" aria-hidden="true">🇬🇧</span><span class="lang-label">EN</span>
+      </button>
+
       <div class="auth-logo" aria-hidden="true">
         <span class="logo-icon">✓</span>
         <span class="logo-text">TaskManager</span>
       </div>
-      <p class="auth-subtitle">Zaloguj się, aby zarządzać swoimi zadaniami</p>
+      <p class="auth-subtitle" data-i18n="auth.subtitle">Zaloguj się, aby zarządzać swoimi zadaniami</p>
 
       <!-- Tabs: Logowanie / Rejestracja -->
       <div class="auth-tabs" role="tablist" aria-label="Wybierz logowanie lub rejestrację">
         <button class="auth-tab active" role="tab" data-auth-tab="login"
-                aria-selected="true" aria-controls="login-panel">Logowanie</button>
+                aria-selected="true" aria-controls="login-panel" data-i18n="auth.tabLogin">Logowanie</button>
         <button class="auth-tab" role="tab" data-auth-tab="register"
-                aria-selected="false" aria-controls="register-panel">Rejestracja</button>
+                aria-selected="false" aria-controls="register-panel" data-i18n="auth.tabRegister">Rejestracja</button>
       </div>
 
       <!-- Panel: Logowanie -->
@@ -47,29 +51,29 @@
               <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A10.96 10.96 0 0 0 1 12c0 1.77.42 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
               <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
             </svg>
-            Kontynuuj z Google
+            <span data-i18n="auth.googleLogin">Kontynuuj z Google</span>
           </button>
         </div>
 
         <div class="auth-divider" aria-hidden="true">
-          <span>lub zaloguj się e-mailem</span>
+          <span data-i18n="auth.dividerLogin">lub zaloguj się e-mailem</span>
         </div>
 
         <form id="login-form" novalidate aria-label="Logowanie e-mailem">
           <div class="form-group">
-            <label for="login-email">Adres e-mail</label>
-            <input type="email" id="login-email" placeholder="twoj@email.pl"
+            <label for="login-email" data-i18n="auth.emailLabel">Adres e-mail</label>
+            <input type="email" id="login-email" placeholder="twoj@email.pl" data-i18n-placeholder="auth.emailPlaceholder"
                    aria-required="true" aria-describedby="login-email-error" autocomplete="email">
             <span class="error-msg" id="login-email-error" role="alert" aria-live="polite"></span>
           </div>
           <div class="form-group">
-            <label for="login-password">Hasło</label>
-            <input type="password" id="login-password" placeholder="Wpisz hasło"
+            <label for="login-password" data-i18n="auth.passwordLabel">Hasło</label>
+            <input type="password" id="login-password" placeholder="Wpisz hasło" data-i18n-placeholder="auth.passwordPlaceholder"
                    aria-required="true" aria-describedby="login-password-error" autocomplete="current-password">
             <span class="error-msg" id="login-password-error" role="alert" aria-live="polite"></span>
           </div>
-          <button type="submit" class="btn btn-primary auth-submit">Zaloguj się</button>
-          <button type="button" class="forgot-link" id="forgot-btn">Zapomniałem hasła?</button>
+          <button type="submit" class="btn btn-primary auth-submit" data-i18n="auth.loginSubmit">Zaloguj się</button>
+          <button type="button" class="forgot-link" id="forgot-btn" data-i18n="auth.forgotLink">Zapomniałem hasła?</button>
         </form>
       </div>
 
@@ -83,30 +87,30 @@
               <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A10.96 10.96 0 0 0 1 12c0 1.77.42 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
               <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
             </svg>
-            Zarejestruj przez Google
+            <span data-i18n="auth.googleRegister">Zarejestruj przez Google</span>
           </button>
         </div>
 
         <div class="auth-divider" aria-hidden="true">
-          <span>lub utwórz konto e-mailem</span>
+          <span data-i18n="auth.dividerRegister">lub utwórz konto e-mailem</span>
         </div>
 
         <form id="register-form" novalidate aria-label="Rejestracja e-mailem">
           <div class="form-group">
-            <label for="register-name">Imię</label>
-            <input type="text" id="register-name" placeholder="Twoje imię"
+            <label for="register-name" data-i18n="auth.nameLabel">Imię</label>
+            <input type="text" id="register-name" placeholder="Twoje imię" data-i18n-placeholder="auth.namePlaceholder"
                    aria-required="true" aria-describedby="register-name-error" autocomplete="given-name">
             <span class="error-msg" id="register-name-error" role="alert" aria-live="polite"></span>
           </div>
           <div class="form-group">
-            <label for="register-email">Adres e-mail</label>
-            <input type="email" id="register-email" placeholder="twoj@email.pl"
+            <label for="register-email" data-i18n="auth.emailLabel">Adres e-mail</label>
+            <input type="email" id="register-email" placeholder="twoj@email.pl" data-i18n-placeholder="auth.emailPlaceholder"
                    aria-required="true" aria-describedby="register-email-error" autocomplete="email">
             <span class="error-msg" id="register-email-error" role="alert" aria-live="polite"></span>
           </div>
           <div class="form-group">
-            <label for="register-password">Hasło</label>
-            <input type="password" id="register-password" placeholder="Min. 6 znaków, 1 cyfra, 1 wielka litera"
+            <label for="register-password" data-i18n="auth.passwordLabel">Hasło</label>
+            <input type="password" id="register-password" placeholder="Min. 6 znaków, 1 cyfra, 1 wielka litera" data-i18n-placeholder="auth.registerPasswordPlaceholder"
                    aria-required="true" aria-describedby="register-password-error" autocomplete="new-password">
             <span class="error-msg" id="register-password-error" role="alert" aria-live="polite"></span>
           </div>
@@ -114,42 +118,41 @@
             <label class="consent-label">
               <input type="checkbox" id="register-consent" aria-required="true"
                      aria-describedby="register-consent-error">
-              <span>Akceptuję
-                <button type="button" class="privacy-inline-link" id="open-privacy-reg">
-                  Politykę Prywatności
-                </button>
-                i wyrażam zgodę na przetwarzanie danych osobowych.
+              <span>
+                <span data-i18n="auth.consentPrefix">Akceptuję</span>
+                <button type="button" class="privacy-inline-link" id="open-privacy-reg" data-i18n="auth.privacyPolicyLink">Politykę Prywatności</button>
+                <span data-i18n="auth.consentSuffix">i wyrażam zgodę na przetwarzanie danych osobowych.</span>
               </span>
             </label>
             <span class="error-msg" id="register-consent-error" role="alert" aria-live="polite"></span>
           </div>
-          <button type="submit" class="btn btn-primary auth-submit">Utwórz konto</button>
+          <button type="submit" class="btn btn-primary auth-submit" data-i18n="auth.registerSubmit">Utwórz konto</button>
         </form>
       </div>
 
       <!-- Panel: Reset hasła -->
       <div id="forgot-panel" class="auth-panel" hidden aria-label="Resetowanie hasła">
         <div class="forgot-icon" aria-hidden="true">🔑</div>
-        <p class="forgot-desc">
+        <p class="forgot-desc" data-i18n="auth.forgotDesc">
           Podaj adres e-mail powiązany z kontem — wyślemy Ci link do ustawienia nowego hasła.
         </p>
         <form id="forgot-form" novalidate aria-label="Formularz resetowania hasła">
           <div class="form-group">
-            <label for="forgot-email">Adres e-mail</label>
-            <input type="email" id="forgot-email" placeholder="twoj@email.pl"
+            <label for="forgot-email" data-i18n="auth.emailLabel">Adres e-mail</label>
+            <input type="email" id="forgot-email" placeholder="twoj@email.pl" data-i18n-placeholder="auth.emailPlaceholder"
                    aria-required="true" aria-describedby="forgot-email-error" autocomplete="email">
             <span class="error-msg" id="forgot-email-error" role="alert" aria-live="polite"></span>
           </div>
-          <button type="submit" class="btn btn-primary auth-submit">Wyślij link resetujący</button>
+          <button type="submit" class="btn btn-primary auth-submit" data-i18n="auth.forgotSubmit">Wyślij link resetujący</button>
         </form>
-        <button type="button" class="guest-link" id="forgot-back-btn">← Wróć do logowania</button>
+        <button type="button" class="guest-link" id="forgot-back-btn" data-i18n="auth.forgotBack">← Wróć do logowania</button>
       </div>
 
       <!-- Przycisk trybu gościa – wewnątrz karty, zawsze widoczny -->
-      <div class="guest-divider" aria-hidden="true">lub</div>
+      <div class="guest-divider" aria-hidden="true" data-i18n="auth.or">lub</div>
       <button id="guest-btn" class="guest-btn-prominent" type="button"
               aria-label="Kontynuuj bez logowania jako gość">
-        👤 Kontynuuj bez logowania →
+        👤 <span data-i18n="auth.guestBtn">Kontynuuj bez logowania →</span>
       </button>
 
     </div><!-- /.auth-card -->
@@ -173,31 +176,31 @@
       <div class="verify-steps">
         <div class="verify-step">
           <span class="verify-step-num">1</span>
-          <span>Otwórz skrzynkę e-mail</span>
+          <span data-i18n="verify.step1">Otwórz skrzynkę e-mail</span>
         </div>
         <div class="verify-step">
           <span class="verify-step-num">2</span>
-          <span>Kliknij link weryfikacyjny od TaskManager</span>
+          <span data-i18n="verify.step2">Kliknij link weryfikacyjny od TaskManager</span>
         </div>
         <div class="verify-step">
           <span class="verify-step-num">3</span>
-          <span>Wróć tutaj i naciśnij przycisk poniżej</span>
+          <span data-i18n="verify.step3">Wróć tutaj i naciśnij przycisk poniżej</span>
         </div>
       </div>
 
       <p class="verify-hint">
-        <small>Nie widzisz wiadomości? Sprawdź folder <strong>Spam / Oferty / Powiadomienia</strong>.</small>
+        <small data-i18n-html="verify.hintHtml">Nie widzisz wiadomości? Sprawdź folder <strong>Spam / Oferty / Powiadomienia</strong>.</small>
       </p>
 
-      <button id="verify-check-btn" class="btn btn-primary auth-submit" type="button">
+      <button id="verify-check-btn" class="btn btn-primary auth-submit" type="button" data-i18n="verify.checkBtn">
         ✓ Potwierdziłem — zaloguj mnie
       </button>
 
-      <button id="verify-resend-btn" class="btn btn-secondary verify-resend" type="button">
+      <button id="verify-resend-btn" class="btn btn-secondary verify-resend" type="button" data-i18n="verify.resendBtn">
         Wyślij link ponownie
       </button>
 
-      <button id="verify-back-btn" class="guest-link" type="button">
+      <button id="verify-back-btn" class="guest-link" type="button" data-i18n="verify.backBtn">
         Użyj innego konta
       </button>
     </div>
@@ -220,25 +223,28 @@
             <a href="#" class="nav-link active" data-view="tasks"
                aria-current="page" aria-label="Przejdź do widoku zadań">
               <span class="nav-icon" aria-hidden="true">📋</span>
-              <span class="nav-label">Zadania</span>
+              <span class="nav-label" data-i18n="nav.tasks">Zadania</span>
             </a>
           </li>
           <li>
             <a href="#" class="nav-link" data-view="stats"
                aria-label="Przejdź do statystyk">
               <span class="nav-icon" aria-hidden="true">📊</span>
-              <span class="nav-label">Statystyki</span>
+              <span class="nav-label" data-i18n="nav.stats">Statystyki</span>
             </a>
           </li>
           <li>
             <a href="#" class="nav-link" data-view="settings"
                aria-label="Przejdź do ustawień">
               <span class="nav-icon" aria-hidden="true">⚙️</span>
-              <span class="nav-label">Ustawienia</span>
+              <span class="nav-label" data-i18n="nav.settings">Ustawienia</span>
             </a>
           </li>
         </ul>
       </nav>
+      <button type="button" id="lang-toggle" class="lang-toggle" aria-label="Switch language to English">
+        <span class="lang-flag" aria-hidden="true">🇬🇧</span><span class="lang-label">EN</span>
+      </button>
       <div class="user-menu" id="user-menu" aria-label="Menu użytkownika">
         <div class="user-avatar" id="user-avatar" aria-hidden="true"></div>
         <span class="user-name" id="user-name"></span>
@@ -256,10 +262,10 @@
   <!-- Banner trybu gościa -->
   <div id="guest-banner" class="guest-banner" hidden aria-live="polite">
     <span class="guest-banner-icon" aria-hidden="true">👤</span>
-    <span class="guest-banner-text">
+    <span class="guest-banner-text" data-i18n-html="guestBanner.textHtml">
       Korzystasz jako <strong>Gość</strong> — zadania są zapisane tylko lokalnie w tej przeglądarce.
     </span>
-    <button id="guest-banner-login" class="guest-banner-btn" type="button">
+    <button id="guest-banner-login" class="guest-banner-btn" type="button" data-i18n="guestBanner.loginBtn">
       Zaloguj się / Zarejestruj
     </button>
     <button id="guest-banner-close" class="guest-banner-close" type="button"
@@ -273,18 +279,19 @@
     ════════════════════════════════════════ -->
     <section id="tasks" class="view" aria-label="Lista zadań">
       <div class="view-header">
-        <h1>Moje zadania</h1>
-        <p class="subtitle">Organizuj i śledź postęp swoich zadań</p>
+        <h1 data-i18n="tasks.title">Moje zadania</h1>
+        <p class="subtitle" data-i18n="tasks.subtitle">Organizuj i śledź postęp swoich zadań</p>
       </div>
 
       <form id="task-form" novalidate aria-label="Formularz dodawania zadania">
         <div class="form-group full-width">
-          <label for="task-name">Nazwa zadania</label>
+          <label for="task-name" data-i18n="tasks.nameLabel">Nazwa zadania</label>
           <input
             type="text"
             id="task-name"
             name="task-name"
             placeholder="Wpisz nazwę zadania (min. 2 znaki)…"
+            data-i18n-placeholder="tasks.namePlaceholder"
             aria-required="true"
             aria-describedby="name-error"
             autocomplete="off"
@@ -295,49 +302,50 @@
 
         <div class="form-row">
           <div class="form-group">
-            <label for="task-priority">Priorytet</label>
+            <label for="task-priority" data-i18n="tasks.priorityLabel">Priorytet</label>
             <select id="task-priority" name="task-priority" aria-label="Wybierz priorytet zadania">
-              <option value="low">🟢 Niski</option>
-              <option value="medium" selected>🟡 Średni</option>
-              <option value="high">🔴 Wysoki</option>
+              <option value="low" data-i18n="priority.low">🟢 Niski</option>
+              <option value="medium" selected data-i18n="priority.medium">🟡 Średni</option>
+              <option value="high" data-i18n="priority.high">🔴 Wysoki</option>
             </select>
           </div>
           <div class="form-group">
-            <label for="task-category">Kategoria</label>
+            <label for="task-category" data-i18n="tasks.categoryLabel">Kategoria</label>
             <select id="task-category" name="task-category" aria-label="Wybierz kategorię zadania">
-              <option value="personal">👤 Osobiste</option>
-              <option value="work">💼 Praca</option>
-              <option value="shopping">🛒 Zakupy</option>
-              <option value="health">❤️ Zdrowie</option>
-              <option value="other">📦 Inne</option>
+              <option value="personal" data-i18n="category.personal">👤 Osobiste</option>
+              <option value="work" data-i18n="category.work">💼 Praca</option>
+              <option value="shopping" data-i18n="category.shopping">🛒 Zakupy</option>
+              <option value="health" data-i18n="category.health">❤️ Zdrowie</option>
+              <option value="other" data-i18n="category.other">📦 Inne</option>
             </select>
           </div>
           <button type="submit" class="btn btn-primary" aria-label="Dodaj nowe zadanie">
-            <span aria-hidden="true">＋</span> Dodaj zadanie
+            <span aria-hidden="true">＋</span> <span data-i18n="tasks.addBtn">Dodaj zadanie</span>
           </button>
         </div>
       </form>
 
       <div class="task-controls" role="toolbar" aria-label="Filtry i sortowanie">
         <div class="filter-buttons" role="group" aria-label="Filtruj zadania według statusu">
-          <button class="filter-btn active" data-filter="all" aria-pressed="true">Wszystkie</button>
-          <button class="filter-btn" data-filter="active" aria-pressed="false">Aktywne</button>
-          <button class="filter-btn" data-filter="done" aria-pressed="false">Ukończone</button>
+          <button class="filter-btn active" data-filter="all" aria-pressed="true" data-i18n="tasks.filterAll">Wszystkie</button>
+          <button class="filter-btn" data-filter="active" aria-pressed="false" data-i18n="tasks.filterActive">Aktywne</button>
+          <button class="filter-btn" data-filter="done" aria-pressed="false" data-i18n="tasks.filterDone">Ukończone</button>
         </div>
         <div class="sort-search">
           <input
             type="search"
             id="search-input"
             placeholder="Szukaj zadania…"
+            data-i18n-placeholder="tasks.searchPlaceholder"
             aria-label="Wyszukaj zadanie po nazwie"
           >
           <select id="sort-select" aria-label="Sortuj zadania">
-            <option value="date-desc">Najnowsze</option>
-            <option value="date-asc">Najstarsze</option>
-            <option value="priority-high">Priorytet ↑</option>
-            <option value="priority-low">Priorytet ↓</option>
-            <option value="alpha-asc">A → Z</option>
-            <option value="alpha-desc">Z → A</option>
+            <option value="date-desc" data-i18n="tasks.sortDateDesc">Najnowsze</option>
+            <option value="date-asc" data-i18n="tasks.sortDateAsc">Najstarsze</option>
+            <option value="priority-high" data-i18n="tasks.sortPriorityHigh">Priorytet ↑</option>
+            <option value="priority-low" data-i18n="tasks.sortPriorityLow">Priorytet ↓</option>
+            <option value="alpha-asc" data-i18n="tasks.sortAlphaAsc">A → Z</option>
+            <option value="alpha-desc" data-i18n="tasks.sortAlphaDesc">Z → A</option>
           </select>
         </div>
       </div>
@@ -348,8 +356,8 @@
 
       <div id="empty-state" class="empty-state" aria-live="polite" hidden>
         <span class="empty-icon" aria-hidden="true">📭</span>
-        <p>Brak zadań do wyświetlenia</p>
-        <small>Dodaj pierwsze zadanie powyżej lub zmień filtry</small>
+        <p data-i18n="tasks.emptyTitle">Brak zadań do wyświetlenia</p>
+        <small data-i18n="tasks.emptyHint">Dodaj pierwsze zadanie powyżej lub zmień filtry</small>
       </div>
     </section>
 
@@ -358,40 +366,40 @@
     ════════════════════════════════════════ -->
     <section id="stats" class="view" aria-label="Statystyki zadań" hidden>
       <div class="view-header">
-        <h1>Statystyki</h1>
-        <p class="subtitle">Przegląd Twoich postępów</p>
+        <h1 data-i18n="stats.title">Statystyki</h1>
+        <p class="subtitle" data-i18n="stats.subtitle">Przegląd Twoich postępów</p>
       </div>
 
       <div class="stats-grid" role="list" aria-label="Karty statystyk">
         <div class="stat-card" role="listitem">
           <div class="stat-icon" aria-hidden="true">📊</div>
           <div class="stat-value" id="stat-total">0</div>
-          <div class="stat-label">Wszystkich zadań</div>
+          <div class="stat-label" data-i18n="stats.total">Wszystkich zadań</div>
         </div>
         <div class="stat-card" role="listitem">
           <div class="stat-icon" aria-hidden="true">⏳</div>
           <div class="stat-value" id="stat-active">0</div>
-          <div class="stat-label">Aktywnych</div>
+          <div class="stat-label" data-i18n="stats.active">Aktywnych</div>
         </div>
         <div class="stat-card" role="listitem">
           <div class="stat-icon" aria-hidden="true">✅</div>
           <div class="stat-value" id="stat-done">0</div>
-          <div class="stat-label">Ukończonych</div>
+          <div class="stat-label" data-i18n="stats.done">Ukończonych</div>
         </div>
         <div class="stat-card stat-card--accent" role="listitem">
           <div class="stat-icon" aria-hidden="true">🎯</div>
           <div class="stat-value" id="stat-percent">0%</div>
-          <div class="stat-label">Procent ukończenia</div>
+          <div class="stat-label" data-i18n="stats.percent">Procent ukończenia</div>
         </div>
       </div>
 
       <div class="stats-charts">
         <div class="chart-box" aria-label="Wykres zadań według kategorii">
-          <h2>Według kategorii</h2>
+          <h2 data-i18n="stats.byCategory">Według kategorii</h2>
           <div id="category-chart" class="bar-chart" role="img" aria-label="Słupkowy wykres kategorii"></div>
         </div>
         <div class="chart-box" aria-label="Wykres zadań według priorytetu">
-          <h2>Według priorytetu</h2>
+          <h2 data-i18n="stats.byPriority">Według priorytetu</h2>
           <div id="priority-chart" class="bar-chart" role="img" aria-label="Słupkowy wykres priorytetów"></div>
         </div>
       </div>
@@ -402,15 +410,15 @@
     ════════════════════════════════════════ -->
     <section id="settings" class="view" aria-label="Ustawienia aplikacji" hidden>
       <div class="view-header">
-        <h1>Ustawienia</h1>
-        <p class="subtitle">Dostosuj aplikację do swoich potrzeb</p>
+        <h1 data-i18n="settings.title">Ustawienia</h1>
+        <p class="subtitle" data-i18n="settings.subtitle">Dostosuj aplikację do swoich potrzeb</p>
       </div>
 
       <div class="settings-grid">
         <div class="setting-card">
           <div class="setting-info">
-            <h2>Tryb ciemny</h2>
-            <p>Przełącz między jasnym a ciemnym motywem interfejsu</p>
+            <h2 data-i18n="settings.darkMode">Tryb ciemny</h2>
+            <p data-i18n="settings.darkModeDesc">Przełącz między jasnym a ciemnym motywem interfejsu</p>
           </div>
           <label class="toggle-switch" aria-label="Przełącz tryb ciemny">
             <input
@@ -425,8 +433,8 @@
 
         <div class="setting-card">
           <div class="setting-info">
-            <h2>Powiadomienia</h2>
-            <p>Wyświetlaj komunikaty toast po każdej akcji</p>
+            <h2 data-i18n="settings.notifications">Powiadomienia</h2>
+            <p data-i18n="settings.notificationsDesc">Wyświetlaj komunikaty toast po każdej akcji</p>
           </div>
           <label class="toggle-switch" aria-label="Włącz powiadomienia">
             <input
@@ -442,40 +450,40 @@
 
         <div class="setting-card setting-card--danger">
           <div class="setting-info">
-            <h2>Wyczyść dane</h2>
-            <p>Trwale usuń wszystkie zadania i zresetuj ustawienia aplikacji</p>
+            <h2 data-i18n="settings.clearData">Wyczyść dane</h2>
+            <p data-i18n="settings.clearDataDesc">Trwale usuń wszystkie zadania i zresetuj ustawienia aplikacji</p>
           </div>
-          <button id="clear-data-btn" class="btn btn-danger" aria-label="Wyczyść wszystkie dane aplikacji">
+          <button id="clear-data-btn" class="btn btn-danger" aria-label="Wyczyść wszystkie dane aplikacji" data-i18n="settings.clearDataBtn">
             Wyczyść dane
           </button>
         </div>
 
         <div class="setting-card setting-card--danger" id="delete-account-card">
           <div class="setting-info">
-            <h2>Usuń konto</h2>
-            <p>Trwale usuń konto i wszystkie powiązane dane — operacja nieodwracalna (prawo do bycia zapomnianym)</p>
+            <h2 data-i18n="settings.deleteAccount">Usuń konto</h2>
+            <p data-i18n="settings.deleteAccountDesc">Trwale usuń konto i wszystkie powiązane dane — operacja nieodwracalna (prawo do bycia zapomnianym)</p>
           </div>
-          <button id="delete-account-btn" class="btn btn-danger" aria-label="Trwale usuń konto">
+          <button id="delete-account-btn" class="btn btn-danger" aria-label="Trwale usuń konto" data-i18n="settings.deleteAccountBtn">
             Usuń konto
           </button>
         </div>
 
         <div class="setting-card">
           <div class="setting-info">
-            <h2>Eksportuj JSON</h2>
-            <p>Pobierz kopię zapasową swoich zadań w formacie JSON</p>
+            <h2 data-i18n="settings.exportJson">Eksportuj JSON</h2>
+            <p data-i18n="settings.exportJsonDesc">Pobierz kopię zapasową swoich zadań w formacie JSON</p>
           </div>
-          <button id="export-btn" class="btn btn-secondary" aria-label="Eksportuj zadania do pliku JSON">
+          <button id="export-btn" class="btn btn-secondary" aria-label="Eksportuj zadania do pliku JSON" data-i18n="settings.exportJson">
             Eksportuj JSON
           </button>
         </div>
 
         <div class="setting-card">
           <div class="setting-info">
-            <h2>Eksportuj TXT</h2>
-            <p>Pobierz czytelną listę zadań w formacie tekstowym</p>
+            <h2 data-i18n="settings.exportTxt">Eksportuj TXT</h2>
+            <p data-i18n="settings.exportTxtDesc">Pobierz czytelną listę zadań w formacie tekstowym</p>
           </div>
-          <button id="export-txt-btn" class="btn btn-secondary" aria-label="Eksportuj zadania do pliku TXT">
+          <button id="export-txt-btn" class="btn btn-secondary" aria-label="Eksportuj zadania do pliku TXT" data-i18n="settings.exportTxt">
             Eksportuj TXT
           </button>
         </div>
@@ -498,7 +506,7 @@
     <div class="modal-overlay" id="modal-overlay" aria-hidden="true"></div>
     <div class="modal-content">
       <div class="modal-header">
-        <h2 id="modal-title">Edytuj zadanie</h2>
+        <h2 id="modal-title" data-i18n="modal.editTitle">Edytuj zadanie</h2>
         <button
           class="modal-close"
           id="modal-close"
@@ -510,7 +518,7 @@
         <input type="hidden" id="edit-task-id">
 
         <div class="form-group">
-          <label for="edit-task-name">Nazwa zadania</label>
+          <label for="edit-task-name" data-i18n="tasks.nameLabel">Nazwa zadania</label>
           <input
             type="text"
             id="edit-task-name"
@@ -523,28 +531,28 @@
 
         <div class="form-row">
           <div class="form-group">
-            <label for="edit-task-priority">Priorytet</label>
+            <label for="edit-task-priority" data-i18n="tasks.priorityLabel">Priorytet</label>
             <select id="edit-task-priority" aria-label="Zmień priorytet zadania">
-              <option value="low">🟢 Niski</option>
-              <option value="medium">🟡 Średni</option>
-              <option value="high">🔴 Wysoki</option>
+              <option value="low" data-i18n="priority.low">🟢 Niski</option>
+              <option value="medium" data-i18n="priority.medium">🟡 Średni</option>
+              <option value="high" data-i18n="priority.high">🔴 Wysoki</option>
             </select>
           </div>
           <div class="form-group">
-            <label for="edit-task-category">Kategoria</label>
+            <label for="edit-task-category" data-i18n="tasks.categoryLabel">Kategoria</label>
             <select id="edit-task-category" aria-label="Zmień kategorię zadania">
-              <option value="personal">👤 Osobiste</option>
-              <option value="work">💼 Praca</option>
-              <option value="shopping">🛒 Zakupy</option>
-              <option value="health">❤️ Zdrowie</option>
-              <option value="other">📦 Inne</option>
+              <option value="personal" data-i18n="category.personal">👤 Osobiste</option>
+              <option value="work" data-i18n="category.work">💼 Praca</option>
+              <option value="shopping" data-i18n="category.shopping">🛒 Zakupy</option>
+              <option value="health" data-i18n="category.health">❤️ Zdrowie</option>
+              <option value="other" data-i18n="category.other">📦 Inne</option>
             </select>
           </div>
         </div>
 
         <div class="modal-actions">
-          <button type="button" class="btn btn-secondary" id="modal-cancel">Anuluj</button>
-          <button type="submit" class="btn btn-primary">Zapisz zmiany</button>
+          <button type="button" class="btn btn-secondary" id="modal-cancel" data-i18n="modal.cancel">Anuluj</button>
+          <button type="submit" class="btn btn-primary" data-i18n="modal.save">Zapisz zmiany</button>
         </div>
       </form>
     </div>
@@ -560,8 +568,8 @@
       <h2 id="confirm-title" class="confirm-title"></h2>
       <p id="confirm-message" class="confirm-message"></p>
       <div class="modal-actions">
-        <button type="button" class="btn btn-secondary" id="confirm-cancel">Anuluj</button>
-        <button type="button" class="btn btn-danger"    id="confirm-ok">Potwierdź</button>
+        <button type="button" class="btn btn-secondary" id="confirm-cancel" data-i18n="modal.cancel">Anuluj</button>
+        <button type="button" class="btn btn-danger"    id="confirm-ok" data-i18n="modal.confirm">Potwierdź</button>
       </div>
     </div>
   </div>
@@ -572,13 +580,13 @@
   <footer>
     <div class="footer-inner">
       <div class="footer-copy">
-        <p>&copy; 2026 TaskManager. Wszelkie prawa zastrzeżone.</p>
+        <p data-i18n="footer.copyright">&copy; 2026 TaskManager. Wszelkie prawa zastrzeżone.</p>
         <p>
-          <button type="button" class="footer-link" id="open-privacy-footer">Polityka Prywatności</button>
+          <button type="button" class="footer-link" id="open-privacy-footer" data-i18n="footer.privacy">Polityka Prywatności</button>
         </p>
       </div>
       <p class="footer-sub">
-        Zbudowany z <span aria-label="pasją">❤️</span> używając czystego HTML, CSS i JavaScript
+        <span data-i18n="footer.builtWithPrefix">Zbudowany z</span> <span aria-label="pasją">❤️</span> <span data-i18n="footer.builtWithSuffix">używając czystego HTML, CSS i JavaScript</span>
       </p>
     </div>
   </footer>
@@ -592,65 +600,65 @@
        aria-labelledby="privacy-modal-title" hidden>
     <div class="privacy-modal-inner">
       <div class="privacy-modal-header">
-        <h2 id="privacy-modal-title">Polityka Prywatności</h2>
+        <h2 id="privacy-modal-title" data-i18n="privacy.title">Polityka Prywatności</h2>
         <button id="privacy-close-btn" class="modal-close" aria-label="Zamknij politykę prywatności">×</button>
       </div>
       <div class="privacy-modal-body">
 
-        <p class="privacy-updated">Ostatnia aktualizacja: 18 kwietnia 2026 r.</p>
+        <p class="privacy-updated" data-i18n="privacy.updated">Ostatnia aktualizacja: 18 kwietnia 2026 r.</p>
 
-        <h3>1. Administrator danych osobowych</h3>
-        <p>Administratorem danych osobowych jest właściciel aplikacji TaskManager dostępnej pod adresem <strong>https://w84kubus.github.io/TaskManager/</strong> (dalej: „Administrator"). Kontakt: profil GitHub <a href="https://github.com/w84kubus" target="_blank" rel="noopener">github.com/w84kubus</a>.</p>
+        <h3 data-i18n="privacy.h1">1. Administrator danych osobowych</h3>
+        <p data-i18n-html="privacy.p1">Administratorem danych osobowych jest właściciel aplikacji TaskManager dostępnej pod adresem <strong>https://w84kubus.github.io/TaskManager/</strong> (dalej: „Administrator"). Kontakt: profil GitHub <a href="https://github.com/w84kubus" target="_blank" rel="noopener">github.com/w84kubus</a>.</p>
 
-        <h3>2. Jakie dane zbieramy</h3>
+        <h3 data-i18n="privacy.h2">2. Jakie dane zbieramy</h3>
         <ul>
-          <li><strong>Adres e-mail</strong> — wymagany do rejestracji i logowania</li>
-          <li><strong>Imię</strong> — podawane dobrowolnie przy rejestracji, wyświetlane w interfejsie</li>
-          <li><strong>Treść zadań</strong> — zadania dodawane przez użytkownika (mogą zawierać dane osobowe)</li>
-          <li><strong>Ustawienia aplikacji</strong> — tryb ciemny, preferencje powiadomień</li>
+          <li data-i18n-html="privacy.d1"><strong>Adres e-mail</strong> — wymagany do rejestracji i logowania</li>
+          <li data-i18n-html="privacy.d2"><strong>Imię</strong> — podawane dobrowolnie przy rejestracji, wyświetlane w interfejsie</li>
+          <li data-i18n-html="privacy.d3"><strong>Treść zadań</strong> — zadania dodawane przez użytkownika (mogą zawierać dane osobowe)</li>
+          <li data-i18n-html="privacy.d4"><strong>Ustawienia aplikacji</strong> — tryb ciemny, preferencje powiadomień</li>
         </ul>
-        <p>Nie zbieramy danych o lokalizacji, numerów telefonów ani informacji płatniczych.</p>
+        <p data-i18n="privacy.p2">Nie zbieramy danych o lokalizacji, numerów telefonów ani informacji płatniczych.</p>
 
-        <h3>3. Cel i podstawa prawna przetwarzania</h3>
+        <h3 data-i18n="privacy.h3">3. Cel i podstawa prawna przetwarzania</h3>
         <ul>
-          <li>Świadczenie usługi (obsługa konta, synchronizacja zadań) — <strong>art. 6 ust. 1 lit. b RODO</strong> (wykonanie umowy)</li>
-          <li>Wysyłka e-maila weryfikacyjnego i linku resetowania hasła — <strong>art. 6 ust. 1 lit. b RODO</strong></li>
-          <li>Przetwarzanie na podstawie zgody udzielonej przy rejestracji — <strong>art. 6 ust. 1 lit. a RODO</strong></li>
-        </ul>
-
-        <h3>4. Procesorzy danych (podmioty trzecie)</h3>
-        <p>Dane są przechowywane w usługach Google LLC w ramach platformy <strong>Firebase</strong>:</p>
-        <ul>
-          <li><strong>Firebase Authentication</strong> — zarządzanie kontami i sesjami</li>
-          <li><strong>Firebase Firestore</strong> — przechowywanie zadań i ustawień</li>
-        </ul>
-        <p>Google LLC stosuje standardowe klauzule umowne (SCC) zapewniające ochronę danych zgodną z RODO. Polityka prywatności Google: <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">policies.google.com/privacy</a>.</p>
-
-        <h3>5. Okres przechowywania danych</h3>
-        <p>Dane są przechowywane do momentu <strong>usunięcia konta</strong> przez użytkownika. Usunięcie konta powoduje trwałe usunięcie wszystkich danych z Firebase Authentication i Firestore. Opcja usunięcia konta dostępna jest w sekcji <strong>Ustawienia → Usuń konto</strong>.</p>
-
-        <h3>6. Prawa użytkownika (RODO)</h3>
-        <ul>
-          <li><strong>Prawo dostępu</strong> — możesz pobrać swoje dane (Ustawienia → Eksportuj JSON)</li>
-          <li><strong>Prawo do sprostowania</strong> — możesz edytować swoje zadania w aplikacji</li>
-          <li><strong>Prawo do usunięcia</strong> — usuń konto w Ustawienia → Usuń konto</li>
-          <li><strong>Prawo do przenoszenia</strong> — eksport danych w formacie JSON lub TXT</li>
-          <li><strong>Prawo do cofnięcia zgody</strong> — możesz usunąć konto w dowolnym momencie</li>
-          <li><strong>Prawo do skargi</strong> — możesz złożyć skargę do Prezesa UODO (<a href="https://uodo.gov.pl" target="_blank" rel="noopener">uodo.gov.pl</a>)</li>
+          <li data-i18n-html="privacy.l1">Świadczenie usługi (obsługa konta, synchronizacja zadań) — <strong>art. 6 ust. 1 lit. b RODO</strong> (wykonanie umowy)</li>
+          <li data-i18n-html="privacy.l2">Wysyłka e-maila weryfikacyjnego i linku resetowania hasła — <strong>art. 6 ust. 1 lit. b RODO</strong></li>
+          <li data-i18n-html="privacy.l3">Przetwarzanie na podstawie zgody udzielonej przy rejestracji — <strong>art. 6 ust. 1 lit. a RODO</strong></li>
         </ul>
 
-        <h3>7. Pliki cookie i pamięć lokalna</h3>
-        <p>Aplikacja nie używa plików cookie. Korzysta z <strong>localStorage</strong> przeglądarki wyłącznie do przechowywania informacji o sesji gościa i lokalnych ustawień. Dane te nie są przesyłane do zewnętrznych serwerów przez samą aplikację.</p>
+        <h3 data-i18n="privacy.h4">4. Procesorzy danych (podmioty trzecie)</h3>
+        <p data-i18n-html="privacy.p3">Dane są przechowywane w usługach Google LLC w ramach platformy <strong>Firebase</strong>:</p>
+        <ul>
+          <li data-i18n-html="privacy.f1"><strong>Firebase Authentication</strong> — zarządzanie kontami i sesjami</li>
+          <li data-i18n-html="privacy.f2"><strong>Firebase Firestore</strong> — przechowywanie zadań i ustawień</li>
+        </ul>
+        <p data-i18n-html="privacy.p4">Google LLC stosuje standardowe klauzule umowne (SCC) zapewniające ochronę danych zgodną z RODO. Polityka prywatności Google: <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">policies.google.com/privacy</a>.</p>
 
-        <h3>8. Bezpieczeństwo danych</h3>
-        <p>Hasła nigdy nie są przechowywane w postaci jawnej — są hashowane przez Firebase Authentication. Dostęp do danych w Firestore jest chroniony regułami bezpieczeństwa: każdy użytkownik ma dostęp wyłącznie do własnych danych (<code>request.auth.uid == userId</code>). Komunikacja z serwerami Firebase odbywa się wyłącznie przez szyfrowane połączenie HTTPS.</p>
+        <h3 data-i18n="privacy.h5">5. Okres przechowywania danych</h3>
+        <p data-i18n-html="privacy.p5">Dane są przechowywane do momentu <strong>usunięcia konta</strong> przez użytkownika. Usunięcie konta powoduje trwałe usunięcie wszystkich danych z Firebase Authentication i Firestore. Opcja usunięcia konta dostępna jest w sekcji <strong>Ustawienia → Usuń konto</strong>.</p>
 
-        <h3>9. Zmiany w polityce prywatności</h3>
-        <p>O istotnych zmianach w polityce prywatności użytkownicy zostaną poinformowani przez toast powiadomienie w aplikacji lub e-mail. Aktualna wersja zawsze dostępna jest pod przyciskiem „Polityka Prywatności" w stopce aplikacji.</p>
+        <h3 data-i18n="privacy.h6">6. Prawa użytkownika (RODO)</h3>
+        <ul>
+          <li data-i18n-html="privacy.r1"><strong>Prawo dostępu</strong> — możesz pobrać swoje dane (Ustawienia → Eksportuj JSON)</li>
+          <li data-i18n-html="privacy.r2"><strong>Prawo do sprostowania</strong> — możesz edytować swoje zadania w aplikacji</li>
+          <li data-i18n-html="privacy.r3"><strong>Prawo do usunięcia</strong> — usuń konto w Ustawienia → Usuń konto</li>
+          <li data-i18n-html="privacy.r4"><strong>Prawo do przenoszenia</strong> — eksport danych w formacie JSON lub TXT</li>
+          <li data-i18n-html="privacy.r5"><strong>Prawo do cofnięcia zgody</strong> — możesz usunąć konto w dowolnym momencie</li>
+          <li data-i18n-html="privacy.r6"><strong>Prawo do skargi</strong> — możesz złożyć skargę do Prezesa UODO (<a href="https://uodo.gov.pl" target="_blank" rel="noopener">uodo.gov.pl</a>)</li>
+        </ul>
+
+        <h3 data-i18n="privacy.h7">7. Pliki cookie i pamięć lokalna</h3>
+        <p data-i18n-html="privacy.p6">Aplikacja nie używa plików cookie. Korzysta z <strong>localStorage</strong> przeglądarki wyłącznie do przechowywania informacji o sesji gościa i lokalnych ustawień. Dane te nie są przesyłane do zewnętrznych serwerów przez samą aplikację.</p>
+
+        <h3 data-i18n="privacy.h8">8. Bezpieczeństwo danych</h3>
+        <p data-i18n-html="privacy.p7">Hasła nigdy nie są przechowywane w postaci jawnej — są hashowane przez Firebase Authentication. Dostęp do danych w Firestore jest chroniony regułami bezpieczeństwa: każdy użytkownik ma dostęp wyłącznie do własnych danych (<code>request.auth.uid == userId</code>). Komunikacja z serwerami Firebase odbywa się wyłącznie przez szyfrowane połączenie HTTPS.</p>
+
+        <h3 data-i18n="privacy.h9">9. Zmiany w polityce prywatności</h3>
+        <p data-i18n-html="privacy.p8">O istotnych zmianach w polityce prywatności użytkownicy zostaną poinformowani przez toast powiadomienie w aplikacji lub e-mail. Aktualna wersja zawsze dostępna jest pod przyciskiem „Polityka Prywatności" w stopce aplikacji.</p>
 
       </div>
       <div class="privacy-modal-footer">
-        <button type="button" class="btn btn-primary" id="privacy-accept-btn">Rozumiem</button>
+        <button type="button" class="btn btn-primary" id="privacy-accept-btn" data-i18n="privacy.accept">Rozumiem</button>
       </div>
     </div>
   </div>
@@ -661,6 +669,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-auth-compat.js"></script>
-  <script src="scripts/app.js?v=10"></script>
+  <script src="scripts/app.js?v=11"></script>
 </body>
 </html>

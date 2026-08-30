@@ -363,6 +363,40 @@ nav ul {
   color: var(--danger);
 }
 
+/* Przełącznik języka (header) */
+.lang-toggle {
+  display: flex;
+  align-items: center;
+  gap: .3rem;
+  padding: .38rem .7rem;
+  font-family: var(--font-ui);
+  font-size: .76rem;
+  font-weight: 700;
+  letter-spacing: .02em;
+  color: var(--text-secondary);
+  background: var(--bg-subtle);
+  border: 1.5px solid var(--border);
+  flex-shrink: 0;
+  transition: background var(--tr-fast), color var(--tr-fast), border-color var(--tr-fast);
+}
+
+.lang-toggle:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-light);
+}
+
+.lang-toggle .lang-flag { font-size: .9rem; line-height: 1; }
+
+/* Przełącznik języka – ekran logowania (róg karty) */
+.lang-toggle--auth {
+  position: absolute;
+  top: var(--sp-lg);
+  right: var(--sp-lg);
+  background: var(--bg-page);
+  z-index: 2;
+}
+
 /* ================================================================
    MAIN CONTENT
 ================================================================ */
@@ -967,6 +1001,7 @@ input.error { border-color: var(--danger) !important; }
 }
 
 .setting-card:hover { box-shadow: var(--shadow-md); }
+.setting-card[hidden] { display: none !important; }
 
 .setting-card--danger {
   border-color: rgba(192,38,26,.3);
@@ -1899,6 +1934,9 @@ body.guest-mode main {
   .auth-card  { padding: var(--sp-xl) var(--sp-lg); }
   .user-name  { display: none; }
   .user-menu  { margin-left: var(--sp-sm); padding-left: var(--sp-sm); }
+
+  .lang-toggle span.lang-label { display: none; }
+  .lang-toggle--auth { top: var(--sp-md); right: var(--sp-md); padding: .34rem .5rem; }
 
   .guest-banner { padding: .5rem var(--sp-md); gap: var(--sp-xs); }
   body.guest-mode main { padding-top: calc(var(--header-h) + var(--safe-top) + 60px + var(--sp-lg)); }

@@ -5,14 +5,529 @@
    ============================================================ */
 const PRIORITY_ORDER = { high: 0, medium: 1, low: 2 };
 
-const PRIORITY_LABEL = { high: 'Wysoki', medium: 'Średni', low: 'Niski' };
-const CATEGORY_LABEL = {
-  personal: 'Osobiste',
-  work:     'Praca',
-  shopping: 'Zakupy',
-  health:   'Zdrowie',
-  other:    'Inne',
+/* ============================================================
+   I18N — TŁUMACZENIA (PL / EN)
+   ============================================================ */
+const LANG_STORAGE_KEY = 'tm_lang';
+const LOCALE_MAP = { pl: 'pl-PL', en: 'en-US' };
+
+const I18N = {
+  pl: {
+    meta: {
+      title: 'TaskManager – Twoje zadania',
+      description: 'TaskManager – aplikacja do zarządzania zadaniami. Dodawaj, filtruj i śledź postęp swoich zadań.',
+    },
+    priority: { low: '🟢 Niski', medium: '🟡 Średni', high: '🔴 Wysoki' },
+    priorityLabel: { low: 'Niski', medium: 'Średni', high: 'Wysoki' },
+    category: {
+      personal: '👤 Osobiste', work: '💼 Praca', shopping: '🛒 Zakupy',
+      health: '❤️ Zdrowie', other: '📦 Inne',
+    },
+    categoryLabel: {
+      personal: 'Osobiste', work: 'Praca', shopping: 'Zakupy',
+      health: 'Zdrowie', other: 'Inne',
+    },
+    auth: {
+      subtitle: 'Zaloguj się, aby zarządzać swoimi zadaniami',
+      tabLogin: 'Logowanie',
+      tabRegister: 'Rejestracja',
+      googleLogin: 'Kontynuuj z Google',
+      googleRegister: 'Zarejestruj przez Google',
+      dividerLogin: 'lub zaloguj się e-mailem',
+      dividerRegister: 'lub utwórz konto e-mailem',
+      emailLabel: 'Adres e-mail',
+      emailPlaceholder: 'twoj@email.pl',
+      passwordLabel: 'Hasło',
+      passwordPlaceholder: 'Wpisz hasło',
+      registerPasswordPlaceholder: 'Min. 6 znaków, 1 cyfra, 1 wielka litera',
+      loginSubmit: 'Zaloguj się',
+      loginSubmitting: 'Logowanie…',
+      registerSubmit: 'Utwórz konto',
+      registerSubmitting: 'Rejestracja…',
+      forgotLink: 'Zapomniałem hasła?',
+      nameLabel: 'Imię',
+      namePlaceholder: 'Twoje imię',
+      consentPrefix: 'Akceptuję',
+      privacyPolicyLink: 'Politykę Prywatności',
+      consentSuffix: 'i wyrażam zgodę na przetwarzanie danych osobowych.',
+      forgotDesc: 'Podaj adres e-mail powiązany z kontem — wyślemy Ci link do ustawienia nowego hasła.',
+      forgotSubtitle: 'Zresetuj swoje hasło',
+      forgotSubmit: 'Wyślij link resetujący',
+      forgotSubmitting: 'Wysyłanie…',
+      forgotBack: '← Wróć do logowania',
+      or: 'lub',
+      guestBtn: 'Kontynuuj bez logowania →',
+      guestBtnAria: 'Kontynuuj bez logowania jako gość',
+      googleLoginAria: 'Zaloguj się przez Google',
+      googleRegisterAria: 'Zarejestruj się przez Google',
+      langToggleAria: 'Przełącz język na angielski',
+    },
+    verify: {
+      step1: 'Otwórz skrzynkę e-mail',
+      step2: 'Kliknij link weryfikacyjny od TaskManager',
+      step3: 'Wróć tutaj i naciśnij przycisk poniżej',
+      hintHtml: 'Nie widzisz wiadomości? Sprawdź folder <strong>Spam / Oferty / Powiadomienia</strong>.',
+      checkBtn: '✓ Potwierdziłem — zaloguj mnie',
+      checkBtnChecking: 'Sprawdzam…',
+      resendBtn: 'Wyślij link ponownie',
+      resendBtnSending: 'Wysyłanie…',
+      backBtn: 'Użyj innego konta',
+      blockedTitle: 'Weryfikacja wymagana',
+      blockedDescHtml: 'Twoje konto nie zostało jeszcze potwierdzone.<br>Kliknij link weryfikacyjny w wiadomości wysłanej na<br><strong>{email}</strong>',
+      freshTitle: 'Potwierdź adres e-mail',
+      freshDescHtml: 'Wysłaliśmy link weryfikacyjny na<br><strong>{email}</strong>',
+    },
+    nav: { tasks: 'Zadania', stats: 'Statystyki', settings: 'Ustawienia' },
+    userMenu: { logoutAria: 'Wyloguj się', logoutTitle: 'Wyloguj', guestMode: 'Tryb gościa' },
+    guestBanner: {
+      textHtml: 'Korzystasz jako <strong>Gość</strong> — zadania są zapisane tylko lokalnie w tej przeglądarce.',
+      loginBtn: 'Zaloguj się / Zarejestruj',
+      closeAria: 'Zamknij powiadomienie',
+    },
+    tasks: {
+      title: 'Moje zadania',
+      subtitle: 'Organizuj i śledź postęp swoich zadań',
+      nameLabel: 'Nazwa zadania',
+      namePlaceholder: 'Wpisz nazwę zadania (min. 2 znaki)…',
+      priorityLabel: 'Priorytet',
+      categoryLabel: 'Kategoria',
+      addBtn: 'Dodaj zadanie',
+      filterAll: 'Wszystkie',
+      filterActive: 'Aktywne',
+      filterDone: 'Ukończone',
+      searchPlaceholder: 'Szukaj zadania…',
+      sortDateDesc: 'Najnowsze',
+      sortDateAsc: 'Najstarsze',
+      sortPriorityHigh: 'Priorytet ↑',
+      sortPriorityLow: 'Priorytet ↓',
+      sortAlphaAsc: 'A → Z',
+      sortAlphaDesc: 'Z → A',
+      emptyTitle: 'Brak zadań do wyświetlenia',
+      emptyHint: 'Dodaj pierwsze zadanie powyżej lub zmień filtry',
+      toggleToDone: 'Oznacz jako ukończone',
+      toggleToActive: 'Oznacz jako aktywne',
+      titleDone: 'Cofnij',
+      titleUndone: 'Ukończ',
+      editAria: 'Edytuj zadanie: {name}',
+      deleteAria: 'Usuń zadanie: {name}',
+      editTitle: 'Edytuj',
+      deleteTitle: 'Usuń',
+    },
+    stats: {
+      title: 'Statystyki', subtitle: 'Przegląd Twoich postępów',
+      total: 'Wszystkich zadań', active: 'Aktywnych', done: 'Ukończonych', percent: 'Procent ukończenia',
+      byCategory: 'Według kategorii', byPriority: 'Według priorytetu',
+    },
+    settings: {
+      title: 'Ustawienia', subtitle: 'Dostosuj aplikację do swoich potrzeb',
+      darkMode: 'Tryb ciemny', darkModeDesc: 'Przełącz między jasnym a ciemnym motywem interfejsu',
+      notifications: 'Powiadomienia', notificationsDesc: 'Wyświetlaj komunikaty toast po każdej akcji',
+      clearData: 'Wyczyść dane', clearDataDesc: 'Trwale usuń wszystkie zadania i zresetuj ustawienia aplikacji', clearDataBtn: 'Wyczyść dane',
+      deleteAccount: 'Usuń konto', deleteAccountDesc: 'Trwale usuń konto i wszystkie powiązane dane — operacja nieodwracalna (prawo do bycia zapomnianym)', deleteAccountBtn: 'Usuń konto',
+      exportJson: 'Eksportuj JSON', exportJsonDesc: 'Pobierz kopię zapasową swoich zadań w formacie JSON',
+      exportTxt: 'Eksportuj TXT', exportTxtDesc: 'Pobierz czytelną listę zadań w formacie tekstowym',
+      exporting: 'Eksportowanie…',
+      deleting: 'Usuwanie…',
+    },
+    modal: { editTitle: 'Edytuj zadanie', cancel: 'Anuluj', save: 'Zapisz zmiany', confirm: 'Potwierdź' },
+    footer: {
+      copyright: '© 2026 TaskManager. Wszelkie prawa zastrzeżone.',
+      privacy: 'Polityka Prywatności',
+      builtWithPrefix: 'Zbudowany z',
+      builtWithSuffix: 'używając czystego HTML, CSS i JavaScript',
+    },
+    privacy: {
+      title: 'Polityka Prywatności',
+      updated: 'Ostatnia aktualizacja: 18 kwietnia 2026 r.',
+      h1: '1. Administrator danych osobowych',
+      p1: 'Administratorem danych osobowych jest właściciel aplikacji TaskManager dostępnej pod adresem <strong>https://w84kubus.github.io/TaskManager/</strong> (dalej: „Administrator"). Kontakt: profil GitHub <a href="https://github.com/w84kubus" target="_blank" rel="noopener">github.com/w84kubus</a>.',
+      h2: '2. Jakie dane zbieramy',
+      d1: '<strong>Adres e-mail</strong> — wymagany do rejestracji i logowania',
+      d2: '<strong>Imię</strong> — podawane dobrowolnie przy rejestracji, wyświetlane w interfejsie',
+      d3: '<strong>Treść zadań</strong> — zadania dodawane przez użytkownika (mogą zawierać dane osobowe)',
+      d4: '<strong>Ustawienia aplikacji</strong> — tryb ciemny, preferencje powiadomień',
+      p2: 'Nie zbieramy danych o lokalizacji, numerów telefonów ani informacji płatniczych.',
+      h3: '3. Cel i podstawa prawna przetwarzania',
+      l1: 'Świadczenie usługi (obsługa konta, synchronizacja zadań) — <strong>art. 6 ust. 1 lit. b RODO</strong> (wykonanie umowy)',
+      l2: 'Wysyłka e-maila weryfikacyjnego i linku resetowania hasła — <strong>art. 6 ust. 1 lit. b RODO</strong>',
+      l3: 'Przetwarzanie na podstawie zgody udzielonej przy rejestracji — <strong>art. 6 ust. 1 lit. a RODO</strong>',
+      h4: '4. Procesorzy danych (podmioty trzecie)',
+      p3: 'Dane są przechowywane w usługach Google LLC w ramach platformy <strong>Firebase</strong>:',
+      f1: '<strong>Firebase Authentication</strong> — zarządzanie kontami i sesjami',
+      f2: '<strong>Firebase Firestore</strong> — przechowywanie zadań i ustawień',
+      p4: 'Google LLC stosuje standardowe klauzule umowne (SCC) zapewniające ochronę danych zgodną z RODO. Polityka prywatności Google: <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">policies.google.com/privacy</a>.',
+      h5: '5. Okres przechowywania danych',
+      p5: 'Dane są przechowywane do momentu <strong>usunięcia konta</strong> przez użytkownika. Usunięcie konta powoduje trwałe usunięcie wszystkich danych z Firebase Authentication i Firestore. Opcja usunięcia konta dostępna jest w sekcji <strong>Ustawienia → Usuń konto</strong>.',
+      h6: '6. Prawa użytkownika (RODO)',
+      r1: '<strong>Prawo dostępu</strong> — możesz pobrać swoje dane (Ustawienia → Eksportuj JSON)',
+      r2: '<strong>Prawo do sprostowania</strong> — możesz edytować swoje zadania w aplikacji',
+      r3: '<strong>Prawo do usunięcia</strong> — usuń konto w Ustawienia → Usuń konto',
+      r4: '<strong>Prawo do przenoszenia</strong> — eksport danych w formacie JSON lub TXT',
+      r5: '<strong>Prawo do cofnięcia zgody</strong> — możesz usunąć konto w dowolnym momencie',
+      r6: '<strong>Prawo do skargi</strong> — możesz złożyć skargę do Prezesa UODO (<a href="https://uodo.gov.pl" target="_blank" rel="noopener">uodo.gov.pl</a>)',
+      h7: '7. Pliki cookie i pamięć lokalna',
+      p6: 'Aplikacja nie używa plików cookie. Korzysta z <strong>localStorage</strong> przeglądarki wyłącznie do przechowywania informacji o sesji gościa i lokalnych ustawień. Dane te nie są przesyłane do zewnętrznych serwerów przez samą aplikację.',
+      h8: '8. Bezpieczeństwo danych',
+      p7: 'Hasła nigdy nie są przechowywane w postaci jawnej — są hashowane przez Firebase Authentication. Dostęp do danych w Firestore jest chroniony regułami bezpieczeństwa: każdy użytkownik ma dostęp wyłącznie do własnych danych (<code>request.auth.uid == userId</code>). Komunikacja z serwerami Firebase odbywa się wyłącznie przez szyfrowane połączenie HTTPS.',
+      h9: '9. Zmiany w polityce prywatności',
+      p8: 'O istotnych zmianach w polityce prywatności użytkownicy zostaną poinformowani przez toast powiadomienie w aplikacji lub e-mail. Aktualna wersja zawsze dostępna jest pod przyciskiem „Polityka Prywatności" w stopce aplikacji.',
+      accept: 'Rozumiem',
+    },
+    relative: { justNow: 'Przed chwilą', minAgo: '{n} min. temu', hoursAgo: '{n} godz. temu', daysAgo: '{n} dni temu' },
+    toast: {
+      added: 'Dodano: „{name}"',
+      deleted: 'Usunięto: „{name}"',
+      updated: 'Zadanie zaktualizowane!',
+      completed: 'Zadanie ukończone! 🎉',
+      allCleared: 'Wszystkie dane zostały wyczyszczone.',
+      darkOn: 'Tryb ciemny włączony 🌙',
+      darkOff: 'Tryb jasny włączony ☀️',
+      exportJsonDone: 'Eksport JSON zakończony!',
+      exportJsonError: 'Błąd podczas eksportu JSON.',
+      exportTxtDone: 'Eksport TXT zakończony!',
+      exportTxtError: 'Błąd podczas eksportu TXT.',
+      welcomeBack: 'Witaj, {name}! 👋',
+      guestWelcome: 'Tryb gościa — zadania są lokalne 👤',
+      verifyEmailSentAfterRegister: '📧 Wysłano link weryfikacyjny na {email} — kliknij go, aby potwierdzić konto',
+      verifyEmailReminder: '📧 Adres e-mail niezweryfikowany — sprawdź skrzynkę i kliknij link',
+      verifyResent: '📧 Wysłano ponownie — sprawdź skrzynkę i folder Spam',
+      verifyTooMany: 'Zbyt wiele prób — poczekaj chwilę i spróbuj ponownie',
+      verifyResendError: 'Błąd wysyłania — spróbuj ponownie',
+      verifyNotYet: 'E-mail jeszcze nie zweryfikowany — kliknij link w wiadomości',
+      verifyCheckError: 'Błąd sprawdzania — spróbuj ponownie',
+      resetLinkSent: '📧 Wysłano link resetowania hasła na {email} — sprawdź skrzynkę',
+      firebaseNotLoaded: 'Firebase nie załadowany — odśwież stronę.',
+      googleLoadError: 'Nie można załadować Google Sign-In. Odśwież stronę.',
+      googleCancelled: 'Logowanie Google anulowane.',
+      syncNoPermission: '⚠️ Sync: brak uprawnień Firestore — sprawdź reguły',
+      firestoreNoPermission: '⚠️ Firestore: brak uprawnień — sprawdź reguły bezpieczeństwa',
+      syncInactiveNoPermission: '⚠️ Sync nieaktywny — brak uprawnień Firestore',
+      synced: '☁️ Zsynchronizowano',
+      accountDeleted: 'Konto zostało trwale usunięte.',
+      accountDeleteReauth: 'Ze względów bezpieczeństwa zaloguj się ponownie i spróbuj jeszcze raz.',
+      accountDeleteError: 'Błąd usuwania konta — spróbuj ponownie.',
+    },
+    confirm: {
+      logoutTitle: 'Wyloguj się', logoutMsg: 'Czy na pewno chcesz się wylogować?',
+      guestLoginTitle: 'Przejdź do logowania',
+      guestLoginMsg: 'Twoje zadania jako gość zostaną zachowane lokalnie. Po zalogowaniu na konto będziesz pracować na osobnym zestawie zadań.',
+      clearDataTitle: 'Wyczyść dane',
+      clearDataMsg: 'Czy na pewno chcesz usunąć wszystkie zadania i zresetować ustawienia? Tej operacji nie można cofnąć.',
+      deleteAccountTitle: 'Usuń konto',
+      deleteAccountMsg: 'Czy na pewno chcesz trwale usunąć konto i wszystkie dane? Tej operacji nie można cofnąć.',
+    },
+    validation: {
+      taskEmpty: 'Nazwa zadania nie może być pusta.',
+      taskTooShort: 'Nazwa musi mieć co najmniej 2 znaki.',
+      taskTooLong: 'Nazwa nie może przekraczać 120 znaków.',
+      taskInvalidChars: 'Nazwa zawiera niedozwolone znaki.',
+      emailInvalid: 'Wpisz poprawny adres e-mail.',
+      passwordEmpty: 'Wpisz hasło.',
+      nameTooShort: 'Imię musi mieć co najmniej 2 znaki.',
+      passwordWeak: 'Min. 6 znaków, 1 wielka litera i 1 cyfra.',
+      consentRequired: 'Akceptacja Polityki Prywatności jest wymagana.',
+    },
+    authError: {
+      'auth/email-already-in-use': 'Konto z tym adresem e-mail już istnieje.',
+      'auth/invalid-email': 'Nieprawidłowy adres e-mail.',
+      'auth/user-not-found': 'Nie znaleziono konta z tym adresem e-mail.',
+      'auth/wrong-password': 'Nieprawidłowe hasło.',
+      'auth/invalid-credential': 'Nieprawidłowy e-mail lub hasło.',
+      'auth/weak-password': 'Hasło musi mieć co najmniej 6 znaków.',
+      'auth/too-many-requests': 'Zbyt wiele prób. Spróbuj ponownie za chwilę.',
+      'auth/network-request-failed': 'Błąd sieci. Sprawdź połączenie.',
+      'auth/popup-blocked': 'Popup zablokowany — zezwól na wyskakujące okna.',
+      'auth/popup-closed-by-user': 'Logowanie anulowane.',
+      generic: 'Wystąpił błąd. Spróbuj ponownie.',
+    },
+    samples: [
+      { name: 'Zaplanuj tygodniowy harmonogram', priority: 'high',   category: 'work'     },
+      { name: 'Zrób zakupy spożywcze',           priority: 'medium', category: 'shopping' },
+      { name: 'Spacer 30 minut',                  priority: 'low',    category: 'health'   },
+    ],
+    exportTxt: {
+      titleBox: 'TASKMANAGER — ZADANIA',
+      exportDate: 'Data eksportu',
+      user: 'Użytkownik',
+      totalLine: 'Wszystkich',
+      activeWord: 'Aktywnych',
+      doneWord: 'Ukończonych',
+      empty: 'Brak zadań do wyeksportowania.',
+      priorityWord: 'Priorytet',
+      categoryWord: 'Kategoria',
+      addedWord: 'Dodano',
+      generatedBy: 'Wygenerowano przez TaskManager',
+    },
+  },
+
+  en: {
+    meta: {
+      title: 'TaskManager – Your Tasks',
+      description: 'TaskManager – a task management app. Add, filter and track the progress of your tasks.',
+    },
+    priority: { low: '🟢 Low', medium: '🟡 Medium', high: '🔴 High' },
+    priorityLabel: { low: 'Low', medium: 'Medium', high: 'High' },
+    category: {
+      personal: '👤 Personal', work: '💼 Work', shopping: '🛒 Shopping',
+      health: '❤️ Health', other: '📦 Other',
+    },
+    categoryLabel: {
+      personal: 'Personal', work: 'Work', shopping: 'Shopping',
+      health: 'Health', other: 'Other',
+    },
+    auth: {
+      subtitle: 'Sign in to manage your tasks',
+      tabLogin: 'Sign in',
+      tabRegister: 'Sign up',
+      googleLogin: 'Continue with Google',
+      googleRegister: 'Sign up with Google',
+      dividerLogin: 'or sign in with email',
+      dividerRegister: 'or create an account with email',
+      emailLabel: 'Email address',
+      emailPlaceholder: 'you@email.com',
+      passwordLabel: 'Password',
+      passwordPlaceholder: 'Enter your password',
+      registerPasswordPlaceholder: 'Min. 6 characters, 1 digit, 1 uppercase letter',
+      loginSubmit: 'Sign in',
+      loginSubmitting: 'Signing in…',
+      registerSubmit: 'Create account',
+      registerSubmitting: 'Creating account…',
+      forgotLink: 'Forgot your password?',
+      nameLabel: 'Name',
+      namePlaceholder: 'Your name',
+      consentPrefix: 'I accept the',
+      privacyPolicyLink: 'Privacy Policy',
+      consentSuffix: 'and consent to the processing of my personal data.',
+      forgotDesc: 'Enter the email address linked to your account — we’ll send you a link to set a new password.',
+      forgotSubtitle: 'Reset your password',
+      forgotSubmit: 'Send reset link',
+      forgotSubmitting: 'Sending…',
+      forgotBack: '← Back to sign in',
+      or: 'or',
+      guestBtn: 'Continue without signing in →',
+      guestBtnAria: 'Continue without signing in as a guest',
+      googleLoginAria: 'Sign in with Google',
+      googleRegisterAria: 'Sign up with Google',
+      langToggleAria: 'Switch language to Polish',
+    },
+    verify: {
+      step1: 'Open your inbox',
+      step2: 'Click the verification link from TaskManager',
+      step3: 'Come back here and press the button below',
+      hintHtml: 'Don’t see the email? Check your <strong>Spam / Promotions / Notifications</strong> folder.',
+      checkBtn: '✓ I’ve confirmed — sign me in',
+      checkBtnChecking: 'Checking…',
+      resendBtn: 'Resend link',
+      resendBtnSending: 'Sending…',
+      backBtn: 'Use a different account',
+      blockedTitle: 'Verification required',
+      blockedDescHtml: 'Your account hasn’t been confirmed yet.<br>Click the verification link in the email sent to<br><strong>{email}</strong>',
+      freshTitle: 'Confirm your email address',
+      freshDescHtml: 'We sent a verification link to<br><strong>{email}</strong>',
+    },
+    nav: { tasks: 'Tasks', stats: 'Statistics', settings: 'Settings' },
+    userMenu: { logoutAria: 'Sign out', logoutTitle: 'Sign out', guestMode: 'Guest mode' },
+    guestBanner: {
+      textHtml: 'You’re using <strong>Guest mode</strong> — tasks are saved only locally in this browser.',
+      loginBtn: 'Sign in / Sign up',
+      closeAria: 'Dismiss notification',
+    },
+    tasks: {
+      title: 'My tasks',
+      subtitle: 'Organize and track the progress of your tasks',
+      nameLabel: 'Task name',
+      namePlaceholder: 'Enter a task name (min. 2 characters)…',
+      priorityLabel: 'Priority',
+      categoryLabel: 'Category',
+      addBtn: 'Add task',
+      filterAll: 'All',
+      filterActive: 'Active',
+      filterDone: 'Done',
+      searchPlaceholder: 'Search tasks…',
+      sortDateDesc: 'Newest',
+      sortDateAsc: 'Oldest',
+      sortPriorityHigh: 'Priority ↑',
+      sortPriorityLow: 'Priority ↓',
+      sortAlphaAsc: 'A → Z',
+      sortAlphaDesc: 'Z → A',
+      emptyTitle: 'No tasks to display',
+      emptyHint: 'Add your first task above or change the filters',
+      toggleToDone: 'Mark as done',
+      toggleToActive: 'Mark as active',
+      titleDone: 'Undo',
+      titleUndone: 'Complete',
+      editAria: 'Edit task: {name}',
+      deleteAria: 'Delete task: {name}',
+      editTitle: 'Edit',
+      deleteTitle: 'Delete',
+    },
+    stats: {
+      title: 'Statistics', subtitle: 'An overview of your progress',
+      total: 'Total tasks', active: 'Active', done: 'Completed', percent: 'Completion rate',
+      byCategory: 'By category', byPriority: 'By priority',
+    },
+    settings: {
+      title: 'Settings', subtitle: 'Customize the app to your needs',
+      darkMode: 'Dark mode', darkModeDesc: 'Switch between light and dark interface theme',
+      notifications: 'Notifications', notificationsDesc: 'Show toast messages after every action',
+      clearData: 'Clear data', clearDataDesc: 'Permanently delete all tasks and reset app settings', clearDataBtn: 'Clear data',
+      deleteAccount: 'Delete account', deleteAccountDesc: 'Permanently delete your account and all related data — this cannot be undone (right to be forgotten)', deleteAccountBtn: 'Delete account',
+      exportJson: 'Export JSON', exportJsonDesc: 'Download a backup of your tasks in JSON format',
+      exportTxt: 'Export TXT', exportTxtDesc: 'Download a readable list of your tasks as a text file',
+      exporting: 'Exporting…',
+      deleting: 'Deleting…',
+    },
+    modal: { editTitle: 'Edit task', cancel: 'Cancel', save: 'Save changes', confirm: 'Confirm' },
+    footer: {
+      copyright: '© 2026 TaskManager. All rights reserved.',
+      privacy: 'Privacy Policy',
+      builtWithPrefix: 'Built with',
+      builtWithSuffix: 'using plain HTML, CSS and JavaScript',
+    },
+    privacy: {
+      title: 'Privacy Policy',
+      updated: 'Last updated: April 18, 2026',
+      h1: '1. Data controller',
+      p1: 'The data controller is the owner of the TaskManager application available at <strong>https://w84kubus.github.io/TaskManager/</strong> (hereinafter: the "Controller"). Contact: GitHub profile <a href="https://github.com/w84kubus" target="_blank" rel="noopener">github.com/w84kubus</a>.',
+      h2: '2. What data we collect',
+      d1: '<strong>Email address</strong> — required for registration and sign-in',
+      d2: '<strong>Name</strong> — provided voluntarily at registration, shown in the interface',
+      d3: '<strong>Task content</strong> — tasks added by the user (may contain personal data)',
+      d4: '<strong>App settings</strong> — dark mode, notification preferences',
+      p2: 'We do not collect location data, phone numbers, or payment information.',
+      h3: '3. Purpose and legal basis for processing',
+      l1: 'Providing the service (account handling, task synchronization) — <strong>Art. 6(1)(b) GDPR</strong> (performance of a contract)',
+      l2: 'Sending verification emails and password reset links — <strong>Art. 6(1)(b) GDPR</strong>',
+      l3: 'Processing based on consent given at registration — <strong>Art. 6(1)(a) GDPR</strong>',
+      h4: '4. Data processors (third parties)',
+      p3: 'Data is stored with Google LLC services as part of the <strong>Firebase</strong> platform:',
+      f1: '<strong>Firebase Authentication</strong> — account and session management',
+      f2: '<strong>Firebase Firestore</strong> — storage of tasks and settings',
+      p4: 'Google LLC applies standard contractual clauses (SCCs) to ensure GDPR-compliant data protection. Google’s privacy policy: <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">policies.google.com/privacy</a>.',
+      h5: '5. Data retention period',
+      p5: 'Data is stored until the user <strong>deletes their account</strong>. Deleting your account permanently removes all data from Firebase Authentication and Firestore. The account deletion option is available under <strong>Settings → Delete account</strong>.',
+      h6: '6. User rights (GDPR)',
+      r1: '<strong>Right of access</strong> — you can download your data (Settings → Export JSON)',
+      r2: '<strong>Right to rectification</strong> — you can edit your tasks in the app',
+      r3: '<strong>Right to erasure</strong> — delete your account under Settings → Delete account',
+      r4: '<strong>Right to data portability</strong> — export your data in JSON or TXT format',
+      r5: '<strong>Right to withdraw consent</strong> — you can delete your account at any time',
+      r6: '<strong>Right to lodge a complaint</strong> — you may file a complaint with your national data protection authority (in Poland: <a href="https://uodo.gov.pl" target="_blank" rel="noopener">uodo.gov.pl</a>)',
+      h7: '7. Cookies and local storage',
+      p6: 'The application does not use cookies. It uses the browser’s <strong>localStorage</strong> solely to store guest session information and local settings. This data is not transmitted to external servers by the app itself.',
+      h8: '8. Data security',
+      p7: 'Passwords are never stored in plain text — they are hashed by Firebase Authentication. Access to Firestore data is protected by security rules: each user can only access their own data (<code>request.auth.uid == userId</code>). Communication with Firebase servers uses encrypted HTTPS only.',
+      h9: '9. Changes to this privacy policy',
+      p8: 'Users will be informed of any significant changes to this privacy policy via an in-app toast notification or email. The current version is always available via the "Privacy Policy" button in the app footer.',
+      accept: 'Got it',
+    },
+    relative: { justNow: 'Just now', minAgo: '{n} min ago', hoursAgo: '{n}h ago', daysAgo: '{n}d ago' },
+    toast: {
+      added: 'Added: "{name}"',
+      deleted: 'Deleted: "{name}"',
+      updated: 'Task updated!',
+      completed: 'Task completed! 🎉',
+      allCleared: 'All data has been cleared.',
+      darkOn: 'Dark mode enabled 🌙',
+      darkOff: 'Light mode enabled ☀️',
+      exportJsonDone: 'JSON export complete!',
+      exportJsonError: 'Error during JSON export.',
+      exportTxtDone: 'TXT export complete!',
+      exportTxtError: 'Error during TXT export.',
+      welcomeBack: 'Welcome, {name}! 👋',
+      guestWelcome: 'Guest mode — tasks are stored locally 👤',
+      verifyEmailSentAfterRegister: '📧 A verification link was sent to {email} — click it to confirm your account',
+      verifyEmailReminder: '📧 Email not verified — check your inbox and click the link',
+      verifyResent: '📧 Resent — check your inbox and Spam folder',
+      verifyTooMany: 'Too many attempts — please wait a moment and try again',
+      verifyResendError: 'Failed to send — please try again',
+      verifyNotYet: 'Email not verified yet — click the link in the message',
+      verifyCheckError: 'Error checking status — please try again',
+      resetLinkSent: '📧 Password reset link sent to {email} — check your inbox',
+      firebaseNotLoaded: 'Firebase failed to load — refresh the page.',
+      googleLoadError: 'Could not load Google Sign-In. Refresh the page.',
+      googleCancelled: 'Google sign-in cancelled.',
+      syncNoPermission: '⚠️ Sync: Firestore permission denied — check your rules',
+      firestoreNoPermission: '⚠️ Firestore: permission denied — check your security rules',
+      syncInactiveNoPermission: '⚠️ Sync inactive — Firestore permission denied',
+      synced: '☁️ Synced',
+      accountDeleted: 'Your account has been permanently deleted.',
+      accountDeleteReauth: 'For security reasons, please sign in again and retry.',
+      accountDeleteError: 'Error deleting account — please try again.',
+    },
+    confirm: {
+      logoutTitle: 'Sign out', logoutMsg: 'Are you sure you want to sign out?',
+      guestLoginTitle: 'Go to sign in',
+      guestLoginMsg: 'Your guest tasks will remain saved locally. Once signed in, you’ll work with a separate set of tasks.',
+      clearDataTitle: 'Clear data',
+      clearDataMsg: 'Are you sure you want to delete all tasks and reset your settings? This action cannot be undone.',
+      deleteAccountTitle: 'Delete account',
+      deleteAccountMsg: 'Are you sure you want to permanently delete your account and all data? This action cannot be undone.',
+    },
+    validation: {
+      taskEmpty: 'Task name cannot be empty.',
+      taskTooShort: 'Name must be at least 2 characters long.',
+      taskTooLong: 'Name cannot exceed 120 characters.',
+      taskInvalidChars: 'Name contains invalid characters.',
+      emailInvalid: 'Enter a valid email address.',
+      passwordEmpty: 'Enter your password.',
+      nameTooShort: 'Name must be at least 2 characters long.',
+      passwordWeak: 'Min. 6 characters, 1 uppercase letter and 1 digit.',
+      consentRequired: 'You must accept the Privacy Policy.',
+    },
+    authError: {
+      'auth/email-already-in-use': 'An account with this email address already exists.',
+      'auth/invalid-email': 'Invalid email address.',
+      'auth/user-not-found': 'No account found with this email address.',
+      'auth/wrong-password': 'Incorrect password.',
+      'auth/invalid-credential': 'Invalid email or password.',
+      'auth/weak-password': 'Password must be at least 6 characters long.',
+      'auth/too-many-requests': 'Too many attempts. Please try again shortly.',
+      'auth/network-request-failed': 'Network error. Check your connection.',
+      'auth/popup-blocked': 'Popup blocked — please allow pop-up windows.',
+      'auth/popup-closed-by-user': 'Sign-in cancelled.',
+      generic: 'An error occurred. Please try again.',
+    },
+    samples: [
+      { name: 'Plan your weekly schedule', priority: 'high',   category: 'work'     },
+      { name: 'Buy groceries',             priority: 'medium', category: 'shopping' },
+      { name: '30-minute walk',            priority: 'low',    category: 'health'   },
+    ],
+    exportTxt: {
+      titleBox: 'TASKMANAGER — TASKS',
+      exportDate: 'Export date',
+      user: 'User',
+      totalLine: 'Total',
+      activeWord: 'Active',
+      doneWord: 'Completed',
+      empty: 'No tasks to export.',
+      priorityWord: 'Priority',
+      categoryWord: 'Category',
+      addedWord: 'Added',
+      generatedBy: 'Generated by TaskManager',
+    },
+  },
 };
+
+/**
+ * Pobierz przetłumaczony string po ścieżce kropkowej, np. t('toast.added', {name: 'Test'}).
+ * Fallback do polskiego, jeśli klucz nie istnieje w bieżącym języku.
+ */
+function t(path, vars) {
+  const dict = I18N[state.lang] || I18N.pl;
+  const fallback = I18N.pl;
+  const get = (obj) => path.split('.').reduce((o, k) => (o && o[k] !== undefined ? o[k] : undefined), obj);
+  let str = get(dict);
+  if (str === undefined) str = get(fallback);
+  if (str === undefined) return path;
+  if (vars && typeof str === 'string') {
+    Object.keys(vars).forEach(k => { str = str.replace(new RegExp(`\\{${k}\\}`, 'g'), vars[k]); });
+  }
+  return str;
+}
+
+function priorityLabel(key) { return t(`priorityLabel.${key}`); }
+function categoryLabel(key) { return t(`categoryLabel.${key}`); }
 
 /* ============================================================
    STAN APLIKACJI
@@ -25,7 +540,104 @@ const state = {
   darkMode:      false,
   notifications: true,
   currentUser:   null,   // { email, name, provider, uid }
+  lang:          'pl',   // 'pl' | 'en'
 };
+
+/* ============================================================
+   ZASTOSOWANIE JĘZYKA (i18n)
+   ============================================================ */
+// Zapamiętaj ostatni stan ekranu weryfikacji, żeby móc go przetłumaczyć „na żywo"
+let _lastVerifyState = null; // { email, source }
+
+function updateLangToggleButtons() {
+  const current = state.lang;
+  const target  = current === 'pl' ? 'en' : 'pl';
+  const flag    = target === 'en' ? '🇬🇧' : '🇵🇱';
+  const label   = target === 'en' ? 'EN' : 'PL';
+  document.querySelectorAll('.lang-toggle').forEach(btn => {
+    const flagEl  = btn.querySelector('.lang-flag');
+    const labelEl = btn.querySelector('.lang-label');
+    if (flagEl)  flagEl.textContent  = flag;
+    if (labelEl) labelEl.textContent = label;
+    btn.setAttribute('aria-label', I18N[current].auth.langToggleAria);
+  });
+}
+
+function applyLanguage(lang) {
+  if (lang !== 'pl' && lang !== 'en') lang = 'pl';
+  state.lang = lang;
+  try { localStorage.setItem(LANG_STORAGE_KEY, lang); } catch (e) { /* ignore */ }
+
+  document.documentElement.lang = lang;
+
+  const titleEl = document.querySelector('title');
+  if (titleEl) titleEl.textContent = t('meta.title');
+  const descMeta = document.querySelector('meta[name="description"]');
+  if (descMeta) descMeta.content = t('meta.description');
+
+  // Proste tłumaczenie tekstu
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    el.textContent = t(el.dataset.i18n);
+  });
+  // Tłumaczenie z zaufanym HTML (własna treść, nie dane użytkownika)
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    el.innerHTML = t(el.dataset.i18nHtml);
+  });
+  // Placeholdery
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    el.placeholder = t(el.dataset.i18nPlaceholder);
+  });
+
+  updateLangToggleButtons();
+
+  // Aria-labels dla kluczowych elementów interaktywnych
+  const ariaMap = {
+    'guest-btn':            'auth.guestBtnAria',
+    'google-login':         'auth.googleLoginAria',
+    'google-register':      'auth.googleRegisterAria',
+    'logout-btn':           'userMenu.logoutAria',
+    'guest-banner-close':   'guestBanner.closeAria',
+  };
+  Object.entries(ariaMap).forEach(([id, key]) => {
+    const el = document.getElementById(id);
+    if (el) el.setAttribute('aria-label', t(key));
+  });
+  const logoutBtn = document.getElementById('logout-btn');
+  if (logoutBtn) logoutBtn.title = t('userMenu.logoutTitle');
+
+  // Odśwież dynamiczne widoki, które nie korzystają z data-i18n
+  if (document.getElementById('app-wrapper') && !document.getElementById('app-wrapper').hidden) {
+    renderTaskList();
+    if (!document.getElementById('stats').hidden) renderStats();
+    const nameEl = document.getElementById('user-name');
+    if (nameEl && state.currentUser?.provider === 'guest') nameEl.textContent = t('userMenu.guestMode');
+  }
+
+  // Odśwież ekran weryfikacji, jeśli aktualnie widoczny
+  if (_lastVerifyState && !document.getElementById('verify-screen').hidden) {
+    showEmailVerification(_lastVerifyState.email, _lastVerifyState.source);
+  }
+
+  // Jeśli panel „zapomniałem hasła" jest otwarty, odśwież jego nagłówek
+  const forgotPanel = document.getElementById('forgot-panel');
+  if (forgotPanel && !forgotPanel.hidden) {
+    document.querySelector('.auth-subtitle').textContent = t('auth.forgotSubtitle');
+  }
+}
+
+function initLanguage() {
+  let saved = null;
+  try { saved = localStorage.getItem(LANG_STORAGE_KEY); } catch (e) { /* ignore */ }
+  applyLanguage(saved === 'en' ? 'en' : 'pl');
+}
+
+function setupLangToggle() {
+  document.querySelectorAll('.lang-toggle').forEach(btn => {
+    btn.addEventListener('click', () => {
+      applyLanguage(state.lang === 'pl' ? 'en' : 'pl');
+    });
+  });
+}
 
 /* ============================================================
    localStorage – zapis / odczyt (per-user)
@@ -102,7 +714,7 @@ function firestoreSetTask(task) {
   col.doc(task.id).set(task).catch(e => {
     console.warn('[FB] setTask:', e);
     if (e.code === 'permission-denied') {
-      showToast('⚠️ Sync: brak uprawnień Firestore — sprawdź reguły', 'error', 6000);
+      showToast(t('toast.syncNoPermission'), 'error', 6000);
     }
   });
 }
@@ -114,7 +726,7 @@ function firestoreDeleteTask(taskId) {
   col.doc(taskId).delete().catch(e => {
     console.warn('[FB] deleteTask:', e);
     if (e.code === 'permission-denied') {
-      showToast('⚠️ Sync: brak uprawnień Firestore — sprawdź reguły', 'error', 6000);
+      showToast(t('toast.syncNoPermission'), 'error', 6000);
     }
   });
 }
@@ -151,7 +763,7 @@ async function firestoreLoad() {
   } catch (e) {
     console.warn('[FB] load:', e);
     if (e.code === 'permission-denied') {
-      showToast('⚠️ Firestore: brak uprawnień — sprawdź reguły bezpieczeństwa', 'error', 8000);
+      showToast(t('toast.firestoreNoPermission'), 'error', 8000);
     }
     return false;
   }
@@ -191,12 +803,12 @@ function firestoreStartListener() {
       localStorage.setItem(userKey('tasks'), JSON.stringify(state.tasks));
       renderTaskList();
       if (!document.getElementById('stats').hidden) renderStats();
-      showToast('☁️ Zsynchronizowano', 'success', 1800);
+      showToast(t('toast.synced'), 'success', 1800);
     }
   }, err => {
     console.warn('[FB] listener:', err);
     if (err.code === 'permission-denied') {
-      showToast('⚠️ Sync nieaktywny — brak uprawnień Firestore', 'error', 8000);
+      showToast(t('toast.syncInactiveNoPermission'), 'error', 8000);
     }
   });
 }
@@ -256,28 +868,17 @@ let _justRegistered = false;
 
 // Tłumaczenie kodów błędów Firebase Auth
 function translateAuthError(code) {
-  const map = {
-    'auth/email-already-in-use':   'Konto z tym adresem e-mail już istnieje.',
-    'auth/invalid-email':          'Nieprawidłowy adres e-mail.',
-    'auth/user-not-found':         'Nie znaleziono konta z tym adresem e-mail.',
-    'auth/wrong-password':         'Nieprawidłowe hasło.',
-    'auth/invalid-credential':     'Nieprawidłowy e-mail lub hasło.',
-    'auth/weak-password':          'Hasło musi mieć co najmniej 6 znaków.',
-    'auth/too-many-requests':      'Zbyt wiele prób. Spróbuj ponownie za chwilę.',
-    'auth/network-request-failed': 'Błąd sieci. Sprawdź połączenie.',
-    'auth/popup-blocked':          'Popup zablokowany — zezwól na wyskakujące okna.',
-    'auth/popup-closed-by-user':   'Logowanie anulowane.',
-  };
-  return map[code] || 'Wystąpił błąd. Spróbuj ponownie.';
+  const dict = I18N[state.lang] || I18N.pl;
+  return dict.authError[code] || dict.authError.generic;
 }
 
 // Logowanie Google przez GIS (Google Identity Services)
 // Omija Firebase /__/auth/handler – działa bez Firebase Hosting
 function triggerGoogleSignIn() {
-  if (!_auth) { showToast('Firebase nie załadowany — odśwież stronę.', 'error'); return; }
+  if (!_auth) { showToast(t('toast.firebaseNotLoaded'), 'error'); return; }
 
   if (!window.google?.accounts?.oauth2) {
-    showToast('Nie można załadować Google Sign-In. Odśwież stronę.', 'error');
+    showToast(t('toast.googleLoadError'), 'error');
     return;
   }
 
@@ -287,7 +888,7 @@ function triggerGoogleSignIn() {
     callback: async (response) => {
       if (response.error) {
         if (response.error !== 'access_denied') {
-          showToast('Logowanie Google anulowane.', 'error');
+          showToast(t('toast.googleCancelled'), 'error');
         }
         return;
       }
@@ -324,7 +925,7 @@ function showForgotPanel() {
   document.getElementById('login-panel').hidden        = true;
   document.getElementById('register-panel').hidden     = true;
   document.getElementById('forgot-panel').hidden       = false;
-  document.querySelector('.auth-subtitle').textContent = 'Zresetuj swoje hasło';
+  document.querySelector('.auth-subtitle').textContent = t('auth.forgotSubtitle');
 }
 
 function hideForgotPanel() {
@@ -332,7 +933,7 @@ function hideForgotPanel() {
   document.querySelector('.auth-tabs').hidden          = false;
   document.getElementById('login-panel').hidden        = false;
   document.getElementById('register-panel').hidden     = true;
-  document.querySelector('.auth-subtitle').textContent = 'Zaloguj się, aby zarządzać swoimi zadaniami';
+  document.querySelector('.auth-subtitle').textContent = t('auth.subtitle');
   // Przywróć aktywną zakładkę „Logowanie"
   document.querySelectorAll('.auth-tab').forEach(t => {
     const isLogin = t.dataset.authTab === 'login';
@@ -356,6 +957,8 @@ function showEmailVerification(email, source) {
   document.getElementById('verify-screen').hidden = false;
   document.getElementById('app-wrapper').hidden   = true;
 
+  _lastVerifyState = { email, source };
+
   const card      = document.querySelector('#verify-screen .verify-card');
   const iconWrap  = document.getElementById('verify-icon-wrap');
   const titleEl   = document.getElementById('verify-title');
@@ -367,24 +970,20 @@ function showEmailVerification(email, source) {
     // Konto niezweryfikowane — blokada dostępu
     card.classList.add('blocked');
     iconWrap.textContent = '🔒';
-    titleEl.textContent  = 'Weryfikacja wymagana';
-    descEl.innerHTML     =
-      `Twoje konto nie zostało jeszcze potwierdzone.<br>` +
-      `Kliknij link weryfikacyjny w wiadomości wysłanej na<br>` +
-      `<strong>${safeEmail}</strong>`;
+    titleEl.textContent  = t('verify.blockedTitle');
+    descEl.innerHTML     = t('verify.blockedDescHtml', { email: safeEmail });
   } else {
     // Świeża rejestracja — poinformuj o wysłaniu linku
     card.classList.remove('blocked');
     iconWrap.textContent = '📧';
-    titleEl.textContent  = 'Potwierdź adres e-mail';
-    descEl.innerHTML     =
-      `Wysłaliśmy link weryfikacyjny na<br>` +
-      `<strong>${safeEmail}</strong>`;
+    titleEl.textContent  = t('verify.freshTitle');
+    descEl.innerHTML     = t('verify.freshDescHtml', { email: safeEmail });
   }
 }
 
 function hideEmailVerification() {
   document.getElementById('verify-screen').hidden = true;
+  _lastVerifyState = null;
 }
 
 async function resendVerificationEmail() {
@@ -392,19 +991,19 @@ async function resendVerificationEmail() {
   if (!user) return;
   const btn = document.getElementById('verify-resend-btn');
   btn.disabled    = true;
-  btn.textContent = 'Wysyłanie…';
+  btn.textContent = t('verify.resendBtnSending');
   try {
     await user.sendEmailVerification({ url: 'https://w84kubus.github.io/TaskManager/' });
-    showToast('📧 Wysłano ponownie — sprawdź skrzynkę i folder Spam', 'success', 5000);
+    showToast(t('toast.verifyResent'), 'success', 5000);
   } catch (e) {
     if (e.code === 'auth/too-many-requests') {
-      showToast('Zbyt wiele prób — poczekaj chwilę i spróbuj ponownie', 'error');
+      showToast(t('toast.verifyTooMany'), 'error');
     } else {
-      showToast('Błąd wysyłania — spróbuj ponownie', 'error');
+      showToast(t('toast.verifyResendError'), 'error');
     }
   } finally {
     btn.disabled    = false;
-    btn.textContent = 'Wyślij link ponownie';
+    btn.textContent = t('verify.resendBtn');
   }
 }
 
@@ -413,7 +1012,7 @@ async function checkEmailVerification() {
   if (!user) return;
   const btn = document.getElementById('verify-check-btn');
   btn.disabled    = true;
-  btn.textContent = 'Sprawdzam…';
+  btn.textContent = t('verify.checkBtnChecking');
   try {
     await user.reload(); // odśwież dane użytkownika z serwera
     if (_auth.currentUser.emailVerified) {
@@ -421,13 +1020,13 @@ async function checkEmailVerification() {
       state.currentUser = mapFirebaseUser(_auth.currentUser);
       await onLoginSuccess(true);
     } else {
-      showToast('E-mail jeszcze nie zweryfikowany — kliknij link w wiadomości', 'warning', 5000);
+      showToast(t('toast.verifyNotYet'), 'warning', 5000);
     }
   } catch (e) {
-    showToast('Błąd sprawdzania — spróbuj ponownie', 'error');
+    showToast(t('toast.verifyCheckError'), 'error');
   } finally {
     btn.disabled    = false;
-    btn.textContent = '✓ Potwierdziłem — zaloguj mnie';
+    btn.textContent = t('verify.checkBtn');
   }
 }
 
@@ -440,7 +1039,7 @@ function showApp() {
   const u      = state.currentUser;
   const isGuest = u.provider === 'guest';
 
-  nameEl.textContent = isGuest ? 'Tryb gościa' : u.name;
+  nameEl.textContent = isGuest ? t('userMenu.guestMode') : u.name;
 
   const initials = isGuest
     ? '👤'
@@ -586,11 +1185,11 @@ function relativeTime(ts) {
   const hours = Math.floor(diff / 3_600_000);
   const days  = Math.floor(diff / 86_400_000);
 
-  if (mins  <  1) return 'Przed chwilą';
-  if (mins  < 60) return `${mins} min. temu`;
-  if (hours < 24) return `${hours} godz. temu`;
-  if (days  <  7) return `${days} dni temu`;
-  return new Date(ts).toLocaleDateString('pl-PL', { day: 'numeric', month: 'short' });
+  if (mins  <  1) return t('relative.justNow');
+  if (mins  < 60) return t('relative.minAgo',   { n: mins  });
+  if (hours < 24) return t('relative.hoursAgo', { n: hours });
+  if (days  <  7) return t('relative.daysAgo',  { n: days  });
+  return new Date(ts).toLocaleDateString(LOCALE_MAP[state.lang] || 'pl-PL', { day: 'numeric', month: 'short' });
 }
 
 /* ============================================================
@@ -627,20 +1226,20 @@ function renderTaskList() {
 
     li.innerHTML = `
       <button class="task-checkbox" data-action="toggle"
-        aria-label="${task.done ? 'Oznacz jako aktywne' : 'Oznacz jako ukończone'}"
-        title="${task.done ? 'Cofnij' : 'Ukończ'}"
+        aria-label="${task.done ? t('tasks.toggleToActive') : t('tasks.toggleToDone')}"
+        title="${task.done ? t('tasks.titleDone') : t('tasks.titleUndone')}"
       >${task.done ? '✓' : ''}</button>
 
       <div class="task-content">
         <div class="task-name">${escHtml(task.name)}</div>
         <div class="task-meta">
           <span class="badge badge-${task.priority}"
-                aria-label="Priorytet: ${PRIORITY_LABEL[task.priority]}">
-            ${PRIORITY_LABEL[task.priority]}
+                aria-label="${priorityLabel(task.priority)}">
+            ${priorityLabel(task.priority)}
           </span>
           <span class="badge badge-cat"
-                aria-label="Kategoria: ${CATEGORY_LABEL[task.category]}">
-            ${CATEGORY_LABEL[task.category]}
+                aria-label="${categoryLabel(task.category)}">
+            ${categoryLabel(task.category)}
           </span>
           <span class="task-date">${relativeTime(task.createdAt)}</span>
         </div>
@@ -648,9 +1247,9 @@ function renderTaskList() {
 
       <div class="task-actions">
         <button class="task-btn edit"   data-action="edit"
-                aria-label="Edytuj zadanie: ${escHtml(task.name)}" title="Edytuj">✎</button>
+                aria-label="${t('tasks.editAria', { name: escHtml(task.name) })}" title="${t('tasks.editTitle')}">✎</button>
         <button class="task-btn delete" data-action="delete"
-                aria-label="Usuń zadanie: ${escHtml(task.name)}"  title="Usuń">✕</button>
+                aria-label="${t('tasks.deleteAria', { name: escHtml(task.name) })}"  title="${t('tasks.deleteTitle')}">✕</button>
       </div>
     `;
 
@@ -672,8 +1271,9 @@ function renderStats() {
   document.getElementById('stat-done').textContent    = done;
   document.getElementById('stat-percent').textContent = `${percent}%`;
 
-  renderBarChart('category-chart', countByKey('category'), CATEGORY_LABEL);
-  renderBarChart('priority-chart', countByKey('priority'), PRIORITY_LABEL);
+  const dict = I18N[state.lang] || I18N.pl;
+  renderBarChart('category-chart', countByKey('category'), dict.categoryLabel);
+  renderBarChart('priority-chart', countByKey('priority'), dict.priorityLabel);
 }
 
 function countByKey(key) {
@@ -744,10 +1344,10 @@ function validateName(value, inputId, errorId) {
   const error = document.getElementById(errorId);
   const v = value.trim();
 
-  if (v.length === 0)      { setError(input, error, 'Nazwa zadania nie może być pusta.');      return false; }
-  if (v.length < 2)        { setError(input, error, 'Nazwa musi mieć co najmniej 2 znaki.');   return false; }
-  if (v.length > 120)      { setError(input, error, 'Nazwa nie może przekraczać 120 znaków.'); return false; }
-  if (!VALID_TASK.test(v)) { setError(input, error, 'Nazwa zawiera niedozwolone znaki.');       return false; }
+  if (v.length === 0)      { setError(input, error, t('validation.taskEmpty'));       return false; }
+  if (v.length < 2)        { setError(input, error, t('validation.taskTooShort'));    return false; }
+  if (v.length > 120)      { setError(input, error, t('validation.taskTooLong'));     return false; }
+  if (!VALID_TASK.test(v)) { setError(input, error, t('validation.taskInvalidChars')); return false; }
 
   clearError(input, error);
   return true;
@@ -868,55 +1468,68 @@ function exportDataAsync() {
 /* ============================================================
    EKSPORT TXT  (async – Promise)
    ============================================================ */
+function boxHeader(text) {
+  const width = Math.max(38, text.length + 4);
+  const pad   = width - text.length;
+  const left  = Math.floor(pad / 2), right = pad - left;
+  return [
+    '╔' + '═'.repeat(width) + '╗',
+    '║' + ' '.repeat(left) + text + ' '.repeat(right) + '║',
+    '╚' + '═'.repeat(width) + '╝',
+  ];
+}
+
 function exportTxtAsync() {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
       try {
-        const dateStr = new Date().toLocaleDateString('pl-PL', {
+        const locale = LOCALE_MAP[state.lang] || 'pl-PL';
+        const ex     = (I18N[state.lang] || I18N.pl).exportTxt;
+        const dateStr = new Date().toLocaleDateString(locale, {
           day: 'numeric', month: 'long', year: 'numeric',
         });
         const total  = state.tasks.length;
         const done   = state.tasks.filter(t => t.done).length;
         const active = total - done;
+        const isGuest = state.currentUser?.provider === 'guest';
+        const userLabel = isGuest ? t('userMenu.guestMode') : (state.currentUser?.name || '—');
 
         const lines = [
-          '╔══════════════════════════════════════╗',
-          '║         TASKMANAGER — ZADANIA        ║',
-          '╚══════════════════════════════════════╝',
-          `  Data eksportu : ${dateStr}`,
-          `  Użytkownik    : ${state.currentUser?.name || '—'}`,
-          `  Wszystkich    : ${total}  |  Aktywnych: ${active}  |  Ukończonych: ${done}`,
+          ...boxHeader(ex.titleBox),
+          `  ${ex.exportDate} : ${dateStr}`,
+          `  ${ex.user}${' '.repeat(Math.max(0, ex.exportDate.length - ex.user.length))} : ${userLabel}`,
+          `  ${ex.totalLine} : ${total}  |  ${ex.activeWord}: ${active}  |  ${ex.doneWord}: ${done}`,
           '',
           '──────────────────────────────────────',
           '',
         ];
 
         if (state.tasks.length === 0) {
-          lines.push('  Brak zadań do wyeksportowania.');
+          lines.push(`  ${ex.empty}`);
         } else {
           const sorted = [...state.tasks].sort((a, b) => b.createdAt - a.createdAt);
           sorted.forEach((task, i) => {
             const status   = task.done ? '[✓]' : '[ ]';
-            const created  = new Date(task.createdAt).toLocaleString('pl-PL');
-            const priority = PRIORITY_LABEL[task.priority] || task.priority;
-            const category = CATEGORY_LABEL[task.category] || task.category;
+            const created  = new Date(task.createdAt).toLocaleString(locale);
+            const priority = priorityLabel(task.priority) || task.priority;
+            const category = categoryLabel(task.category) || task.category;
             lines.push(`${i + 1}. ${status} ${task.name}`);
-            lines.push(`     Priorytet : ${priority}`);
-            lines.push(`     Kategoria : ${category}`);
-            lines.push(`     Dodano    : ${created}`);
+            lines.push(`     ${ex.priorityWord} : ${priority}`);
+            lines.push(`     ${ex.categoryWord} : ${category}`);
+            lines.push(`     ${ex.addedWord} : ${created}`);
             lines.push('');
           });
         }
 
         lines.push('──────────────────────────────────────');
-        lines.push('  Wygenerowano przez TaskManager');
+        lines.push(`  ${ex.generatedBy}`);
         lines.push('  https://w84kubus.github.io/TaskManager/');
 
         const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
         const url  = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href     = url;
-        link.download = `zadania_${new Date().toISOString().slice(0, 10)}.txt`;
+        link.download = `${state.lang === 'en' ? 'tasks' : 'zadania'}_${new Date().toISOString().slice(0, 10)}.txt`;
         link.click();
         URL.revokeObjectURL(url);
         resolve();
@@ -948,60 +1561,53 @@ async function deleteAccount() {
   const user = _auth?.currentUser;
   if (!user) return;
 
-  const confirmed = await showConfirm(
-    'Usuń konto',
-    'Czy na pewno chcesz trwale usunąć konto i wszystkie dane? Tej operacji nie można cofnąć.'
-  );
-  if (!confirmed) return;
+  openConfirm(t('confirm.deleteAccountTitle'), t('confirm.deleteAccountMsg'), async () => {
+    const btn = document.getElementById('delete-account-btn');
+    btn.disabled    = true;
+    btn.textContent = t('settings.deleting');
 
-  const btn = document.getElementById('delete-account-btn');
-  btn.disabled    = true;
-  btn.textContent = 'Usuwanie…';
+    try {
+      // 1. Zatrzymaj listener Firestore
+      if (_firestoreUnsubscribe) { _firestoreUnsubscribe(); _firestoreUnsubscribe = null; }
 
-  try {
-    // 1. Zatrzymaj listener Firestore
-    if (_firestoreUnsubscribe) { _firestoreUnsubscribe(); _firestoreUnsubscribe = null; }
-
-    // 2. Usuń wszystkie zadania z Firestore
-    const col = tasksCol();
-    if (col && _db) {
-      const snap = await col.get();
-      if (!snap.empty) {
-        const batch = _db.batch();
-        snap.docs.forEach(d => batch.delete(d.ref));
-        await batch.commit();
+      // 2. Usuń wszystkie zadania z Firestore
+      const col = tasksCol();
+      if (col && _db) {
+        const snap = await col.get();
+        if (!snap.empty) {
+          const batch = _db.batch();
+          snap.docs.forEach(d => batch.delete(d.ref));
+          await batch.commit();
+        }
+        // Usuń dokument użytkownika (ustawienia)
+        await _db.collection('users').doc(firestoreDocId()).delete().catch(() => {});
       }
-      // Usuń dokument użytkownika (ustawienia)
-      await _db.collection('users').doc(firestoreDocId()).delete().catch(() => {});
-    }
 
-    // 3. Usuń konto z Firebase Auth
-    await user.delete();
+      // 3. Usuń konto z Firebase Auth
+      await user.delete();
 
-    // 4. Wyczyść localStorage
-    localStorage.clear();
+      // 4. Wyczyść localStorage
+      localStorage.clear();
 
-    // 5. Pokaż ekran logowania
-    state.currentUser = null;
-    state.tasks = [];
-    showAuth();
-    showToast('Konto zostało trwale usunięte.', 'success', 5000);
-  } catch (err) {
-    btn.disabled    = false;
-    btn.textContent = 'Usuń konto';
-
-    if (err.code === 'auth/requires-recent-login') {
-      showToast(
-        'Ze względów bezpieczeństwa zaloguj się ponownie i spróbuj jeszcze raz.',
-        'error', 7000
-      );
-      await _auth.signOut();
+      // 5. Pokaż ekran logowania
+      state.currentUser = null;
+      state.tasks = [];
       showAuth();
-    } else {
-      showToast('Błąd usuwania konta — spróbuj ponownie.', 'error');
-      console.error('[DeleteAccount]', err);
+      showToast(t('toast.accountDeleted'), 'success', 5000);
+    } catch (err) {
+      btn.disabled    = false;
+      btn.textContent = t('settings.deleteAccountBtn');
+
+      if (err.code === 'auth/requires-recent-login') {
+        showToast(t('toast.accountDeleteReauth'), 'error', 7000);
+        await _auth.signOut();
+        showAuth();
+      } else {
+        showToast(t('toast.accountDeleteError'), 'error');
+        console.error('[DeleteAccount]', err);
+      }
     }
-  }
+  });
 }
 
 /* ============================================================
@@ -1042,7 +1648,7 @@ function clearAll() {
 
   renderTaskList();
   renderStats();
-  showToast('Wszystkie dane zostały wyczyszczone.', 'warning');
+  showToast(t('toast.allCleared'), 'warning');
 }
 
 /* ============================================================
@@ -1075,14 +1681,14 @@ function setupAuthEvents() {
     let valid = true;
 
     if (!EMAIL_REGEX.test(emailInput.value.trim())) {
-      setError(emailInput, document.getElementById('login-email-error'), 'Wpisz poprawny adres e-mail.');
+      setError(emailInput, document.getElementById('login-email-error'), t('validation.emailInvalid'));
       valid = false;
     } else {
       clearError(emailInput, document.getElementById('login-email-error'));
     }
 
     if (passInput.value.length < 1) {
-      setError(passInput, document.getElementById('login-password-error'), 'Wpisz hasło.');
+      setError(passInput, document.getElementById('login-password-error'), t('validation.passwordEmpty'));
       valid = false;
     } else {
       clearError(passInput, document.getElementById('login-password-error'));
@@ -1092,7 +1698,7 @@ function setupAuthEvents() {
 
     const submitBtn = e.target.querySelector('[type="submit"]');
     submitBtn.disabled    = true;
-    submitBtn.textContent = 'Logowanie…';
+    submitBtn.textContent = t('auth.loginSubmitting');
 
     try {
       await _auth.signInWithEmailAndPassword(
@@ -1105,7 +1711,7 @@ function setupAuthEvents() {
         translateAuthError(err.code));
     } finally {
       submitBtn.disabled    = false;
-      submitBtn.textContent = 'Zaloguj się';
+      submitBtn.textContent = t('auth.loginSubmit');
     }
   });
 
@@ -1119,14 +1725,14 @@ function setupAuthEvents() {
     let valid = true;
 
     if (nameInput.value.trim().length < 2) {
-      setError(nameInput, document.getElementById('register-name-error'), 'Imię musi mieć co najmniej 2 znaki.');
+      setError(nameInput, document.getElementById('register-name-error'), t('validation.nameTooShort'));
       valid = false;
     } else {
       clearError(nameInput, document.getElementById('register-name-error'));
     }
 
     if (!EMAIL_REGEX.test(emailInput.value.trim())) {
-      setError(emailInput, document.getElementById('register-email-error'), 'Wpisz poprawny adres e-mail.');
+      setError(emailInput, document.getElementById('register-email-error'), t('validation.emailInvalid'));
       valid = false;
     } else {
       clearError(emailInput, document.getElementById('register-email-error'));
@@ -1134,7 +1740,7 @@ function setupAuthEvents() {
 
     if (!PASS_REGEX.test(passInput.value)) {
       setError(passInput, document.getElementById('register-password-error'),
-        'Min. 6 znaków, 1 wielka litera i 1 cyfra.');
+        t('validation.passwordWeak'));
       valid = false;
     } else {
       clearError(passInput, document.getElementById('register-password-error'));
@@ -1143,7 +1749,7 @@ function setupAuthEvents() {
     const consentBox = document.getElementById('register-consent');
     if (!consentBox.checked) {
       setError(consentBox, document.getElementById('register-consent-error'),
-        'Akceptacja Polityki Prywatności jest wymagana.');
+        t('validation.consentRequired'));
       valid = false;
     } else {
       clearError(consentBox, document.getElementById('register-consent-error'));
@@ -1153,7 +1759,7 @@ function setupAuthEvents() {
 
     const submitBtn = e.target.querySelector('[type="submit"]');
     submitBtn.disabled    = true;
-    submitBtn.textContent = 'Rejestracja…';
+    submitBtn.textContent = t('auth.registerSubmitting');
 
     try {
       const cred = await _auth.createUserWithEmailAndPassword(
@@ -1174,7 +1780,7 @@ function setupAuthEvents() {
         translateAuthError(err.code));
     } finally {
       submitBtn.disabled    = false;
-      submitBtn.textContent = 'Utwórz konto';
+      submitBtn.textContent = t('auth.registerSubmit');
     }
   });
 
@@ -1200,21 +1806,21 @@ function setupAuthEvents() {
     const emailError = document.getElementById('forgot-email-error');
 
     if (!EMAIL_REGEX.test(emailInput.value.trim())) {
-      setError(emailInput, emailError, 'Wpisz poprawny adres e-mail.');
+      setError(emailInput, emailError, t('validation.emailInvalid'));
       return;
     }
     clearError(emailInput, emailError);
 
     const submitBtn = e.target.querySelector('[type="submit"]');
     submitBtn.disabled    = true;
-    submitBtn.textContent = 'Wysyłanie…';
+    submitBtn.textContent = t('auth.forgotSubmitting');
 
     try {
       await _auth.sendPasswordResetEmail(emailInput.value.trim(), {
         url: 'https://w84kubus.github.io/TaskManager/',
       });
       showToast(
-        `📧 Wysłano link resetowania hasła na ${emailInput.value.trim()} — sprawdź skrzynkę`,
+        t('toast.resetLinkSent', { email: emailInput.value.trim() }),
         'success', 7000
       );
       emailInput.value = '';
@@ -1223,7 +1829,7 @@ function setupAuthEvents() {
       setError(emailInput, emailError, translateAuthError(err.code));
     } finally {
       submitBtn.disabled    = false;
-      submitBtn.textContent = 'Wyślij link resetujący';
+      submitBtn.textContent = t('auth.forgotSubmit');
     }
   });
 
@@ -1245,8 +1851,8 @@ function setupAuthEvents() {
   /* ── Banner gościa: zaloguj się ─────────────────────────── */
   document.getElementById('guest-banner-login').addEventListener('click', () => {
     openConfirm(
-      'Przejdź do logowania',
-      'Twoje zadania jako gość zostaną zachowane lokalnie. Po zalogowaniu na konto będziesz pracować na osobnym zestawie zadań.',
+      t('confirm.guestLoginTitle'),
+      t('confirm.guestLoginMsg'),
       () => {
         clearGuestSession();
         state.currentUser = null;
@@ -1292,7 +1898,7 @@ async function onLoginSuccess(isFreshLogin = true) {
   if (isFreshLogin) {
     const isGuest = state.currentUser.provider === 'guest';
     showToast(
-      isGuest ? 'Tryb gościa — zadania są lokalne 👤' : `Witaj, ${state.currentUser.name}! 👋`,
+      isGuest ? t('toast.guestWelcome') : t('toast.welcomeBack', { name: state.currentUser.name }),
       isGuest ? 'warning' : 'success',
       3500
     );
@@ -1302,13 +1908,13 @@ async function onLoginSuccess(isFreshLogin = true) {
         // Świeża rejestracja — poinformuj o e-mailu weryfikacyjnym
         _justRegistered = false;
         setTimeout(() => showToast(
-          `📧 Wysłano link weryfikacyjny na ${state.currentUser.email} — kliknij go, aby potwierdzić konto`,
+          t('toast.verifyEmailSentAfterRegister', { email: state.currentUser.email }),
           'warning', 8000
         ), 3800);
       } else if (!state.currentUser.emailVerified) {
         // Logowanie na niezweryfikowane konto — przypomnij
         setTimeout(() => showToast(
-          '📧 Adres e-mail niezweryfikowany — sprawdź skrzynkę i kliknij link',
+          t('toast.verifyEmailReminder'),
           'warning', 6000
         ), 3800);
       }
@@ -1326,11 +1932,7 @@ async function onLoginSuccess(isFreshLogin = true) {
   // Przykładowe zadania TYLKO dla absolutnie nowych użytkowników
   if (isNewUser && state.tasks.length === 0) {
     setTimeout(() => {
-      const samples = [
-        { name: 'Zaplanuj tygodniowy harmonogram', priority: 'high',   category: 'work'     },
-        { name: 'Zrób zakupy spożywcze',           priority: 'medium', category: 'shopping' },
-        { name: 'Spacer 30 minut',                  priority: 'low',    category: 'health'   },
-      ];
+      const samples = (I18N[state.lang] || I18N.pl).samples;
       samples.forEach(s => addTask(s.name, s.priority, s.category));
       renderTaskList();
     }, 500);
@@ -1366,7 +1968,7 @@ function setupEvents() {
 
     addTask(name, priority, category);
     renderTaskList();
-    showToast(`Dodano: „${name.trim()}"`, 'success');
+    showToast(t('toast.added', { name: name.trim() }), 'success');
 
     nameInput.value = '';
     nameInput.focus();
@@ -1385,7 +1987,7 @@ function setupEvents() {
 
       case 'toggle': {
         const task = toggleTask(taskId);
-        if (task?.done) showToast('Zadanie ukończone! 🎉', 'success');
+        if (task?.done) showToast(t('toast.completed'), 'success');
         renderTaskList();
         break;
       }
@@ -1399,7 +2001,7 @@ function setupEvents() {
         setTimeout(() => {
           removeTask(taskId);
           renderTaskList();
-          showToast(`Usunięto: „${task.name}"`, 'warning');
+          showToast(t('toast.deleted', { name: task.name }), 'warning');
         }, 200);
         break;
       }
@@ -1442,7 +2044,7 @@ function setupEvents() {
     applyDarkMode(state.darkMode);
     saveState();
     firestoreSyncSettings();
-    showToast(state.darkMode ? 'Tryb ciemny włączony 🌙' : 'Tryb jasny włączony ☀️', 'success');
+    showToast(state.darkMode ? t('toast.darkOn') : t('toast.darkOff'), 'success');
   });
 
   /* ── Powiadomienia toggle (change) ─────────────────────── */
@@ -1467,8 +2069,8 @@ function setupEvents() {
   /* ── Wyczyść dane (click) ──────────────────────────────── */
   document.getElementById('clear-data-btn').addEventListener('click', () => {
     openConfirm(
-      'Wyczyść dane',
-      'Czy na pewno chcesz usunąć wszystkie zadania i zresetować ustawienia? Tej operacji nie można cofnąć.',
+      t('confirm.clearDataTitle'),
+      t('confirm.clearDataMsg'),
       clearAll
     );
   });
@@ -1477,15 +2079,15 @@ function setupEvents() {
   document.getElementById('export-btn').addEventListener('click', async () => {
     const btn = document.getElementById('export-btn');
     btn.disabled    = true;
-    btn.textContent = 'Eksportowanie…';
+    btn.textContent = t('settings.exporting');
     try {
       await exportDataAsync();
-      showToast('Eksport JSON zakończony!', 'success');
+      showToast(t('toast.exportJsonDone'), 'success');
     } catch {
-      showToast('Błąd podczas eksportu JSON.', 'error');
+      showToast(t('toast.exportJsonError'), 'error');
     } finally {
       btn.disabled    = false;
-      btn.textContent = 'Eksportuj JSON';
+      btn.textContent = t('settings.exportJson');
     }
   });
 
@@ -1493,15 +2095,15 @@ function setupEvents() {
   document.getElementById('export-txt-btn').addEventListener('click', async () => {
     const btn = document.getElementById('export-txt-btn');
     btn.disabled    = true;
-    btn.textContent = 'Eksportowanie…';
+    btn.textContent = t('settings.exporting');
     try {
       await exportTxtAsync();
-      showToast('Eksport TXT zakończony!', 'success');
+      showToast(t('toast.exportTxtDone'), 'success');
     } catch {
-      showToast('Błąd podczas eksportu TXT.', 'error');
+      showToast(t('toast.exportTxtError'), 'error');
     } finally {
       btn.disabled    = false;
-      btn.textContent = 'Eksportuj TXT';
+      btn.textContent = t('settings.exportTxt');
     }
   });
 
@@ -1532,7 +2134,7 @@ function setupEvents() {
 
     closeModal();
     renderTaskList();
-    showToast('Zadanie zaktualizowane!', 'success');
+    showToast(t('toast.updated'), 'success');
   });
 
   /* ── Scroll – cień nagłówka (scroll) ───────────────────── */
@@ -1543,7 +2145,7 @@ function setupEvents() {
 
   /* ── Wyloguj (click) ────────────────────────────────────── */
   document.getElementById('logout-btn').addEventListener('click', () => {
-    openConfirm('Wyloguj się', 'Czy na pewno chcesz się wylogować?', logout);
+    openConfirm(t('confirm.logoutTitle'), t('confirm.logoutMsg'), logout);
   });
 
   /* ── Klawiatura: Escape zamyka modal (keydown) ─────────── */
@@ -1560,6 +2162,8 @@ function setupEvents() {
 let _authInitialized = false;
 
 function init() {
+  initLanguage();
+  setupLangToggle();
   initFirebase();
   setupAuthEvents();
   setupEvents();
