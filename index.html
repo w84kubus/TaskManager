@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;1,9..144,300;1,9..144,700;1,9..144,900&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles/style.css?v=79">
+  <link rel="stylesheet" href="styles/style.css?v=80">
 </head>
 <body>
 
@@ -385,6 +385,10 @@
             <option value="alpha-asc" data-i18n="tasks.sortAlphaAsc">A → Z</option>
             <option value="alpha-desc" data-i18n="tasks.sortAlphaDesc">Z → A</option>
           </select>
+        </div>
+        <div class="attr-filters">
+          <select id="filter-priority" aria-label="Filtruj według priorytetu" data-i18n-aria="tasks.filterPriorityAria"></select>
+          <select id="filter-category" aria-label="Filtruj według kategorii" data-i18n-aria="tasks.filterCategoryAria"></select>
         </div>
       </div>
 
@@ -795,6 +799,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-auth-compat.js"></script>
-  <script src="scripts/app.js?v=13"></script>
+  <script src="scripts/app.js?v=14"></script>
 </body>
 </html>

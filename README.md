@@ -61,7 +61,7 @@ Everything is entered by hand and synced in real time — no calendar imports, n
 
 ### Tasks
 - Add, edit, delete, mark as done - active tasks always shown above completed ones
-- Filtering (all / active / done) + live search
+- Filtering by status (all / active / done), **priority** and **category**, combinable with live search
 - Sorting by date, priority, or alphabetically
 - Confirmation modal replacing the native `confirm()`
 
@@ -185,6 +185,7 @@ service cloud.firestore {
 | Google OAuth sign-in | ✅ |
 | Account deletion (GDPR) | ✅ |
 | Custom priorities & categories (add / edit / reorder / delete) | ✅ |
+| Filtering by priority and category | ✅ |
 | PL/EN language switching | ✅ |
 | Console — 0 errors | ✅ |
 

@@ -61,7 +61,7 @@ Wszystko wpisywane ręcznie i synchronizowane w czasie rzeczywistym — bez impo
 
 ### Zadania
 - Dodawanie, edycja, usuwanie, oznaczanie jako ukończone - aktywne zawsze nad ukończonymi
-- Filtrowanie (wszystkie / aktywne / ukończone) + wyszukiwanie live
+- Filtrowanie po statusie (wszystkie / aktywne / ukończone), **priorytecie** i **kategorii**, łączone z wyszukiwaniem live
 - Sortowanie po dacie, priorytecie lub alfabetycznie
 - Modal potwierdzenia zamiast natywnego `confirm()`
 
@@ -185,6 +185,7 @@ service cloud.firestore {
 | Logowanie Google OAuth | ✅ |
 | Usunięcie konta (RODO) | ✅ |
 | Własne priorytety i kategorie (dodawanie / edycja / kolejność / usuwanie) | ✅ |
+| Filtrowanie po priorytecie i kategorii | ✅ |
 | Przełączanie języka PL/EN | ✅ |
 | Konsola — 0 błędów | ✅ |
 

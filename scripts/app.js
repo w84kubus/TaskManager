@@ -130,6 +130,10 @@ const I18N = {
       filterActive: 'Aktywne',
       filterDone: 'Ukończone',
       searchPlaceholder: 'Szukaj zadania…',
+      filterPriorityAria: 'Filtruj według priorytetu',
+      filterCategoryAria: 'Filtruj według kategorii',
+      allPriorities: 'Wszystkie priorytety',
+      allCategories: 'Wszystkie kategorie',
       sortDateDesc: 'Najnowsze',
       sortDateAsc: 'Najstarsze',
       sortPriorityHigh: 'Priorytet ↑',
@@ -418,6 +422,10 @@ const I18N = {
       filterActive: 'Active',
       filterDone: 'Done',
       searchPlaceholder: 'Search tasks…',
+      filterPriorityAria: 'Filter by priority',
+      filterCategoryAria: 'Filter by category',
+      allPriorities: 'All priorities',
+      allCategories: 'All categories',
       sortDateDesc: 'Newest',
       sortDateAsc: 'Oldest',
       sortPriorityHigh: 'Priority ↑',
@@ -653,6 +661,8 @@ const state = {
   priorities:    defaultList('priorities'),   // [{ id, color, name? }] — od najwyższego
   categories:    defaultList('categories'),   // [{ id, icon,  name? }]
   filter:        'all',
+  filterPriority: '',    // id priorytetu albo '' = wszystkie
+  filterCategory: '',    // id kategorii albo '' = wszystkie
   sort:          'date-desc',
   search:        '',
   darkMode:      false,
@@ -1345,6 +1355,8 @@ function logout() {
   stopFirestoreListeners();
 
   state.tasks         = [];
+  state.filterPriority = '';
+  state.filterCategory = '';
   state.priorities    = defaultList('priorities');
   state.categories    = defaultList('categories');
   state.darkMode      = false;
@@ -1416,6 +1428,9 @@ function getVisibleTasks() {
 
   if (state.filter === 'active') list = list.filter(t => !t.done);
   if (state.filter === 'done')   list = list.filter(t =>  t.done);
+
+  if (state.filterPriority) list = list.filter(t => t.priority === state.filterPriority);
+  if (state.filterCategory) list = list.filter(t => t.category === state.filterCategory);
 
   if (state.search.trim()) {
     const q = state.search.trim().toLowerCase();
@@ -1887,6 +1902,8 @@ async function deleteAccount() {
       // 5. Pokaż ekran logowania
       state.currentUser = null;
       state.tasks = [];
+      state.filterPriority = '';
+      state.filterCategory = '';
       state.priorities = defaultList('priorities');
       state.categories = defaultList('categories');
       renderListControls();
@@ -2184,6 +2201,8 @@ function setupAuthEvents() {
    ============================================================ */
 async function onLoginSuccess(isFreshLogin = true) {
   state.tasks         = [];
+  state.filterPriority = '';
+  state.filterCategory = '';
   state.priorities    = defaultList('priorities');
   state.categories    = defaultList('categories');
   state.darkMode      = false;
@@ -2294,7 +2313,34 @@ function fillSelect(selectId, kind) {
   sel.value = items.some(i => i.id === prev) ? prev : defaultChoiceId(kind);
 }
 
+// Select filtra: „wszystkie" + pozycje z listy użytkownika. Źródłem prawdy jest state, nie DOM.
+function fillFilterSelect(selectId, kind, stateKey, allLabelKey) {
+  const sel = document.getElementById(selectId);
+  if (!sel) return;
+
+  const items = state[kind];
+  // filtrowana pozycja została usunięta (np. w Ustawieniach lub z innego urządzenia) — wracamy do „wszystkie"
+  if (state[stateKey] && !items.some(i => i.id === state[stateKey])) state[stateKey] = '';
+
+  sel.innerHTML = '';
+  const all = document.createElement('option');
+  all.value       = '';
+  all.textContent = t(allLabelKey);
+  sel.appendChild(all);
+  items.forEach(item => {
+    const opt = document.createElement('option');
+    opt.value       = item.id;
+    opt.textContent = itemLabel(kind, item);
+    sel.appendChild(opt);
+  });
+
+  sel.value = state[stateKey];
+  sel.classList.toggle('is-filtered', state[stateKey] !== '');
+}
+
 function renderSelectOptions() {
+  fillFilterSelect('filter-priority', 'priorities', 'filterPriority', 'tasks.allPriorities');
+  fillFilterSelect('filter-category', 'categories', 'filterCategory', 'tasks.allCategories');
   fillSelect('task-priority',      'priorities');
   fillSelect('edit-task-priority', 'priorities');
   fillSelect('task-category',      'categories');
@@ -2711,6 +2757,15 @@ function setupEvents() {
       });
       btn.classList.add('active');
       btn.setAttribute('aria-pressed', 'true');
+      renderTaskList();
+    });
+  });
+
+  /* ── Filtry: priorytet i kategoria (change) ─────────────── */
+  [['filter-priority', 'filterPriority'], ['filter-category', 'filterCategory']].forEach(([id, key]) => {
+    document.getElementById(id).addEventListener('change', e => {
+      state[key] = e.target.value;
+      e.target.classList.toggle('is-filtered', state[key] !== '');
       renderTaskList();
     });
   });
