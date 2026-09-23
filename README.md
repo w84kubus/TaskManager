@@ -56,7 +56,7 @@ Everything is entered by hand and synced in real time — no calendar imports, n
 ### Cloud sync
 - **Real-time** task synchronization (`onSnapshot`)
 - Each task is its own Firestore document - no conflicts on concurrent writes
-- Dark mode and notification preferences synced across devices
+- Dark mode, notification preferences and your custom priorities/categories synced across devices
 - Data isolated per account (`request.auth.uid == userId`)
 
 ### Tasks
@@ -64,6 +64,13 @@ Everything is entered by hand and synced in real time — no calendar imports, n
 - Filtering (all / active / done) + live search
 - Sorting by date, priority, or alphabetically
 - Confirmation modal replacing the native `confirm()`
+
+### Custom priorities and categories
+- **Settings tabs** - General, Priorities, Categories
+- **Priorities** - beyond Low / Medium / High, add your own (up to 8) with a name and one of 8 colors
+- **Categories** - add your own (up to 20) with a name and one of 20 icons
+- **Manage** - rename, recolor, reorder (order defines priority sorting), delete; a counter shows how many tasks use each entry
+- Deleting an entry in use moves its tasks to a fallback entry ("Medium" / "Other") after confirmation; "Restore defaults" brings back the built-in ones
 
 ### Statistics
 - Summary cards - total, active, completed, completion rate
@@ -177,6 +184,7 @@ service cloud.firestore {
 | Registration + email verification | ✅ |
 | Google OAuth sign-in | ✅ |
 | Account deletion (GDPR) | ✅ |
+| Custom priorities & categories (add / edit / reorder / delete) | ✅ |
 | PL/EN language switching | ✅ |
 | Console — 0 errors | ✅ |
 

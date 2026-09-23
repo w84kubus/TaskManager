@@ -3,7 +3,46 @@
 /* ============================================================
    STAŁE / SŁOWNIKI
    ============================================================ */
-const PRIORITY_ORDER = { high: 0, medium: 1, low: 2 };
+/* ── Priorytety i kategorie definiowane przez użytkownika ─────
+   Wbudowane pozycje mają stałe id (zgodne z zadaniami zapisanymi wcześniej),
+   własne dostają id typu „c_…". Kolejność na liście = ranga (pierwszy = najwyższy priorytet). */
+const PRIORITY_COLORS = ['red', 'orange', 'amber', 'green', 'teal', 'blue', 'plum', 'gray'];
+
+const CATEGORY_ICONS = [
+  'icon-user', 'icon-briefcase', 'icon-shopping-cart', 'icon-heart', 'icon-package',
+  'icon-house', 'icon-book-open', 'icon-graduation-cap', 'icon-airplane', 'icon-car',
+  'icon-wallet', 'icon-fork-knife', 'icon-barbell', 'icon-music', 'icon-game',
+  'icon-wrench', 'icon-paw', 'icon-star', 'icon-lightbulb', 'icon-code',
+];
+
+const DEFAULT_PRIORITIES = [
+  { id: 'high',   color: 'red'   },
+  { id: 'medium', color: 'amber' },
+  { id: 'low',    color: 'green' },
+];
+
+const DEFAULT_CATEGORIES = [
+  { id: 'personal', icon: 'icon-user'          },
+  { id: 'work',     icon: 'icon-briefcase'     },
+  { id: 'shopping', icon: 'icon-shopping-cart' },
+  { id: 'health',   icon: 'icon-heart'         },
+  { id: 'other',    icon: 'icon-package'       },
+];
+
+// kind → konfiguracja wspólna dla obu list (jeden kod obsługuje priorytety i kategorie)
+const LIST_KIND = {
+  priorities: {
+    prefix: 'priority', field: 'color', choices: PRIORITY_COLORS, defaults: DEFAULT_PRIORITIES,
+    max: 8,  taskKey: 'priority', labelDict: 'priorityLabel',
+  },
+  categories: {
+    prefix: 'category', field: 'icon',  choices: CATEGORY_ICONS,  defaults: DEFAULT_CATEGORIES,
+    max: 20, taskKey: 'category', labelDict: 'categoryLabel',
+  },
+};
+
+const LIST_ID_RE   = /^[A-Za-z0-9_-]{1,40}$/;
+const LIST_NAME_RE = /^[\p{L}\p{N} \-.,!?()&/+]{2,24}$/u;
 
 /* ============================================================
    I18N — TŁUMACZENIA (PL / EN)
@@ -123,6 +162,47 @@ const I18N = {
       exportTxt: 'Eksportuj TXT', exportTxtDesc: 'Pobierz czytelną listę zadań w formacie tekstowym',
       exporting: 'Eksportowanie…',
       deleting: 'Usuwanie…',
+      tabsAria: 'Sekcje ustawień',
+      tabGeneral: 'Ogólne', tabPriorities: 'Priorytety', tabCategories: 'Kategorie',
+    },
+    lists: {
+      prioritiesTitle: 'Twoje priorytety',
+      prioritiesDesc: 'Kolejność ma znaczenie: od najwyższego do najniższego. Według niej sortowane są zadania.',
+      categoriesTitle: 'Twoje kategorie',
+      categoriesDesc: 'Porządkuj zadania po swojemu — dodaj własne kategorie i wybierz dla nich ikonę.',
+      addPriority: 'Dodaj priorytet', editPriority: 'Edytuj priorytet',
+      addCategory: 'Dodaj kategorię', editCategory: 'Edytuj kategorię',
+      nameLabel: 'Nazwa',
+      namePlaceholderPriority: 'np. Krytyczny',
+      namePlaceholderCategory: 'np. Nauka',
+      colorLabel: 'Kolor', iconLabel: 'Ikona',
+      add: 'Dodaj', save: 'Zapisz', cancel: 'Anuluj',
+      restoreDefaults: 'Przywróć domyślne',
+      restoreTitle: 'Przywrócić domyślne?',
+      restoreMsg: 'Brakujące pozycje domyślne zostaną dodane, a ich nazwy i wygląd przywrócone. Twoje własne pozycje zostaną zachowane.',
+      usedIn: 'Użyte w zadaniach: {n}',
+      moveUp: 'Przesuń w górę: {name}', moveDown: 'Przesuń w dół: {name}',
+      edit: 'Edytuj: {name}', remove: 'Usuń: {name}',
+      cannotRemoveLast: 'Musi zostać co najmniej jedna pozycja',
+      deletePriorityTitle: 'Usunąć priorytet?', deleteCategoryTitle: 'Usunąć kategorię?',
+      deleteUnused: 'Pozycja „{name}" zostanie usunięta.',
+      deleteUsed: 'Pozycja „{name}" zostanie usunięta. Zadania z tą pozycją ({n}) zostaną przeniesione do „{target}".',
+      errLength: 'Nazwa musi mieć od 2 do 24 znaków',
+      errChars: 'Dozwolone: litery, cyfry, spacje oraz - . , ! ? ( ) & / +',
+      errDuplicate: 'Pozycja o takiej nazwie już istnieje',
+      errLimit: 'Osiągnięto limit pozycji ({max})',
+      unknown: 'Nieznane',
+      colors: {
+        red: 'Czerwony', orange: 'Pomarańczowy', amber: 'Bursztynowy', green: 'Zielony',
+        teal: 'Morski', blue: 'Niebieski', plum: 'Śliwkowy', gray: 'Szary',
+      },
+      icons: {
+        'icon-user': 'Osoba', 'icon-briefcase': 'Teczka', 'icon-shopping-cart': 'Koszyk', 'icon-heart': 'Serce',
+        'icon-package': 'Paczka', 'icon-house': 'Dom', 'icon-book-open': 'Książka', 'icon-graduation-cap': 'Nauka',
+        'icon-airplane': 'Samolot', 'icon-car': 'Samochód', 'icon-wallet': 'Portfel', 'icon-fork-knife': 'Jedzenie',
+        'icon-barbell': 'Sport', 'icon-music': 'Muzyka', 'icon-game': 'Gry', 'icon-wrench': 'Naprawy',
+        'icon-paw': 'Zwierzęta', 'icon-star': 'Gwiazdka', 'icon-lightbulb': 'Pomysły', 'icon-code': 'Kod',
+      },
     },
     modal: { editTitle: 'Edytuj zadanie', cancel: 'Anuluj', save: 'Zapisz zmiany', confirm: 'Potwierdź' },
     footer: {
@@ -140,7 +220,7 @@ const I18N = {
       d1: '<strong>Adres e-mail</strong> — wymagany do rejestracji i logowania',
       d2: '<strong>Imię</strong> — podawane dobrowolnie przy rejestracji, wyświetlane w interfejsie',
       d3: '<strong>Treść zadań</strong> — zadania dodawane przez użytkownika (mogą zawierać dane osobowe)',
-      d4: '<strong>Ustawienia aplikacji</strong> — tryb ciemny, preferencje powiadomień',
+      d4: '<strong>Ustawienia aplikacji</strong> — tryb ciemny, preferencje powiadomień, własne priorytety i kategorie',
       p2: 'Nie zbieramy danych o lokalizacji, numerów telefonów ani informacji płatniczych.',
       h3: '3. Cel i podstawa prawna przetwarzania',
       l1: 'Świadczenie usługi (obsługa konta, synchronizacja zadań) — <strong>art. 6 ust. 1 lit. b RODO</strong> (wykonanie umowy)',
@@ -172,6 +252,10 @@ const I18N = {
     toast: {
       added: 'Dodano: „{name}"',
       deleted: 'Usunięto: „{name}"',
+      listAdded: 'Dodano: „{name}"',
+      listUpdated: 'Zapisano: „{name}"',
+      listDeleted: 'Usunięto: „{name}"',
+      listRestored: 'Przywrócono domyślne pozycje',
       updated: 'Zadanie zaktualizowane!',
       completed: 'Zadanie ukończone!',
       allCleared: 'Wszystkie dane zostały wyczyszczone.',
@@ -366,6 +450,47 @@ const I18N = {
       exportTxt: 'Export TXT', exportTxtDesc: 'Download a readable list of your tasks as a text file',
       exporting: 'Exporting…',
       deleting: 'Deleting…',
+      tabsAria: 'Settings sections',
+      tabGeneral: 'General', tabPriorities: 'Priorities', tabCategories: 'Categories',
+    },
+    lists: {
+      prioritiesTitle: 'Your priorities',
+      prioritiesDesc: 'Order matters: highest first, lowest last. Tasks are sorted by it.',
+      categoriesTitle: 'Your categories',
+      categoriesDesc: 'Organize tasks your way — add your own categories and pick an icon for each.',
+      addPriority: 'Add priority', editPriority: 'Edit priority',
+      addCategory: 'Add category', editCategory: 'Edit category',
+      nameLabel: 'Name',
+      namePlaceholderPriority: 'e.g. Critical',
+      namePlaceholderCategory: 'e.g. Study',
+      colorLabel: 'Color', iconLabel: 'Icon',
+      add: 'Add', save: 'Save', cancel: 'Cancel',
+      restoreDefaults: 'Restore defaults',
+      restoreTitle: 'Restore defaults?',
+      restoreMsg: 'Missing default entries will be added back, and their names and looks restored. Your own entries will be kept.',
+      usedIn: 'Used in tasks: {n}',
+      moveUp: 'Move up: {name}', moveDown: 'Move down: {name}',
+      edit: 'Edit: {name}', remove: 'Delete: {name}',
+      cannotRemoveLast: 'At least one entry must remain',
+      deletePriorityTitle: 'Delete priority?', deleteCategoryTitle: 'Delete category?',
+      deleteUnused: '"{name}" will be deleted.',
+      deleteUsed: '"{name}" will be deleted. Tasks using it ({n}) will be moved to "{target}".',
+      errLength: 'Name must be 2 to 24 characters',
+      errChars: 'Allowed: letters, digits, spaces and - . , ! ? ( ) & / +',
+      errDuplicate: 'An entry with this name already exists',
+      errLimit: 'Limit reached ({max} entries)',
+      unknown: 'Unknown',
+      colors: {
+        red: 'Red', orange: 'Orange', amber: 'Amber', green: 'Green',
+        teal: 'Teal', blue: 'Blue', plum: 'Plum', gray: 'Gray',
+      },
+      icons: {
+        'icon-user': 'Person', 'icon-briefcase': 'Briefcase', 'icon-shopping-cart': 'Cart', 'icon-heart': 'Heart',
+        'icon-package': 'Package', 'icon-house': 'Home', 'icon-book-open': 'Book', 'icon-graduation-cap': 'Study',
+        'icon-airplane': 'Plane', 'icon-car': 'Car', 'icon-wallet': 'Wallet', 'icon-fork-knife': 'Food',
+        'icon-barbell': 'Sport', 'icon-music': 'Music', 'icon-game': 'Games', 'icon-wrench': 'Repairs',
+        'icon-paw': 'Pets', 'icon-star': 'Star', 'icon-lightbulb': 'Ideas', 'icon-code': 'Code',
+      },
     },
     modal: { editTitle: 'Edit task', cancel: 'Cancel', save: 'Save changes', confirm: 'Confirm' },
     footer: {
@@ -383,7 +508,7 @@ const I18N = {
       d1: '<strong>Email address</strong> — required for registration and sign-in',
       d2: '<strong>Name</strong> — provided voluntarily at registration, shown in the interface',
       d3: '<strong>Task content</strong> — tasks added by the user (may contain personal data)',
-      d4: '<strong>App settings</strong> — dark mode, notification preferences',
+      d4: '<strong>App settings</strong> — dark mode, notification preferences, custom priorities and categories',
       p2: 'We do not collect location data, phone numbers, or payment information.',
       h3: '3. Purpose and legal basis for processing',
       l1: 'Providing the service (account handling, task synchronization) — <strong>Art. 6(1)(b) GDPR</strong> (performance of a contract)',
@@ -415,6 +540,10 @@ const I18N = {
     toast: {
       added: 'Added: "{name}"',
       deleted: 'Deleted: "{name}"',
+      listAdded: 'Added: "{name}"',
+      listUpdated: 'Saved: "{name}"',
+      listDeleted: 'Deleted: "{name}"',
+      listRestored: 'Default entries restored',
       updated: 'Task updated!',
       completed: 'Task completed!',
       allCleared: 'All data has been cleared.',
@@ -516,14 +645,13 @@ function t(path, vars) {
   return str;
 }
 
-function priorityLabel(key) { return t(`priorityLabel.${key}`); }
-function categoryLabel(key) { return t(`categoryLabel.${key}`); }
-
 /* ============================================================
    STAN APLIKACJI
    ============================================================ */
 const state = {
   tasks:         [],
+  priorities:    defaultList('priorities'),   // [{ id, color, name? }] — od najwyższego
+  categories:    defaultList('categories'),   // [{ id, icon,  name? }]
   filter:        'all',
   sort:          'date-desc',
   search:        '',
@@ -532,6 +660,83 @@ const state = {
   currentUser:   null,   // { email, name, provider, uid }
   lang:          'pl',   // 'pl' | 'en'
 };
+
+/* ============================================================
+   PRIORYTETY I KATEGORIE — dane
+   ============================================================ */
+function defaultList(kind) {
+  return LIST_KIND[kind].defaults.map(d => ({ ...d }));
+}
+
+function isBuiltinId(kind, id) {
+  return LIST_KIND[kind].defaults.some(d => d.id === id);
+}
+
+/** Wczytanie listy z localStorage / Firestore — nic z zewnątrz nie jest zaufane. */
+function sanitizeList(kind, raw) {
+  const cfg = LIST_KIND[kind];
+  if (!Array.isArray(raw)) return defaultList(kind);
+
+  const seen = new Set();
+  const out  = [];
+  for (const r of raw) {
+    if (out.length >= cfg.max) break;
+    if (!r || typeof r.id !== 'string' || !LIST_ID_RE.test(r.id) || seen.has(r.id)) continue;
+
+    const def  = cfg.defaults.find(d => d.id === r.id);
+    const name = typeof r.name === 'string' ? r.name.trim() : '';
+    const nameOk = LIST_NAME_RE.test(name) && /[\p{L}\p{N}]/u.test(name);
+    if (!def && !nameOk) continue;                       // własna pozycja bez poprawnej nazwy — pomiń
+
+    const choice = cfg.choices.includes(r[cfg.field]) ? r[cfg.field] : (def ? def[cfg.field] : cfg.choices[0]);
+    const item = { id: r.id, [cfg.field]: choice };      // stała kolejność kluczy — potrzebna do porównań JSON
+    if (nameOk) item.name = name;
+
+    seen.add(r.id);
+    out.push(item);
+  }
+  return out.length ? out : defaultList(kind);
+}
+
+function listItem(kind, id) {
+  return state[kind].find(i => i.id === id) || null;
+}
+
+function itemLabel(kind, item) {
+  if (item.name) return item.name;
+  return isBuiltinId(kind, item.id) ? t(`${LIST_KIND[kind].labelDict}.${item.id}`) : t('lists.unknown');
+}
+
+function priorityLabel(id) {
+  const item = listItem('priorities', id);
+  return item ? itemLabel('priorities', item) : t('lists.unknown');
+}
+
+function categoryLabel(id) {
+  const item = listItem('categories', id);
+  return item ? itemLabel('categories', item) : t('lists.unknown');
+}
+
+/** Ranga do sortowania: indeks na liście (0 = najwyższy). Nieznany priorytet ląduje na końcu. */
+function priorityRank(id) {
+  const i = state.priorities.findIndex(p => p.id === id);
+  return i === -1 ? state.priorities.length : i;
+}
+
+/** Dokąd przenieść zadania po usunięciu pozycji / dla nieznanego id. */
+function fallbackId(kind, items) {
+  if (kind === 'priorities') return (items.find(i => i.id === 'medium') || items[Math.floor(items.length / 2)]).id;
+  return (items.find(i => i.id === 'other') || items[items.length - 1]).id;
+}
+
+function resolveListId(kind, id) {
+  return listItem(kind, id) ? id : fallbackId(kind, state[kind]);
+}
+
+function listsAreDefault() {
+  return JSON.stringify(state.priorities) === JSON.stringify(defaultList('priorities'))
+      && JSON.stringify(state.categories) === JSON.stringify(defaultList('categories'));
+}
 
 /* ============================================================
    ZASTOSOWANIE JĘZYKA (i18n)
@@ -574,6 +779,13 @@ function applyLanguage(lang) {
   document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
     el.placeholder = t(el.dataset.i18nPlaceholder);
   });
+  // Etykiety aria (np. grupy zakładek)
+  document.querySelectorAll('[data-i18n-aria]').forEach(el => {
+    el.setAttribute('aria-label', t(el.dataset.i18nAria));
+  });
+
+  // Selecty i panele zarządzania — etykiety wbudowanych pozycji zależą od języka
+  renderListControls();
 
   updateLangToggleButtons();
 
@@ -640,6 +852,8 @@ function saveState() {
   localStorage.setItem(userKey('tasks'), JSON.stringify(state.tasks));
   localStorage.setItem(userKey('dark'),  JSON.stringify(state.darkMode));
   localStorage.setItem(userKey('notif'), JSON.stringify(state.notifications));
+  localStorage.setItem(userKey('priorities'), JSON.stringify(state.priorities));
+  localStorage.setItem(userKey('categories'), JSON.stringify(state.categories));
 }
 
 function loadState() {
@@ -647,10 +861,14 @@ function loadState() {
     const tasks = localStorage.getItem(userKey('tasks'));
     const dark  = localStorage.getItem(userKey('dark'));
     const notif = localStorage.getItem(userKey('notif'));
+    const prios = localStorage.getItem(userKey('priorities'));
+    const cats  = localStorage.getItem(userKey('categories'));
 
     if (tasks !== null) state.tasks         = JSON.parse(tasks);
     if (dark  !== null) state.darkMode      = JSON.parse(dark);
     if (notif !== null) state.notifications = JSON.parse(notif);
+    if (prios !== null) state.priorities    = sanitizeList('priorities', JSON.parse(prios));
+    if (cats  !== null) state.categories    = sanitizeList('categories', JSON.parse(cats));
   } catch (e) {
     console.warn('[TaskManager] Błąd odczytu localStorage:', e);
   }
@@ -729,16 +947,33 @@ function firestoreSyncSettings() {
   }, { merge: true }).catch(e => console.warn('[FB] syncSettings:', e));
 }
 
+// Synchronizuj własne priorytety i kategorie (osobno od ustawień — zmieniają się rzadziej)
+function firestoreSyncLists() {
+  const docId = firestoreDocId();
+  if (!_db || !docId) return;
+  _db.collection('users').doc(docId).set({
+    priorities: state.priorities,
+    categories: state.categories,
+    updatedAt:  firebase.firestore.FieldValue.serverTimestamp(),
+  }, { merge: true }).catch(e => console.warn('[FB] syncLists:', e));
+}
+
+// Czy chmura miała już zapisane listy (żeby nie nadpisać ich domyślnymi)
+let _cloudHadLists = false;
+
 // Wczytaj wszystkie dane z Firestore (przy logowaniu / ładowaniu strony)
 async function firestoreLoad() {
   const docId = firestoreDocId();
   if (!_db || !docId) return false;
+  _cloudHadLists = false;
   try {
     const userDoc = await _db.collection('users').doc(docId).get();
     if (userDoc.exists) {
       const d = userDoc.data();
       if (typeof d.notifications === 'boolean') state.notifications = d.notifications;
       if (typeof d.darkMode      === 'boolean') state.darkMode      = d.darkMode;
+      if (Array.isArray(d.priorities)) { state.priorities = sanitizeList('priorities', d.priorities); _cloudHadLists = true; }
+      if (Array.isArray(d.categories)) { state.categories = sanitizeList('categories', d.categories); _cloudHadLists = true; }
     }
     const snap = await tasksCol().get();
     if (!snap.empty) {
@@ -800,6 +1035,37 @@ function firestoreStartListener() {
   });
 }
 
+// Nasłuchiwacz czasu rzeczywistego — dokument użytkownika (priorytety i kategorie z innych urządzeń)
+let _settingsUnsubscribe = null;
+
+function firestoreStartSettingsListener() {
+  const docId = firestoreDocId();
+  if (!_db || !docId) return;
+  if (_settingsUnsubscribe) { _settingsUnsubscribe(); _settingsUnsubscribe = null; }
+
+  _settingsUnsubscribe = _db.collection('users').doc(docId).onSnapshot(snap => {
+    if (!snap.exists || snap.metadata.hasPendingWrites) return;   // własne, jeszcze niepotwierdzone zapisy pomijamy
+    const d = snap.data();
+    const prios = Array.isArray(d.priorities) ? sanitizeList('priorities', d.priorities) : state.priorities;
+    const cats  = Array.isArray(d.categories) ? sanitizeList('categories', d.categories) : state.categories;
+
+    if (JSON.stringify(prios) === JSON.stringify(state.priorities) &&
+        JSON.stringify(cats)  === JSON.stringify(state.categories)) return;
+
+    state.priorities = prios;
+    state.categories = cats;
+    saveState();
+    renderListControls();
+    renderTaskList();
+    if (!document.getElementById('stats').hidden) renderStats();
+  }, err => console.warn('[FB] settings listener:', err));
+}
+
+function stopFirestoreListeners() {
+  if (_firestoreUnsubscribe) { _firestoreUnsubscribe(); _firestoreUnsubscribe = null; }
+  if (_settingsUnsubscribe)  { _settingsUnsubscribe();  _settingsUnsubscribe  = null; }
+}
+
 // Pełna inicjalizacja synchronizacji przy logowaniu / ładowaniu strony
 async function firestoreOnLoad() {
   if (!state.currentUser || state.currentUser.provider === 'guest') return false;
@@ -809,12 +1075,11 @@ async function firestoreOnLoad() {
   const cloudExists = await firestoreLoad();
 
   if (cloudExists) {
-    localStorage.setItem(userKey('tasks'), JSON.stringify(state.tasks));
-    localStorage.setItem(userKey('dark'),  JSON.stringify(state.darkMode));
-    localStorage.setItem(userKey('notif'), JSON.stringify(state.notifications));
+    saveState();
     applyDarkMode(state.darkMode);
     const nt = document.getElementById('notifications-toggle');
     if (nt) { nt.checked = state.notifications; nt.setAttribute('aria-checked', String(state.notifications)); }
+    renderListControls();
     renderTaskList();
   } else if (localTasks.length > 0) {
     // Migracja lokalnych zadań do chmury
@@ -826,7 +1091,11 @@ async function firestoreOnLoad() {
     }
   }
 
+  // Własne listy są tylko lokalnie (chmura ich jeszcze nie ma) — wyślij je, żeby nie zginęły
+  if (!_cloudHadLists && !listsAreDefault()) firestoreSyncLists();
+
   firestoreStartListener();
+  firestoreStartSettingsListener();
   return cloudExists;
 }
 
@@ -1073,12 +1342,15 @@ function showAuth() {
 }
 
 function logout() {
-  if (_firestoreUnsubscribe) { _firestoreUnsubscribe(); _firestoreUnsubscribe = null; }
+  stopFirestoreListeners();
 
   state.tasks         = [];
+  state.priorities    = defaultList('priorities');
+  state.categories    = defaultList('categories');
   state.darkMode      = false;
   state.notifications = true;
   applyDarkMode(false);
+  renderListControls();
 
   if (state.currentUser?.provider === 'guest') {
     clearGuestSession();
@@ -1153,8 +1425,8 @@ function getVisibleTasks() {
   switch (state.sort) {
     case 'date-asc':      list.sort((a, b) => a.createdAt - b.createdAt); break;
     case 'date-desc':     list.sort((a, b) => b.createdAt - a.createdAt); break;
-    case 'priority-high': list.sort((a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]); break;
-    case 'priority-low':  list.sort((a, b) => PRIORITY_ORDER[b.priority] - PRIORITY_ORDER[a.priority]); break;
+    case 'priority-high': list.sort((a, b) => priorityRank(a.priority) - priorityRank(b.priority)); break;
+    case 'priority-low':  list.sort((a, b) => priorityRank(b.priority) - priorityRank(a.priority)); break;
     case 'alpha-asc':     list.sort((a, b) => a.name.localeCompare(b.name, 'pl')); break;
     case 'alpha-desc':    list.sort((a, b) => b.name.localeCompare(a.name, 'pl')); break;
   }
@@ -1190,20 +1462,17 @@ function escHtml(str) {
   return d.innerHTML;
 }
 
+// Do wartości atrybutów HTML (escHtml nie zamienia cudzysłowów)
+function escAttr(str) {
+  return escHtml(str).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
 /* ============================================================
    IKONY SVG — spójny system zamiast emoji (sprite w index.html)
    ============================================================ */
 function iconSvg(name, extraClass = '') {
   return `<svg class="icon${extraClass ? ' ' + extraClass : ''}" aria-hidden="true"><use href="#${name}"/></svg>`;
 }
-
-const CATEGORY_ICON = {
-  personal: 'icon-user',
-  work:     'icon-briefcase',
-  shopping: 'icon-shopping-cart',
-  health:   'icon-heart',
-  other:    'icon-package',
-};
 
 /* ============================================================
    RENDEROWANIE LISTY ZADAŃ
@@ -1213,6 +1482,7 @@ function renderTaskList() {
   const emptyState = document.getElementById('empty-state');
   const tasks      = getVisibleTasks();
 
+  updateManageCounts();
   ul.innerHTML = '';
 
   if (tasks.length === 0) {
@@ -1223,8 +1493,14 @@ function renderTaskList() {
   emptyState.hidden = true;
 
   tasks.forEach(task => {
+    const prio  = listItem('priorities', task.priority);
+    const cat   = listItem('categories', task.category);
+    const prioText = priorityLabel(task.priority);
+    const catText  = categoryLabel(task.category);
+
     const li = document.createElement('li');
-    li.className  = `task-item${task.done ? ' done' : ''}`;
+    // klasa pc-<kolor> ustawia --pc: kolor lewej krawędzi i badge'a priorytetu (kolor z białej listy, nie z danych)
+    li.className  = `task-item${task.done ? ' done' : ''}${prio ? ` pc-${prio.color}` : ''}`;
     li.dataset.id = task.id;
     li.setAttribute('role', 'listitem');
 
@@ -1237,13 +1513,13 @@ function renderTaskList() {
       <div class="task-content">
         <div class="task-name">${escHtml(task.name)}</div>
         <div class="task-meta">
-          <span class="badge badge-${task.priority}"
-                aria-label="${priorityLabel(task.priority)}">
-            ${iconSvg('icon-dot')} ${priorityLabel(task.priority)}
+          <span class="badge badge-prio"
+                aria-label="${escAttr(prioText)}">
+            ${iconSvg('icon-dot')} ${escHtml(prioText)}
           </span>
           <span class="badge badge-cat"
-                aria-label="${categoryLabel(task.category)}">
-            ${iconSvg(CATEGORY_ICON[task.category])} ${categoryLabel(task.category)}
+                aria-label="${escAttr(catText)}">
+            ${iconSvg(cat ? cat.icon : 'icon-package')} ${escHtml(catText)}
           </span>
           <span class="task-date">${relativeTime(task.createdAt)}</span>
         </div>
@@ -1275,9 +1551,8 @@ function renderStats() {
   document.getElementById('stat-done').textContent    = done;
   document.getElementById('stat-percent').textContent = `${percent}%`;
 
-  const dict = I18N[state.lang] || I18N.pl;
-  renderBarChart('category-chart', countByKey('category'), dict.categoryLabel);
-  renderBarChart('priority-chart', countByKey('priority'), dict.priorityLabel);
+  renderBarChart('category-chart', countByKey('category'), chartRows('categories'));
+  renderBarChart('priority-chart', countByKey('priority'), chartRows('priorities'));
 }
 
 function countByKey(key) {
@@ -1287,25 +1562,37 @@ function countByKey(key) {
   }, {});
 }
 
-function renderBarChart(id, counts, labels) {
+// Wiersze wykresu = lista użytkownika w jego kolejności
+function chartRows(kind) {
+  return state[kind].map(item => ({ id: item.id, label: itemLabel(kind, item) }));
+}
+
+function renderBarChart(id, counts, rows) {
   const container = document.getElementById(id);
   container.innerHTML = '';
-  const maxVal = Math.max(...Object.values(counts), 1);
 
-  Object.entries(labels).forEach(([key, label]) => {
-    const count = counts[key] || 0;
+  // Zadania ze znikniętą pozycją (np. jeszcze niezsynchronizowaną) — jeden zbiorczy wiersz
+  const known   = new Set(rows.map(r => r.id));
+  const orphans = Object.entries(counts).filter(([key]) => !known.has(key)).reduce((n, [, c]) => n + c, 0);
+  const all     = orphans > 0 ? [...rows, { id: '__unknown', label: t('lists.unknown') }] : rows;
+  const value   = r => (r.id === '__unknown' ? orphans : (counts[r.id] || 0));
+
+  const maxVal = Math.max(...all.map(value), 1);
+
+  all.forEach(r => {
+    const count = value(r);
     const pct   = Math.round((count / maxVal) * 100);
 
     const row = document.createElement('div');
     row.className = 'bar-item';
     row.innerHTML = `
-      <span class="bar-label">${label}</span>
+      <span class="bar-label">${escHtml(r.label)}</span>
       <div class="bar-track"
            role="progressbar"
            aria-valuenow="${count}"
            aria-valuemin="0"
            aria-valuemax="${maxVal}"
-           aria-label="${label}: ${count}">
+           aria-label="${escAttr(r.label)}: ${count}">
         <div class="bar-fill" style="width:${pct}%"></div>
       </div>
       <span class="bar-count">${count}</span>
@@ -1396,10 +1683,12 @@ function openModal(taskId) {
   const task = state.tasks.find(t => t.id === taskId);
   if (!task) return;
 
+  renderSelectOptions();   // odśwież opcje (i usuń tymczasowe z poprzedniego otwarcia)
+
   document.getElementById('edit-task-id').value       = task.id;
   document.getElementById('edit-task-name').value     = task.name;
-  document.getElementById('edit-task-priority').value = task.priority;
-  document.getElementById('edit-task-category').value = task.category;
+  setSelectValue('edit-task-priority', task.priority);
+  setSelectValue('edit-task-category', task.category);
 
   clearError(
     document.getElementById('edit-task-name'),
@@ -1448,7 +1737,9 @@ function exportDataAsync() {
       try {
         const payload = {
           exportedAt: new Date().toISOString(),
-          version:    '2.0.0',
+          version:    '2.1.0',
+          priorities: state.priorities,
+          categories: state.categories,
           tasks:      state.tasks,
         };
         const blob = new Blob(
@@ -1571,8 +1862,8 @@ async function deleteAccount() {
     btn.textContent = t('settings.deleting');
 
     try {
-      // 1. Zatrzymaj listener Firestore
-      if (_firestoreUnsubscribe) { _firestoreUnsubscribe(); _firestoreUnsubscribe = null; }
+      // 1. Zatrzymaj listenery Firestore
+      stopFirestoreListeners();
 
       // 2. Usuń wszystkie zadania z Firestore
       const col = tasksCol();
@@ -1596,6 +1887,9 @@ async function deleteAccount() {
       // 5. Pokaż ekran logowania
       state.currentUser = null;
       state.tasks = [];
+      state.priorities = defaultList('priorities');
+      state.categories = defaultList('categories');
+      renderListControls();
       showAuth();
       showToast(t('toast.accountDeleted'), 'success', 5000);
     } catch (err) {
@@ -1639,12 +1933,18 @@ function clearAll() {
   if (col) state.tasks.forEach(t => col.doc(t.id).delete().catch(() => {}));
 
   state.tasks         = [];
+  state.priorities    = defaultList('priorities');
+  state.categories    = defaultList('categories');
   state.darkMode      = false;
   state.notifications = true;
+  listEdit.priorities = null;
+  listEdit.categories = null;
   saveState();
   firestoreSyncSettings();
+  firestoreSyncLists();
 
   applyDarkMode(false);
+  renderListControls();
   document.getElementById('notifications-toggle').checked = true;
   document.getElementById('notifications-toggle').setAttribute('aria-checked', 'true');
   document.getElementById('dark-mode-toggle').checked = false;
@@ -1884,8 +2184,12 @@ function setupAuthEvents() {
    ============================================================ */
 async function onLoginSuccess(isFreshLogin = true) {
   state.tasks         = [];
+  state.priorities    = defaultList('priorities');
+  state.categories    = defaultList('categories');
   state.darkMode      = false;
   state.notifications = true;
+  listEdit.priorities = null;
+  listEdit.categories = null;
 
   // 1. Szybki odczyt z localStorage (offline-first)
   loadState();
@@ -1895,6 +2199,7 @@ async function onLoginSuccess(isFreshLogin = true) {
   notifToggle.checked = state.notifications;
   notifToggle.setAttribute('aria-checked', String(state.notifications));
 
+  renderListControls();
   renderTaskList();
   switchView('tasks');
   showApp();
@@ -1937,16 +2242,396 @@ async function onLoginSuccess(isFreshLogin = true) {
   if (isNewUser && state.tasks.length === 0) {
     setTimeout(() => {
       const samples = (I18N[state.lang] || I18N.pl).samples;
-      samples.forEach(s => addTask(s.name, s.priority, s.category));
+      samples.forEach(s => addTask(
+        s.name,
+        resolveListId('priorities', s.priority),
+        resolveListId('categories', s.category)
+      ));
       renderTaskList();
     }, 500);
   }
 }
 
 /* ============================================================
+   PRIORYTETY I KATEGORIE — interfejs (Ustawienia → zakładki)
+   ============================================================ */
+const listEdit = { priorities: null, categories: null };   // id edytowanej pozycji albo null
+
+const capitalize = s => s.charAt(0).toUpperCase() + s.slice(1);
+
+function newListId() {
+  return `c_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 5)}`;
+}
+
+function pickerName(kind) {
+  const cfg = LIST_KIND[kind];
+  return `${cfg.prefix}-${cfg.field}`;
+}
+
+function selectedChoice(kind) {
+  return document.querySelector(`input[name="${pickerName(kind)}"]:checked`)?.value || null;
+}
+
+/* ── Selecty w formularzach zadań ───────────────────────────── */
+// Domyślnie zaznaczona pozycja w formularzu dodawania: środkowy priorytet, pierwsza kategoria
+function defaultChoiceId(kind) {
+  return kind === 'priorities' ? fallbackId(kind, state[kind]) : state[kind][0].id;
+}
+
+function fillSelect(selectId, kind) {
+  const sel = document.getElementById(selectId);
+  if (!sel) return;
+
+  const prev  = sel.value;
+  const items = state[kind];
+  sel.innerHTML = '';
+  items.forEach(item => {
+    const opt = document.createElement('option');
+    opt.value       = item.id;
+    opt.textContent = itemLabel(kind, item);
+    sel.appendChild(opt);
+  });
+  sel.value = items.some(i => i.id === prev) ? prev : defaultChoiceId(kind);
+}
+
+function renderSelectOptions() {
+  fillSelect('task-priority',      'priorities');
+  fillSelect('edit-task-priority', 'priorities');
+  fillSelect('task-category',      'categories');
+  fillSelect('edit-task-category', 'categories');
+}
+
+// Dla zadania z nieznaną pozycją dodaje tymczasową opcję — zapis niczego po cichu nie zmieni
+function setSelectValue(selectId, value) {
+  const sel = document.getElementById(selectId);
+  if (![...sel.options].some(o => o.value === value)) {
+    const opt = document.createElement('option');
+    opt.value       = value;
+    opt.textContent = t('lists.unknown');
+    sel.appendChild(opt);
+  }
+  sel.value = value;
+}
+
+/* ── Panel zarządzania (lista + formularz) ──────────────────── */
+function needsRestore(kind) {
+  const cfg = LIST_KIND[kind];
+  return cfg.defaults.some(d => {
+    const it = listItem(kind, d.id);
+    return !it || it.name || it[cfg.field] !== d[cfg.field];
+  });
+}
+
+function renderPicker(kind, selected) {
+  const cfg = LIST_KIND[kind];
+  const box = document.getElementById(`${cfg.prefix}-picker`);
+  if (!box) return;
+
+  box.innerHTML = '';
+  const isColor = kind === 'priorities';
+  cfg.choices.forEach(choice => {
+    const name = t(`lists.${isColor ? 'colors' : 'icons'}.${choice}`);
+
+    const label = document.createElement('label');
+    label.className = isColor ? `swatch pc-${choice}` : 'icon-choice';
+    label.title     = name;
+
+    const input = document.createElement('input');
+    input.type    = 'radio';
+    input.name    = pickerName(kind);
+    input.value   = choice;
+    input.checked = choice === selected;
+
+    const face = document.createElement('span');
+    face.className = isColor ? 'swatch-face' : 'icon-choice-face';
+    if (!isColor) face.innerHTML = iconSvg(choice);
+
+    const sr = document.createElement('span');
+    sr.className   = 'sr-only';
+    sr.textContent = name;
+
+    label.append(input, face, sr);
+    box.appendChild(label);
+  });
+}
+
+function renderManagePanel(kind) {
+  const cfg  = LIST_KIND[kind];
+  const list = document.getElementById(`${kind}-list`);
+  if (!list) return;
+
+  const items   = state[kind];
+  const isColor = kind === 'priorities';
+  if (listEdit[kind] && !listItem(kind, listEdit[kind])) listEdit[kind] = null;   // pozycja zniknęła (np. po synchronizacji)
+
+  list.innerHTML = '';
+  items.forEach((item, idx) => {
+    const label = itemLabel(kind, item);
+    const used  = state.tasks.filter(tk => tk[cfg.taskKey] === item.id).length;
+    const usedText = t('lists.usedIn', { n: used });
+    const isOnly   = items.length === 1;
+
+    const li = document.createElement('li');
+    li.className  = `manage-item${isColor ? ` pc-${item.color}` : ''}${listEdit[kind] === item.id ? ' editing' : ''}`;
+    li.dataset.id = item.id;
+    li.innerHTML = `
+      <span class="manage-mark${isColor ? ' manage-mark--color' : ''}" aria-hidden="true">${isColor ? '' : iconSvg(item.icon)}</span>
+      <span class="manage-name">${escHtml(label)}</span>
+      <span class="manage-count" title="${escAttr(usedText)}">
+        <span aria-hidden="true">${used}</span><span class="sr-only">${escHtml(usedText)}</span>
+      </span>
+      <div class="manage-actions">
+        <button type="button" class="task-btn" data-action="up" ${idx === 0 ? 'disabled' : ''}
+                aria-label="${escAttr(t('lists.moveUp', { name: label }))}"
+                title="${escAttr(t('lists.moveUp', { name: label }))}">${iconSvg('icon-caret-up')}</button>
+        <button type="button" class="task-btn" data-action="down" ${idx === items.length - 1 ? 'disabled' : ''}
+                aria-label="${escAttr(t('lists.moveDown', { name: label }))}"
+                title="${escAttr(t('lists.moveDown', { name: label }))}">${iconSvg('icon-caret-down')}</button>
+        <button type="button" class="task-btn" data-action="edit"
+                aria-label="${escAttr(t('lists.edit', { name: label }))}"
+                title="${escAttr(t('lists.edit', { name: label }))}">${iconSvg('icon-edit')}</button>
+        <button type="button" class="task-btn delete" data-action="delete" ${isOnly ? 'disabled' : ''}
+                aria-label="${escAttr(t('lists.remove', { name: label }))}"
+                title="${escAttr(isOnly ? t('lists.cannotRemoveLast') : t('lists.remove', { name: label }))}">${iconSvg('icon-trash')}</button>
+      </div>
+    `;
+    list.appendChild(li);
+  });
+
+  // Formularz: dodawanie albo edycja
+  const editing = listEdit[kind] ? listItem(kind, listEdit[kind]) : null;
+  const cap     = capitalize(cfg.prefix);
+  document.getElementById(`${cfg.prefix}-form-title`).textContent = t(`lists.${editing ? 'edit' : 'add'}${cap}`);
+  document.getElementById(`${cfg.prefix}-submit`).textContent     = t(editing ? 'lists.save' : 'lists.add');
+  document.getElementById(`${cfg.prefix}-cancel`).hidden          = !editing;
+  document.getElementById(`${cfg.prefix}-name`).placeholder       = t(`lists.namePlaceholder${cap}`);
+
+  // Wybór koloru/ikony: zachowaj niezapisany wybór, dopóki edytujemy tę samą pozycję
+  const box  = document.getElementById(`${cfg.prefix}-picker`);
+  const same = box.dataset.for === (editing ? editing.id : '') && selectedChoice(kind);
+  renderPicker(kind, same ? selectedChoice(kind) : (editing ? editing[cfg.field] : cfg.choices[0]));
+  box.dataset.for = editing ? editing.id : '';
+
+  document.getElementById(`${kind}-count`).textContent = `${items.length} / ${cfg.max}`;
+  document.getElementById(`${kind}-reset`).disabled    = !needsRestore(kind);
+}
+
+// Liczniki „użyte w zadaniach" — odświeżane przy każdej zmianie zadań (bez przebudowy całego panelu)
+function updateManageCounts() {
+  Object.entries(LIST_KIND).forEach(([kind, cfg]) => {
+    document.querySelectorAll(`#${kind}-list .manage-item`).forEach(li => {
+      const counter = li.querySelector('.manage-count');
+      if (!counter) return;
+      const used = state.tasks.filter(tk => tk[cfg.taskKey] === li.dataset.id).length;
+      const text = t('lists.usedIn', { n: used });
+      counter.title = text;
+      counter.firstElementChild.textContent = used;
+      counter.lastElementChild.textContent  = text;
+    });
+  });
+}
+
+function renderListControls() {
+  renderSelectOptions();
+  renderManagePanel('priorities');
+  renderManagePanel('categories');
+}
+
+/* ── Operacje na listach ────────────────────────────────────── */
+function commitLists() {
+  state.priorities = sanitizeList('priorities', state.priorities);
+  state.categories = sanitizeList('categories', state.categories);
+  saveState();
+  firestoreSyncLists();
+  renderListControls();
+  renderTaskList();
+  if (!document.getElementById('stats').hidden) renderStats();
+}
+
+function validateListName(kind, value, editingId) {
+  const cfg = LIST_KIND[kind];
+  if (value.length < 2 || value.length > 24) return t('lists.errLength');
+  if (!LIST_NAME_RE.test(value) || !/[\p{L}\p{N}]/u.test(value)) return t('lists.errChars');
+  if (!editingId && state[kind].length >= cfg.max) return t('lists.errLimit', { max: cfg.max });
+
+  const lc = value.toLocaleLowerCase();
+  const taken = state[kind].some(i => i.id !== editingId && itemLabel(kind, i).toLocaleLowerCase() === lc);
+  return taken ? t('lists.errDuplicate') : null;
+}
+
+function startEdit(kind, id) {
+  const cfg  = LIST_KIND[kind];
+  const item = listItem(kind, id);
+  if (!item) return;
+
+  listEdit[kind] = id;
+  const input = document.getElementById(`${cfg.prefix}-name`);
+  input.value = itemLabel(kind, item);
+  clearError(input, document.getElementById(`${cfg.prefix}-name-error`));
+  renderManagePanel(kind);
+  input.focus();
+  input.select();
+  input.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+}
+
+function cancelEdit(kind) {
+  const cfg   = LIST_KIND[kind];
+  const input = document.getElementById(`${cfg.prefix}-name`);
+  listEdit[kind] = null;
+  input.value = '';
+  clearError(input, document.getElementById(`${cfg.prefix}-name-error`));
+  renderManagePanel(kind);
+}
+
+function submitList(kind) {
+  const cfg     = LIST_KIND[kind];
+  const input   = document.getElementById(`${cfg.prefix}-name`);
+  const errEl   = document.getElementById(`${cfg.prefix}-name-error`);
+  const editId  = listEdit[kind];
+  const value   = input.value.trim().replace(/ {2,}/g, ' ');
+
+  const err = validateListName(kind, value, editId);
+  if (err) { setError(input, errEl, err); input.focus(); return; }
+  clearError(input, errEl);
+
+  const picked = selectedChoice(kind) || cfg.choices[0];
+
+  if (editId) {
+    const item = listItem(kind, editId);
+    if (!item) return;
+    item[cfg.field] = picked;
+    // nazwa równa domyślnej (w bieżącym języku) = wracamy do tłumaczonej etykiety
+    if (isBuiltinId(kind, item.id) && value === t(`${cfg.labelDict}.${item.id}`)) delete item.name;
+    else item.name = value;
+    showToast(t('toast.listUpdated', { name: value }), 'success');
+  } else {
+    state[kind].push({ id: newListId(), [cfg.field]: picked, name: value });
+    showToast(t('toast.listAdded', { name: value }), 'success');
+  }
+
+  listEdit[kind] = null;
+  input.value = '';
+  commitLists();
+  input.focus();
+}
+
+function moveItem(kind, id, dir) {
+  const items = state[kind];
+  const from  = items.findIndex(i => i.id === id);
+  const to    = from + dir;
+  if (from === -1 || to < 0 || to >= items.length) return;
+
+  [items[from], items[to]] = [items[to], items[from]];
+  commitLists();
+
+  // Focus wraca na przycisku przeniesionej pozycji (DOM został przebudowany)
+  const row  = document.querySelector(`#${kind}-list [data-id="${id}"]`);
+  const pref = row?.querySelector(`[data-action="${dir < 0 ? 'up' : 'down'}"]`);
+  (pref && !pref.disabled ? pref : row?.querySelector(`[data-action="${dir < 0 ? 'down' : 'up'}"]`))?.focus();
+}
+
+function removeItem(kind, id) {
+  const cfg   = LIST_KIND[kind];
+  const items = state[kind];
+  const item  = listItem(kind, id);
+  if (!item || items.length <= 1) return;
+
+  const label     = itemLabel(kind, item);
+  const used      = state.tasks.filter(tk => tk[cfg.taskKey] === id).length;
+  const remaining = items.filter(i => i.id !== id);
+  const target    = remaining.find(i => i.id === fallbackId(kind, remaining));
+  const targetLabel = itemLabel(kind, target);
+
+  openConfirm(
+    t(`lists.delete${capitalize(cfg.prefix)}Title`),
+    used > 0
+      ? t('lists.deleteUsed',   { name: label, n: used, target: targetLabel })
+      : t('lists.deleteUnused', { name: label }),
+    () => {
+      // zadania z usuwaną pozycją przechodzą na pozycję zastępczą — żadne zadanie nie zostaje „w próżni"
+      state.tasks.forEach(task => {
+        if (task[cfg.taskKey] === id) { task[cfg.taskKey] = target.id; firestoreSetTask(task); }
+      });
+      state[kind] = state[kind].filter(i => i.id !== id);
+      if (listEdit[kind] === id) cancelEdit(kind);
+      commitLists();
+      showToast(t('toast.listDeleted', { name: label }), 'warning');
+    }
+  );
+}
+
+function restoreDefaults(kind) {
+  const cfg = LIST_KIND[kind];
+  openConfirm(t('lists.restoreTitle'), t('lists.restoreMsg'), () => {
+    cfg.defaults.forEach(d => {
+      const it = listItem(kind, d.id);
+      if (it) { it[cfg.field] = d[cfg.field]; delete it.name; }
+      else if (state[kind].length < cfg.max) state[kind].push({ ...d });
+    });
+    commitLists();
+    showToast(t('toast.listRestored'), 'success');
+  });
+}
+
+/* ── Zakładki ustawień ──────────────────────────────────────── */
+function switchSettingsTab(name) {
+  document.querySelectorAll('.settings-tab').forEach(tab => {
+    const on = tab.dataset.settingsTab === name;
+    tab.classList.toggle('active', on);
+    tab.setAttribute('aria-selected', String(on));
+    tab.tabIndex = on ? 0 : -1;
+  });
+  document.querySelectorAll('.settings-panel').forEach(p => { p.hidden = p.dataset.panel !== name; });
+}
+
+function setupListEvents() {
+  const tabs = [...document.querySelectorAll('.settings-tab')];
+  tabs.forEach((tab, i) => {
+    tab.addEventListener('click', () => switchSettingsTab(tab.dataset.settingsTab));
+    tab.addEventListener('keydown', e => {
+      const move = { ArrowRight: 1, ArrowLeft: -1 }[e.key];
+      let next = null;
+      if (move)               next = tabs[(i + move + tabs.length) % tabs.length];
+      else if (e.key === 'Home') next = tabs[0];
+      else if (e.key === 'End')  next = tabs[tabs.length - 1];
+      if (!next) return;
+      e.preventDefault();
+      next.focus();
+      switchSettingsTab(next.dataset.settingsTab);
+    });
+  });
+
+  Object.entries(LIST_KIND).forEach(([kind, cfg]) => {
+    const input = document.getElementById(`${cfg.prefix}-name`);
+
+    document.getElementById(`${cfg.prefix}-form`).addEventListener('submit', e => {
+      e.preventDefault();
+      submitList(kind);
+    });
+    document.getElementById(`${cfg.prefix}-cancel`).addEventListener('click', () => cancelEdit(kind));
+    document.getElementById(`${kind}-reset`).addEventListener('click', () => restoreDefaults(kind));
+    input.addEventListener('input', () => clearError(input, document.getElementById(`${cfg.prefix}-name-error`)));
+
+    document.getElementById(`${kind}-list`).addEventListener('click', e => {
+      const btn = e.target.closest('[data-action]');
+      if (!btn || btn.disabled) return;
+      const id = btn.closest('.manage-item')?.dataset.id;
+      if (!id) return;
+      switch (btn.dataset.action) {
+        case 'up':     moveItem(kind, id, -1); break;
+        case 'down':   moveItem(kind, id,  1); break;
+        case 'edit':   startEdit(kind, id);    break;
+        case 'delete': removeItem(kind, id);   break;
+      }
+    });
+  });
+}
+
+/* ============================================================
    REJESTRACJA ZDARZEŃ – APLIKACJA
    ============================================================ */
 function setupEvents() {
+  setupListEvents();
 
   /* ── Nawigacja (click) ─────────────────────────────────── */
   document.querySelectorAll('.nav-link').forEach(link => {

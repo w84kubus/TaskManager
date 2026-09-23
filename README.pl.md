@@ -56,7 +56,7 @@ Wszystko wpisywane ręcznie i synchronizowane w czasie rzeczywistym — bez impo
 ### Synchronizacja w chmurze
 - Synchronizacja zadań w **czasie rzeczywistym** (`onSnapshot`)
 - Każde zadanie to osobny dokument Firestore - brak konfliktów przy równoczesnym zapisie
-- Dark mode i powiadomienia synchronizowane między urządzeniami
+- Dark mode, powiadomienia oraz własne priorytety i kategorie synchronizowane między urządzeniami
 - Dane izolowane per konto (`request.auth.uid == userId`)
 
 ### Zadania
@@ -64,6 +64,13 @@ Wszystko wpisywane ręcznie i synchronizowane w czasie rzeczywistym — bez impo
 - Filtrowanie (wszystkie / aktywne / ukończone) + wyszukiwanie live
 - Sortowanie po dacie, priorytecie lub alfabetycznie
 - Modal potwierdzenia zamiast natywnego `confirm()`
+
+### Własne priorytety i kategorie
+- **Zakładki w Ustawieniach** - Ogólne, Priorytety, Kategorie
+- **Priorytety** - poza Niskim / Średnim / Wysokim możesz dodać własne (do 8) z nazwą i jednym z 8 kolorów
+- **Kategorie** - dodawaj własne (do 20) z nazwą i jedną z 20 ikon
+- **Zarządzanie** - zmiana nazwy i koloru, kolejność (wyznacza sortowanie po priorytecie), usuwanie; licznik pokazuje, w ilu zadaniach użyto danej pozycji
+- Usunięcie używanej pozycji przenosi jej zadania na pozycję zastępczą („Średni” / „Inne”) po potwierdzeniu; „Przywróć domyślne” przywraca wbudowane
 
 ### Statystyki
 - Karty podsumowujące - wszystkich, aktywnych, ukończonych, procent ukończenia
@@ -177,6 +184,7 @@ service cloud.firestore {
 | Rejestracja + weryfikacja e-mail | ✅ |
 | Logowanie Google OAuth | ✅ |
 | Usunięcie konta (RODO) | ✅ |
+| Własne priorytety i kategorie (dodawanie / edycja / kolejność / usuwanie) | ✅ |
 | Przełączanie języka PL/EN | ✅ |
 | Konsola — 0 błędów | ✅ |
 
