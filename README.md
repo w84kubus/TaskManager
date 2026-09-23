@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="favicon.svg" width="96" height="96" alt="TaskManager logo" />
+  <img src="assets/icons/icon-512.png" width="112" height="112" alt="TaskManager logo" />
 </p>
 
 <h1 align="center">TaskManager</h1>
@@ -107,15 +107,16 @@ Everything is entered by hand and synced in real time — no calendar imports, n
 
 ```
 TaskManager/
-├── index.html          # Markup, SVG icon sprite, all views and modals
-├── favicon.svg          # App icon
+├── index.html              # Markup, SVG icon sprite, all views and modals
+├── assets/
+│   └── icons/              # App icon (favicon, apple-touch, in-app logo)
 ├── styles/
-│   └── style.css        # Full stylesheet (theming, layout, components)
+│   └── style.css           # Full stylesheet (theming, layout, components)
 ├── scripts/
-│   └── app.js             # App state, Firebase, rendering, i18n dictionary
+│   └── app.js              # App state, Firebase, rendering, i18n dictionary
 ├── screenshots/            # README screenshots
-├── README.md                # This file
-└── README.pl.md               # Polish version
+├── README.md               # This file
+└── README.pl.md            # Polish version
 ```
 
 ### Key design decisions

@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="favicon.svg" width="96" height="96" alt="Logo TaskManager" />
+  <img src="assets/icons/icon-512.png" width="112" height="112" alt="Logo TaskManager" />
 </p>
 
 <h1 align="center">TaskManager</h1>
@@ -107,15 +107,16 @@ Wszystko wpisywane ręcznie i synchronizowane w czasie rzeczywistym — bez impo
 
 ```
 TaskManager/
-├── index.html          # Znaczniki, sprite ikon SVG, wszystkie widoki i modale
-├── favicon.svg          # Ikona aplikacji
+├── index.html              # Znaczniki, sprite ikon SVG, wszystkie widoki i modale
+├── assets/
+│   └── icons/              # Ikona aplikacji (favicon, apple-touch, logo w UI)
 ├── styles/
-│   └── style.css        # Pełny arkusz stylów (theming, layout, komponenty)
+│   └── style.css           # Pełny arkusz stylów (theming, layout, komponenty)
 ├── scripts/
-│   └── app.js             # Stan aplikacji, Firebase, renderowanie, słownik i18n
+│   └── app.js              # Stan aplikacji, Firebase, renderowanie, słownik i18n
 ├── screenshots/            # Zrzuty ekranu do README
-├── README.md                # Ten plik (English)
-└── README.pl.md               # Wersja polska
+├── README.md               # English version
+└── README.pl.md            # Ten plik
 ```
 
 ### Kluczowe decyzje projektowe
